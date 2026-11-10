@@ -62,6 +62,41 @@ class ApiClient {
     await _storage.write(key: _passwordKey, value: password);
   }
 
+  Future<void> sendOtp(String email, {String? purpose}) async {
+    final response = await _http.post(
+      Uri.parse('$baseUrl/api/auth/send-otp'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email.trim(),
+        'purpose': purpose ?? '',
+      }),
+    );
+    if (response.statusCode != 200) _throwApiError(response);
+  }
+
+  Future<void> verifyOtpAndLogin({
+    required String email,
+    required String code,
+    String? displayName,
+  }) async {
+    final response = await _http.post(
+      Uri.parse('$baseUrl/api/auth/verify-otp'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email.trim(),
+        'code': code.trim(),
+        if (displayName != null && displayName.trim().isNotEmpty)
+          'displayName': displayName.trim(),
+      }),
+    );
+    if (response.statusCode != 200) _throwApiError(response);
+    final data =
+        jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+    final sessionToken = data['sessionToken'] as String;
+    await _storage.write(key: _emailKey, value: email.trim());
+    await _storage.write(key: _passwordKey, value: sessionToken);
+  }
+
   Future<void> loginWithGoogle({
     required String email,
     String? displayName,

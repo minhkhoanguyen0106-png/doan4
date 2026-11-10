@@ -9,13 +9,18 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
     private final AuthService authService;
+    private final OtpService otpService;
 
-    public AuthController(AuthService authService) { this.authService = authService; }
+    public AuthController(AuthService authService, OtpService otpService) {
+        this.authService = authService;
+        this.otpService = otpService;
+    }
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
@@ -26,6 +31,18 @@ public class AuthController {
     @PostMapping("/login")
     public AuthDtos.UserResponse login(@Valid @RequestBody AuthDtos.LoginRequest request) {
         return authService.login(request);
+    }
+
+    @PostMapping("/send-otp")
+    public Map<String, String> sendOtp(@Valid @RequestBody AuthDtos.SendOtpRequest request) {
+        otpService.sendOtp(request.email(), request.purpose());
+        return Map.of("message", "Đã gửi mã xác thực OTP tới " + request.email());
+    }
+
+    @PostMapping("/verify-otp")
+    public AuthDtos.GoogleAuthResponse verifyOtpAndLogin(@Valid @RequestBody AuthDtos.VerifyOtpRequest request) {
+        otpService.verifyOtp(request.email(), request.code());
+        return authService.loginWithGoogle(new AuthDtos.GoogleAuthRequest(request.email(), request.displayName()));
     }
 
     @PostMapping("/google")
