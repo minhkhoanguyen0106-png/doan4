@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 export 'species_models.dart';
 import 'species_models.dart';
 
@@ -106,6 +107,37 @@ class WaterMeasurement {
   final String assessmentLevel;
   final Map<String, num?> readings;
   final String qualityStatus;
+
+  num? getMetric(String key) {
+    if (key == 'nh3Pct') {
+      final ph = readings['ph'];
+      if (ph == null) return null;
+      final temp = (readings['temperatureC'] ?? 28.0).toDouble();
+      // Emerson et al. formula for pKa of ammonia:
+      final pKa = 0.09018 + (2729.92 / (273.15 + temp));
+      final exponent = pKa - ph.toDouble();
+      final nh3Percent = 100.0 / (1.0 + math.pow(10.0, exponent));
+      return double.parse(nh3Percent.toStringAsFixed(2));
+    }
+    if (key == 'salinityPpt') {
+      final tds = readings['tdsMgL'];
+      if (tds == null) return null;
+      // Salinity (ppt / ‰) ≈ TDS (mg/L) / 1000 * 1.05
+      final sal = (tds.toDouble() / 1000.0) * 1.05;
+      return double.parse(sal.toStringAsFixed(2));
+    }
+    return readings[key];
+  }
+
+  double? get nh3Percentage {
+    final v = getMetric('nh3Pct');
+    return v?.toDouble();
+  }
+
+  double? get salinityPpt {
+    final v = getMetric('salinityPpt');
+    return v?.toDouble();
+  }
   factory WaterMeasurement.fromJson(Map<String, dynamic> json) {
     final values = Map<String, dynamic>.from(json['readings'] as Map);
     return WaterMeasurement(

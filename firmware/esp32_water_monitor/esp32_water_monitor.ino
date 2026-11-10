@@ -1,37 +1,31 @@
 /*
  * =========================================================
- * DU AN: HE THONG IOT QUAN TRAC CHAT LUONG NUOC AO NUOI TOM
- * PHAN MEM: PONDORA SMART AQUACULTURE
- * 
- * TINH NANG NANG CAO (EDGE SIGNAL PROCESSING & SOFT SENSOR):
- *   1. Edge Signal Processing:
- *      - Bo loc trung vi (Truncated Median Filter 15 mau, loai 3 min, 3 max)
- *      - Triet tieu xung nhieu dien ap ADC & bot khi bam que do
- *      - Tinh dao ham toc do bien thien pH theo thoi gian (dpH/dt)
- *   2. Soft Sensor (Cam bien mem tinh khi doc NH3 tu do):
- *      - Ap dung mo hinh can bang hoa ly Emerson:
- *        % NH3 = 100% / (1 + 10^(9.25 - pH))
- *      - Du bao doc to NH3 thoi gian thuc ma khong can cam bien dat tien
+ * DU AN: IOT GIAM SAT MOI TRUONG VA DINH DUONG CHO CAY OT
+ * CAM BIEN: pH PH-4502C
+ * VI DIEU KHIEN: ESP32 DEVKIT V1
  *
- * KET NOI PHAN CUNG:
- *   Po  -> Cau phan ap 10k:10k -> GPIO35 (D35)
- *   V+  -> Nguon 5V
+ * KET NOI:
+ *   PO  -> Cau phan ap -> GPIO35 (D35)
+ *   V+  -> Nguon 5V rieng
  *   GND -> GND chung
+ *   DO  -> Khong noi
+ *   TO  -> Khong noi
  *
  * THINGSPEAK:
- *   FIELD 1 = pH da loc trung vi (pH thuc te)
- *   FIELD 2 = % Khi doc NH3 tu do (Soft Sensor)
- *   FIELD 3 = Canh bao he thong (0: An toan, 1: Canh bao)
+ *   FIELD 1 = Gia tri pH
+ *   FIELD 2 = Gia tri ADC tho
  *
- * HIEU CHUAN pH:
+ * HIEU CHUAN:
  *   pH 4.01 = 1.998 V
  *   pH 6.86 = 1.496 V
+ *
+ * SERIAL MONITOR: 115200 baud
+ * CHU KY GUI: 20 giay
  * =========================================================
  */
 
 #include <WiFi.h>
 #include <HTTPClient.h>
-#include <math.h>
 
 // =========================================================
 // 1. CAU HINH WIFI
@@ -45,7 +39,9 @@ const char* WIFI_PASSWORD = "thaochode";
 // =========================================================
 
 const char* WRITE_API_KEY = "8L8NJP5QT7UAE0IE";
-const char* THINGSPEAK_URL = "http://api.thingspeak.com/update";
+
+const char* THINGSPEAK_URL =
+  "http://api.thingspeak.com/update";
 
 // =========================================================
 // 3. CAU HINH CAM BIEN pH
@@ -53,115 +49,83 @@ const char* THINGSPEAK_URL = "http://api.thingspeak.com/update";
 
 #define PH_PIN 35
 
-// Tỷ lệ cầu phân áp 10k và 10k
+// So lan lay mau ADC
+const int ADC_SAMPLES = 20;
+
+// Ty le cau phan ap 10k va 10k
 const float VOLTAGE_DIVIDER_RATIO = 2.0;
 
-// Thông số hiệu chuẩn chuẩn của bạn
+// =========================================================
+// 4. THONG SO HIEU CHUAN pH
+// =========================================================
+
+// Diem hieu chuan thu nhat
 const float PH_VOLT_AT_4_01 = 1.998f;
 const float PH_VALUE_AT_4_01 = 4.01f;
 
+// Diem hieu chuan thu hai
 const float PH_VOLT_AT_6_86 = 1.496f;
 const float PH_VALUE_AT_6_86 = 6.86f;
 
-// Chu kỳ gửi dữ liệu lên Cloud: 20 giây
+// =========================================================
+// 5. THOI GIAN GUI DU LIEU
+// =========================================================
+
 const unsigned long UPLOAD_INTERVAL = 20000;
+
 unsigned long lastUploadTime = 0;
 
-// Biến lưu vết theo dõi tốc độ biến thiên pH (dpH/dt)
-float previousPH = -1.0f;
-unsigned long previousPHTime = 0;
-float phVelocityPerHour = 0.0f; // Đơn vị: delta pH / giờ
-
 // =========================================================
-// 4. EDGE PROCESSING: BO LOC TRUNG VI (TRUNCATED MEDIAN FILTER)
+// 6. DOC DU LIEU CAM BIEN
 // =========================================================
 
-void readPHSensorEdgeFiltered(int &adcFiltered, float &gpioVoltage, float &sensorVoltage) {
-  const int SAMPLES = 15;
-  int rawAdc[SAMPLES];
-  int rawMv[SAMPLES];
+void readPHSensor(
+  int &adcValue,
+  float &gpioVoltage,
+  float &sensorVoltage
+) {
 
-  // Đọc liên tiếp 15 mẫu
-  for (int i = 0; i < SAMPLES; i++) {
-    rawAdc[i] = analogRead(PH_PIN);
-    rawMv[i] = analogReadMilliVolts(PH_PIN);
-    delay(8);
+  long adcTotal = 0;
+  long voltageTotal = 0;
+
+  for (int i = 0; i < ADC_SAMPLES; i++) {
+
+    adcTotal += analogRead(PH_PIN);
+
+    voltageTotal += analogReadMilliVolts(PH_PIN);
+
+    delay(10);
   }
 
-  // Sắp xếp tăng dần (Bubble sort)
-  for (int i = 0; i < SAMPLES - 1; i++) {
-    for (int j = i + 1; j < SAMPLES; j++) {
-      if (rawAdc[i] > rawAdc[j]) {
-        int t = rawAdc[i]; rawAdc[i] = rawAdc[j]; rawAdc[j] = t;
-      }
-      if (rawMv[i] > rawMv[j]) {
-        int t = rawMv[i]; rawMv[i] = rawMv[j]; rawMv[j] = t;
-      }
-    }
-  }
+  // Tinh ADC trung binh
+  adcValue = adcTotal / ADC_SAMPLES;
 
-  // Loại bỏ 3 mẫu nhỏ nhất (xung âm, bọt khí) và 3 mẫu lớn nhất (nhiễu xung đỉnh)
-  // Lấy trung bình cộng 9 mẫu ổn định ở giữa
-  long sumAdc = 0;
-  long sumMv = 0;
-  for (int i = 3; i < 12; i++) {
-    sumAdc += rawAdc[i];
-    sumMv += rawMv[i];
-  }
+  // Dien ap tai GPIO35
+  gpioVoltage =
+    (voltageTotal / (float)ADC_SAMPLES) / 1000.0f;
 
-  adcFiltered = sumAdc / 9;
-  gpioVoltage = (sumMv / 9.0f) / 1000.0f;
-  sensorVoltage = gpioVoltage * VOLTAGE_DIVIDER_RATIO;
+  // Khoi phuc dien ap PO truoc cau phan ap
+  sensorVoltage =
+    gpioVoltage * VOLTAGE_DIVIDER_RATIO;
 }
 
 // =========================================================
-// 5. TINH TOAN GIA TRI pH TUYEN TINH
+// 7. TINH GIA TRI pH
 // =========================================================
 
 float calculatePH(float sensorVoltage) {
-  float slope = (PH_VALUE_AT_6_86 - PH_VALUE_AT_4_01) /
-                (PH_VOLT_AT_6_86 - PH_VOLT_AT_4_01);
 
-  float phValue = PH_VALUE_AT_4_01 + (sensorVoltage - PH_VOLT_AT_4_01) * slope;
+  // Tinh he so goc tu hai diem hieu chuan
+  float slope =
+(PH_VALUE_AT_6_86 - PH_VALUE_AT_4_01) /
+    (PH_VOLT_AT_6_86 - PH_VOLT_AT_4_01);
 
-  if (phValue < 0.0f) phValue = 0.0f;
-  if (phValue > 14.0f) phValue = 14.0f;
+  // Noi suy tuyen tinh
+  float phValue =
+    PH_VALUE_AT_4_01 +
+    (sensorVoltage - PH_VOLT_AT_4_01) * slope;
 
   return phValue;
-}
-
-// =========================================================
-// 6. SOFT SENSOR: TINH TY LE KHI DOC NH3 THEO CONG THUC EMERSON
-// =========================================================
-
-float calculateToxicNH3Percent(float ph) {
-  // pKa của hệ Amoniac ở điều kiện nhiệt độ ao nuôi ~28°C là 9.25
-  // Công thức: % NH3 = 100 / (1 + 10^(9.25 - pH))
-  float exponent = 9.25f - ph;
-  float denominator = 1.0f + pow(10.0f, exponent);
-  float toxicNH3 = 100.0f / denominator;
-  return toxicNH3;
-}
-
-// =========================================================
-// 7. TINH DAO HAM TOC DO BIEN THIEN pH (dpH/dt)
-// =========================================================
-
-void updatePHRateOfChange(float currentPH) {
-  unsigned long now = millis();
-  if (previousPH < 0.0f) {
-    previousPH = currentPH;
-    previousPHTime = now;
-    return;
-  }
-
-  float elapsedHours = (now - previousPHTime) / 3600000.0f;
-  // Cập nhật sau mỗi chu kỳ ít nhất 15 giây
-  if (elapsedHours >= (15.0f / 3600.0f)) {
-    phVelocityPerHour = (currentPH - previousPH) / elapsedHours;
-    previousPH = currentPH;
-    previousPHTime = now;
-  }
 }
 
 // =========================================================
@@ -169,66 +133,121 @@ void updatePHRateOfChange(float currentPH) {
 // =========================================================
 
 void connectWiFi() {
-  if (WiFi.status() == WL_CONNECTED) return;
+
+  if (WiFi.status() == WL_CONNECTED) {
+    return;
+  }
 
   Serial.println();
-  Serial.print("Dang ket noi Wi-Fi '");
-  Serial.print(WIFI_SSID);
-  Serial.println("'...");
+  Serial.println("Dang ket noi Wi-Fi...");
 
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
   int retry = 0;
-  while (WiFi.status() != WL_CONNECTED && retry < 25) {
+
+  while (
+    WiFi.status() != WL_CONNECTED &&
+    retry < 30
+  ) {
+
     delay(500);
+
     Serial.print(".");
+
     retry++;
   }
 
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("\n>> Ket noi Wi-Fi thanh cong!");
-    Serial.print(">> Dia chi IP: ");
+
+    Serial.println();
+    Serial.println("Ket noi Wi-Fi thanh cong!");
+
+    Serial.print("Dia chi IP: ");
     Serial.println(WiFi.localIP());
+
   } else {
-    Serial.println("\n>> Khong the ket noi Wi-Fi!");
+
+    Serial.println();
+    Serial.println("Khong the ket noi Wi-Fi!");
   }
 }
 
 // =========================================================
-// 9. GUI DU LIEU LEN THINGSPEAK (pH, % NH3, Alert)
+// 9. GUI DU LIEU LEN THINGSPEAK
 // =========================================================
 
-void uploadThingSpeak(float phValue, float nh3Percent, bool isAlarm) {
-  if (WiFi.status() != WL_CONNECTED) return;
+void uploadThingSpeak(
+  int adcValue,
+  float phValue
+) {
+
+  if (WiFi.status() != WL_CONNECTED) {
+
+    Serial.println("Wi-Fi chua ket noi!");
+    return;
+  }
 
   HTTPClient http;
+
   String url = String(THINGSPEAK_URL);
-  url += "?api_key=" + String(WRITE_API_KEY);
 
-  // FIELD 1: pH đã lọc
-  url += "&field1=" + String(phValue, 2);
+  url += "?api_key=";
+  url += WRITE_API_KEY;
 
-  // FIELD 2: % Khí độc NH3 (Soft Sensor)
-  url += "&field2=" + String(nh3Percent, 2);
+  // FIELD 1: Gia tri pH
+  url += "&field1=";
+  url += String(phValue, 2);
 
-  // FIELD 3: Cảnh báo chất lượng nước
-  url += "&field3=" + String(isAlarm ? 1 : 0);
+  // FIELD 2: Gia tri ADC tho
+  url += "&field2=";
+  url += String(adcValue);
 
   http.begin(url);
+
   int httpCode = http.GET();
 
   if (httpCode > 0) {
+
     String response = http.getString();
-    Serial.println("---------- THINGSPEAK UPLOAD ----------");
+
+    Serial.println();
+    Serial.println("========== THINGSPEAK ==========");
+
     Serial.print("HTTP Code: ");
     Serial.println(httpCode);
+
     Serial.print("Entry ID: ");
     Serial.println(response);
-    if (httpCode == HTTP_CODE_OK && response.toInt() > 0) {
-      Serial.println(">> Gui len ThingSpeak thanh cong! (Field 1: pH, Field 2: % NH3)");
+
+    if (
+      httpCode == HTTP_CODE_OK &&
+      response.toInt() > 0
+    ) {
+
+      Serial.println("Gui du lieu thanh cong!");
+
+    } else {
+
+      Serial.println("Gui du lieu that bai!");
     }
-    Serial.println("---------------------------------------");
+
+  } else {
+
+    Serial.print("Loi HTTP: ");
+    Serial.println(http.errorToString(httpCode));
   }
+
   http.end();
+}
+
+// =========================================================
+// SOFT SENSOR: TINH TOAN DOC TO % NH3 TU pH (APHA / EMERSON)
+// =========================================================
+float calculateToxicNH3Percent(float ph, float tempC = 28.0) {
+  // Cong thuc Emerson tinh pKa theo nhiet do:
+  float pKa = 0.09018 + (2729.92 / (273.15 + tempC));
+  float nh3Pct = 100.0 / (1.0 + pow(10.0, (pKa - ph)));
+  return nh3Pct;
 }
 
 // =========================================================
@@ -236,19 +255,39 @@ void uploadThingSpeak(float phValue, float nh3Percent, bool isAlarm) {
 // =========================================================
 
 void setup() {
+
   Serial.begin(115200);
+
   delay(1000);
 
   Serial.println();
-  Serial.println("==========================================================");
-  Serial.println("   HE THONG GIAM SAT AO NUOI - PONDORA SMART AQUACULTURE");
-  Serial.println("   TICH HOP: EDGE SIGNAL FILTERING & SOFT SENSOR NH3");
-  Serial.println("==========================================================");
+  Serial.println("==================================");
+  Serial.println("     HE THONG GIAM SAT pH");
+  Serial.println("          PH-4502C");
+  Serial.println("==================================");
 
+  // Cau hinh ADC 12 bit
   analogReadResolution(12);
-  analogSetPinAttenuation(PH_PIN, ADC_11db);
 
-  connectWiFi();
+  // Cau hinh ADC cho GPIO35
+  analogSetPinAttenuation(
+    PH_PIN,
+    ADC_11db
+  );
+
+  // Hien thi thong tin hieu chuan
+  Serial.println("THONG SO HIEU CHUAN:");
+
+  Serial.print("pH 4.01: ");
+  Serial.print(PH_VOLT_AT_4_01, 3);
+  Serial.println(" V");
+
+  Serial.print("pH 6.86: ");
+  Serial.print(PH_VOLT_AT_6_86, 3);
+  Serial.println(" V");
+
+  // Ket noi Wi-Fi
+connectWiFi();
 }
 
 // =========================================================
@@ -256,54 +295,70 @@ void setup() {
 // =========================================================
 
 void loop() {
-  int adcFiltered = 0;
+
+  int adcValue = 0;
+
   float gpioVoltage = 0;
   float sensorVoltage = 0;
 
-  // 1. Đọc và lọc tín hiệu bằng bộ lọc trung vị (Median Filter + SMA)
-  readPHSensorEdgeFiltered(adcFiltered, gpioVoltage, sensorVoltage);
+  // Doc du lieu cam bien
+  readPHSensor(
+    adcValue,
+    gpioVoltage,
+    sensorVoltage
+  );
+
+  // Tinh gia tri pH
   float phValue = calculatePH(sensorVoltage);
+  float toxicNH3Pct = calculateToxicNH3Percent(phValue, 28.0);
 
-  // 2. Soft Sensor: Tính tỷ lệ % khí độc Amonia (NH3)
-  float nh3Percent = calculateToxicNH3Percent(phValue);
-
-  // 3. Tính đạo hàm tốc độ biến thiên pH (dpH/dt)
-  updatePHRateOfChange(phValue);
-
-  // 4. Nhận diện các kịch bản bất thường trong ao nuôi
-  bool isAcidShock = (phValue < 6.8f);
-  bool isToxicNH3 = (nh3Percent > 5.0f || phValue > 8.5f);
-  bool isAlgaeCrash = (phVelocityPerHour < -0.5f); // Tụt nhanh hơn 0.5 pH / giờ
-  bool isAlarm = isAcidShock || isToxicNH3 || isAlgaeCrash;
-
-  // 5. In báo cáo ra Serial Monitor
+  // Hien thi du lieu
   Serial.println();
-  Serial.println("========== PONDORA EDGE AI & SOFT SENSOR ==========");
-  Serial.printf("1. pH (Median Filter): %.2f  (PO: %.3f V | ADC: %d)\n", 
-                phValue, sensorVoltage, adcFiltered);
-  Serial.printf("2. Soft Sensor NH3:    %.2f %%  [%s]\n", 
-                nh3Percent, 
-                nh3Percent < 2.0f ? "An toan" : (nh3Percent < 5.0f ? "Canh giac" : "NGUY HIEM: DOC TO CAO"));
-  Serial.printf("3. Bien thien dpH/dt:  %+.2f pH/gio  [%s]\n", 
-                phVelocityPerHour, 
-                fabs(phVelocityPerHour) < 0.3f ? "On dinh" : (phVelocityPerHour < -0.5f ? "CANH BAO: SUP TAO/AXIT" : "Dang tang"));
-  
-  if (isAcidShock) {
-    Serial.printf("4. Danh gia ao:        [!] NGUY CAP: Nuoc bi chua/axit hoa (pH = %.2f)\n", phValue);
-  } else if (isToxicNH3) {
-    Serial.printf("4. Danh gia ao:        [!] NGUY CAP: Khi doc NH3 boc phat manh (%.2f %%) gay chet tom!\n", nh3Percent);
-  } else if (isAlgaeCrash) {
-    Serial.println("4. Danh gia ao:        [!] CANH BAO SOM: Toc do tut pH cao (Hien tuong sup tao)!");
-  } else {
-    Serial.println("4. Danh gia ao:        [OK] AN TOAN - Moi truong nuoc ly tuong cho tom");
-  }
-  Serial.println("===================================================");
+  Serial.println("========== DU LIEU CAM BIEN pH & SOFT SENSOR ==========");
 
-  // 6. Gửi lên ThingSpeak định kỳ 20 giây
-  if (millis() - lastUploadTime >= UPLOAD_INTERVAL) {
+  Serial.print("ADC tho: ");
+  Serial.println(adcValue);
+
+  Serial.print("Dien ap GPIO35: ");
+  Serial.print(gpioVoltage, 3);
+  Serial.println(" V");
+
+  Serial.print("Dien ap PO: ");
+  Serial.print(sensorVoltage, 3);
+  Serial.println(" V");
+
+  Serial.print("Gia tri pH: ");
+  Serial.println(phValue, 2);
+
+  Serial.print("Doc to NH3 (Soft Sensor): ");
+  Serial.print(toxicNH3Pct, 2);
+  Serial.println(" %");
+
+  if (toxicNH3Pct > 10.0) {
+    Serial.println(">> CANH BAO: Doc to NH3 vuot nguong (>10%)!");
+  } else if (phValue < 7.5) {
+    Serial.println(">> LUU Y: pH < 7.5 (nguy co doc to H2S, tom mem vo)!");
+  } else {
+    Serial.println(">> Nuoc dat nguong an toan.");
+  }
+
+  Serial.println("=======================================================");
+
+  // Gui du lieu moi 20 giay
+  if (
+    millis() - lastUploadTime >= UPLOAD_INTERVAL
+  ) {
+
     lastUploadTime = millis();
+
+    // Kiem tra Wi-Fi
     connectWiFi();
-    uploadThingSpeak(phValue, nh3Percent, isAlarm);
+
+    // Gui du lieu len ThingSpeak
+    uploadThingSpeak(
+      adcValue,
+      phValue
+    );
   }
 
   delay(1000);

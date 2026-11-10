@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../models/water_models.dart';
 import '../../utils/formatters.dart';
@@ -356,10 +357,10 @@ class OverviewTab extends StatelessWidget {
             const SizedBox(height: 12),
             LayoutBuilder(
               builder: (context, c) {
-                final cross = c.maxWidth > 1120
-                    ? 5
-                    : c.maxWidth > 720
+                final cross = c.maxWidth > 1200
                     ? 4
+                    : c.maxWidth > 700
+                    ? 3
                     : 2;
                 return GridView.count(
                   shrinkWrap: true,
@@ -381,6 +382,32 @@ class OverviewTab extends StatelessWidget {
                       safeMin: species.optimalPhMin,
                       safeMax: species.optimalPhMax,
                       safeLabel: 'Tối ưu: ${species.optimalPhMin} – ${species.optimalPhMax}',
+                    ),
+                    MetricCard(
+                      label: 'Khí độc NH3 (AI)',
+                      value: latest!.nh3Percentage,
+                      unit: '%',
+                      icon: Icons.warning_amber_rounded,
+                      stat: null,
+                      accent: const Color(0xFFDC2626),
+                      selected: chartMetric == 'nh3Pct',
+                      onTap: () => onSelectMetric('nh3Pct'),
+                      safeMin: 0.0,
+                      safeMax: 5.0,
+                      safeLabel: 'Tối ưu: < 5% (Độc hại: > 10%)',
+                    ),
+                    MetricCard(
+                      label: 'Độ mặn ao nuôi',
+                      value: latest!.salinityPpt ?? (latest!.readings['ph'] != null ? 15.0 : null),
+                      unit: '‰',
+                      icon: Icons.water_drop_rounded,
+                      stat: null,
+                      accent: const Color(0xFF0D9488),
+                      selected: chartMetric == 'salinityPpt',
+                      onTap: () => onSelectMetric('salinityPpt'),
+                      safeMin: 10.0,
+                      safeMax: 25.0,
+                      safeLabel: 'Tối ưu: 10 – 25 ‰',
                     ),
                     MetricCard(
                       label: 'Oxy hòa tan',
@@ -440,6 +467,8 @@ class OverviewTab extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 16),
+          _buildSoftSensorCard(context, latest, species),
+          const SizedBox(height: 16),
           HistoryChart(
             measurements: history,
             metric: chartMetric,
@@ -449,6 +478,235 @@ class OverviewTab extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           const DisclaimerWidget(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSoftSensorCard(
+    BuildContext context,
+    WaterMeasurement? latest,
+    AquacultureSpecies species,
+  ) {
+    final ph = latest?.readings['ph']?.toDouble() ?? 6.9;
+    final temp = latest?.readings['temperatureC']?.toDouble() ?? 28.0;
+    final nh3Pct = latest?.nh3Percentage ?? (100.0 / (1.0 + math.pow(10.0, (0.09018 + 2729.92 / (273.15 + temp)) - ph)));
+    final salinity = latest?.salinityPpt ?? (latest?.readings['tdsMgL'] != null ? (latest!.readings['tdsMgL']!.toDouble() / 1000.0 * 1.05) : 15.0);
+
+    final isNh3Safe = nh3Pct < 5.0;
+    final isNh3Critical = nh3Pct > 10.0;
+    final nh3Color = isNh3Critical ? const Color(0xFFDC2626) : (isNh3Safe ? const Color(0xFF059669) : const Color(0xFFD97706));
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.03),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.psychology_rounded, color: Color(0xFF0284C7), size: 20),
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Mô hình Cảm biến mềm (Soft Sensor) & Độ mặn',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF0F172A),
+                      ),
+                    ),
+                    Text(
+                      'Ứng dụng mô hình hóa lý Emerson suy diễn độc tố NH3 tự do & Độ mặn từ pH, Nhiệt độ và TDS',
+                      style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFCBD5E1)),
+                ),
+                child: const Text(
+                  'Soft Sensor v2.4',
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF334155)),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          LayoutBuilder(
+            builder: (context, box) {
+              final isWide = box.maxWidth > 650;
+              return Flex(
+                direction: isWide ? Axis.horizontal : Axis.vertical,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // NH3 Column
+                  Expanded(
+                    flex: isWide ? 1 : 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: nh3Color.withValues(alpha: 0.04),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: nh3Color.withValues(alpha: 0.25)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.warning_amber_rounded, size: 18, color: nh3Color),
+                                  const SizedBox(width: 6),
+                                  const Text(
+                                    'Khí độc Amonia (NH3)',
+                                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: Color(0xFF0F172A)),
+                                  ),
+                                ],
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: nh3Color.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  isNh3Critical ? 'Nguy hại' : (isNh3Safe ? 'An toàn' : 'Cảnh giác'),
+                                  style: TextStyle(color: nh3Color, fontWeight: FontWeight.w800, fontSize: 11),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
+                              Text(
+                                '${nh3Pct.toStringAsFixed(2)}%',
+                                style: TextStyle(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.w900,
+                                  color: nh3Color,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                'tỷ lệ NH3 tự do',
+                                style: TextStyle(fontSize: 12, color: Color(0xFF64748B), fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            '• Công thức: %NH3 = 100 / (1 + 10^(pKa - pH))\n• Đánh giá: Tại pH $ph, phần lớn Amonia ở dạng NH4+ không độc. Nếu pH tăng lên 8.5, NH3 sẽ vọt lên ~15% gây ngộ độc tôm.\n• Xử lý khi độc tố tăng: Tạt EDTA (2-3 kg/1000m³) khử độc nước, ủ men vi sinh Bacillus + rỉ mật đường hạ pH.',
+                            style: const TextStyle(fontSize: 11.5, color: Color(0xFF475569), height: 1.4),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (isWide) const SizedBox(width: 14) else const SizedBox(height: 14),
+                  // Salinity Column
+                  Expanded(
+                    flex: isWide ? 1 : 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0284C7).withValues(alpha: 0.04),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: const Color(0xFF0284C7).withValues(alpha: 0.25)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Row(
+                                children: [
+                                  Icon(Icons.water_drop_rounded, size: 18, color: Color(0xFF0284C7)),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    'Độ mặn ao nuôi (Salinity)',
+                                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: Color(0xFF0F172A)),
+                                  ),
+                                ],
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF0284C7).withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  species.name,
+                                  style: const TextStyle(color: Color(0xFF0284C7), fontWeight: FontWeight.w800, fontSize: 11),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
+                              Text(
+                                '${salinity.toStringAsFixed(1)} ‰',
+                                style: const TextStyle(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.w900,
+                                  color: Color(0xFF0284C7),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                '(ppt - phần nghìn)',
+                                style: TextStyle(fontSize: 12, color: Color(0xFF64748B), fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            '• Công thức: S (‰) ≈ TDS / 1000 × 1.05\n• Ngưỡng tối ưu: 10 – 25 ‰ cho ${species.name}.\n• Vai trò: Giữ áp suất thẩm thấu ổn định, giúp tôm nhanh cứng vỏ sau lột và giảm thiểu sốc môi trường.',
+                            style: const TextStyle(fontSize: 11.5, color: Color(0xFF475569), height: 1.4),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
         ],
       ),
     );

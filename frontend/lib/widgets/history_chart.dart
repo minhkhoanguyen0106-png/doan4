@@ -59,6 +59,20 @@ class HistoryChart extends StatelessWidget {
       color: Color(0xFF0284C7),
       bg: Color(0xFFF0F9FF),
     ),
+    'nh3Pct': (
+      label: 'Khí độc NH3 (Soft Sensor)',
+      unit: '%',
+      icon: Icons.warning_amber_rounded,
+      color: Color(0xFFDC2626),
+      bg: Color(0xFFFEF2F2),
+    ),
+    'salinityPpt': (
+      label: 'Độ mặn ao nuôi',
+      unit: '‰',
+      icon: Icons.water_drop_rounded,
+      color: Color(0xFF0D9488),
+      bg: Color(0xFFF0FDFA),
+    ),
   };
 
   @override
@@ -66,21 +80,21 @@ class HistoryChart extends StatelessWidget {
     final points =
         measurements
             .where(
-              (m) => m.qualityStatus == 'VALID' && m.readings[metric] != null,
+              (m) => m.qualityStatus == 'VALID' && m.getMetric(metric) != null,
             )
             .toList()
           ..sort((a, b) => a.measuredAt.compareTo(b.measuredAt));
-    final config = _metrics[metric]!;
-    final latest = points.isEmpty ? null : points.last.readings[metric];
+    final config = _metrics[metric] ?? _metrics['ph']!;
+    final latest = points.isEmpty ? null : points.last.getMetric(metric);
     final change = points.length < 2
         ? null
-        : points.last.readings[metric]! - points.first.readings[metric]!;
+        : points.last.getMetric(metric)! - points.first.getMetric(metric)!;
     final double? minVal = points.isEmpty
         ? null
-        : points.map((p) => p.readings[metric]!.toDouble()).reduce((a, b) => a < b ? a : b);
+        : points.map((p) => p.getMetric(metric)!.toDouble()).reduce((a, b) => a < b ? a : b);
     final double? maxVal = points.isEmpty
         ? null
-        : points.map((p) => p.readings[metric]!.toDouble()).reduce((a, b) => a > b ? a : b);
+        : points.map((p) => p.getMetric(metric)!.toDouble()).reduce((a, b) => a > b ? a : b);
 
     return Container(
       decoration: BoxDecoration(
@@ -342,7 +356,7 @@ class HistoryChart extends StatelessWidget {
                           .map(
                             (p) => (
                               p.measuredAt,
-                              p.readings[metric]!.toDouble(),
+                              p.getMetric(metric)!.toDouble(),
                             ),
                           )
                           .toList(),
