@@ -92,56 +92,66 @@ class AssessmentCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEFF6FF),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFFBFDBFE)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF0F62FE),
-                              shape: BoxShape.circle,
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEFF6FF),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xFFBFDBFE)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF0F62FE),
+                                shape: BoxShape.circle,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 6),
-                          const Text(
-                            'AI TỔNG HỢP & PHÂN TÍCH CHẤT LƯỢNG NƯỚC',
-                            style: TextStyle(
-                              color: Color(0xFF0F62FE),
-                              fontWeight: FontWeight.w800,
-                              fontSize: 10.5,
-                              letterSpacing: 1.1,
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                isMobile
+                                    ? 'AI PHÂN TÍCH CHẤT LƯỢNG NƯỚC'
+                                    : 'AI TỔNG HỢP & PHÂN TÍCH CHẤT LƯỢNG NƯỚC',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Color(0xFF0F62FE),
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 10,
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
+                    const SizedBox(width: 8),
                     InkWell(
                       onTap: onPickDay,
                       borderRadius: BorderRadius.circular(10),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5.5),
                         decoration: BoxDecoration(
                           color: const Color(0xFFF8FAFC),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(color: const Color(0xFFE2E8F0)),
                         ),
                         child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.calendar_month_rounded, color: Color(0xFF0284C7), size: 15),
-                            const SizedBox(width: 6),
+                            const Icon(Icons.calendar_month_rounded, color: Color(0xFF0284C7), size: 14),
+                            const SizedBox(width: 5),
                             Text(
                               dateLabel(day),
                               style: const TextStyle(
                                 color: Color(0xFF334155),
-                                fontSize: 11.5,
+                                fontSize: 11,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -384,7 +394,7 @@ class AssessmentCard extends StatelessWidget {
 
                 // Stat counters at bottom
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF8FAFC),
                     borderRadius: BorderRadius.circular(14),
@@ -392,24 +402,27 @@ class AssessmentCard extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      HeroStat(
-                        icon: Icons.query_stats_rounded,
-                        value: '$sampleCount',
-                        label: 'mẫu quan trắc hợp lệ',
-                        accent: const Color(0xFF0284C7),
+                      Expanded(
+                        child: HeroStat(
+                          icon: Icons.query_stats_rounded,
+                          value: '$sampleCount',
+                          label: isMobile ? 'mẫu đo hợp lệ' : 'mẫu quan trắc hợp lệ',
+                          accent: const Color(0xFF0284C7),
+                        ),
                       ),
-                      const Spacer(),
                       Container(
                         width: 1,
-                        height: 24,
+                        height: 22,
+                        margin: const EdgeInsets.symmetric(horizontal: 6),
                         color: const Color(0xFFE2E8F0),
                       ),
-                      const Spacer(),
-                      HeroStat(
-                        icon: Icons.hub_rounded,
-                        value: '$deviceCount',
-                        label: 'thiết bị kết nối',
-                        accent: const Color(0xFF10B981),
+                      Expanded(
+                        child: HeroStat(
+                          icon: Icons.hub_rounded,
+                          value: '$deviceCount',
+                          label: isMobile ? 'thiết bị' : 'thiết bị kết nối',
+                          accent: const Color(0xFF10B981),
+                        ),
                       ),
                     ],
                   ),
@@ -476,6 +489,7 @@ class HeroStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
     children: [
       Container(
         padding: const EdgeInsets.all(5),
@@ -483,24 +497,28 @@ class HeroStat extends StatelessWidget {
           color: accent.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Icon(icon, color: accent, size: 16),
+        child: Icon(icon, color: accent, size: 15),
       ),
-      const SizedBox(width: 8),
+      const SizedBox(width: 6),
       Text(
         value,
         style: const TextStyle(
           color: Color(0xFF0F172A),
           fontWeight: FontWeight.w900,
-          fontSize: 16,
+          fontSize: 14.5,
         ),
       ),
-      const SizedBox(width: 6),
-      Text(
-        label,
-        style: const TextStyle(
-          color: Color(0xFF64748B),
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
+      const SizedBox(width: 4),
+      Flexible(
+        child: Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            color: Color(0xFF64748B),
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
     ],
