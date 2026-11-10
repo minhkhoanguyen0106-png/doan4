@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -49,6 +50,7 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
   Duration _historyRange = const Duration(hours: 24);
   DailySummary? _summary;
   List<WaterAlert> _alerts = [];
+  Timer? _realtimeTimer;
   List<AccountUser> _adminUsers = [];
   bool _adminLoading = false;
   DateTime _day = DateTime.now();
@@ -252,13 +254,27 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
     super.initState();
     _loadCustomSpecies();
     _load();
+    // Real-time automatic streaming: silently poll every 3 seconds without spinner blinking
+    _realtimeTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (mounted && !_loading) {
+        _load(silent: true);
+      }
+    });
   }
 
-  Future<void> _load({int? siteId}) async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
+  @override
+  void dispose() {
+    _realtimeTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _load({int? siteId, bool silent = false}) async {
+    if (!silent) {
+      setState(() {
+        _loading = true;
+        _error = null;
+      });
+    }
     try {
       final sites = await widget.api.sites();
       final chosen =
@@ -310,7 +326,7 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
         _loading = false;
       });
     } catch (e) {
-      if (mounted) {
+      if (mounted && !silent) {
         setState(() {
           _error = e.toString();
           _loading = false;
