@@ -12,6 +12,7 @@ class AssessmentCard extends StatelessWidget {
     required this.onPickDay,
     this.species,
     this.onViewActionPlan,
+    this.onSimulate,
   });
 
   final String level;
@@ -21,6 +22,7 @@ class AssessmentCard extends StatelessWidget {
   final VoidCallback onPickDay;
   final AquacultureSpecies? species;
   final VoidCallback? onViewActionPlan;
+  final VoidCallback? onSimulate;
 
   @override
   Widget build(BuildContext context) {
@@ -318,22 +320,42 @@ class AssessmentCard extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              SizedBox(
-                                width: double.infinity,
-                                child: FilledButton.icon(
-                                  onPressed: onViewActionPlan,
-                                  icon: const Icon(Icons.arrow_forward_rounded, size: 15),
-                                  label: const Text('Xem phác đồ AI'),
-                                  style: FilledButton.styleFrom(
-                                    backgroundColor: accentColor,
-                                    foregroundColor: Colors.white,
-                                    visualDensity: VisualDensity.compact,
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: FilledButton.icon(
+                                      onPressed: onViewActionPlan,
+                                      icon: const Icon(Icons.arrow_forward_rounded, size: 15),
+                                      label: const Text('Xem phác đồ AI'),
+                                      style: FilledButton.styleFrom(
+                                        backgroundColor: accentColor,
+                                        foregroundColor: Colors.white,
+                                        visualDensity: VisualDensity.compact,
+                                        padding: const EdgeInsets.symmetric(vertical: 8),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
+                                  if (onSimulate != null) ...[
+                                    const SizedBox(width: 8),
+                                    OutlinedButton.icon(
+                                      onPressed: onSimulate,
+                                      icon: const Icon(Icons.science_outlined, size: 15),
+                                      label: const Text('Mô phỏng'),
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: accentColor,
+                                        side: BorderSide(color: accentColor.withValues(alpha: 0.4)),
+                                        visualDensity: VisualDensity.compact,
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
                               ),
                             ],
                           )
@@ -371,6 +393,23 @@ class AssessmentCard extends StatelessWidget {
                                   ],
                                 ),
                               ),
+                              if (onSimulate != null) ...[
+                                OutlinedButton.icon(
+                                  onPressed: onSimulate,
+                                  icon: const Icon(Icons.science_outlined, size: 15),
+                                  label: const Text('Mô phỏng'),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: accentColor,
+                                    side: BorderSide(color: accentColor.withValues(alpha: 0.4)),
+                                    visualDensity: VisualDensity.compact,
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                              ],
                               FilledButton.icon(
                                 onPressed: onViewActionPlan,
                                 icon: const Icon(Icons.arrow_forward_rounded, size: 15),

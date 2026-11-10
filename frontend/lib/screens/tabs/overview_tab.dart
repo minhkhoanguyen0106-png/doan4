@@ -34,6 +34,7 @@ class OverviewTab extends StatelessWidget {
     required this.onResolveAlert,
     required this.onSelectSpecies,
     required this.onViewActionPlan,
+    this.onSimulate,
   });
 
   final List<MonitoringSite> sites;
@@ -61,6 +62,7 @@ class OverviewTab extends StatelessWidget {
   final ValueChanged<WaterAlert> onResolveAlert;
   final ValueChanged<AquacultureSpecies> onSelectSpecies;
   final VoidCallback onViewActionPlan;
+  final VoidCallback? onSimulate;
 
   @override
   Widget build(BuildContext context) {
@@ -324,6 +326,7 @@ class OverviewTab extends StatelessWidget {
             onPickDay: onChooseDay,
             species: species,
             onViewActionPlan: onViewActionPlan,
+            onSimulate: onSimulate,
           ),
           const SizedBox(height: 20),
           Row(

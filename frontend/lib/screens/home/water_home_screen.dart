@@ -455,6 +455,11 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
                   ),
                   actions: [
                     IconButton(
+                      tooltip: 'Mô phỏng AI & Cảm biến IoT',
+                      onPressed: _openSimulationDialog,
+                      icon: const Icon(Icons.science_outlined, color: Color(0xFF0F62FE)),
+                    ),
+                    IconButton(
                       tooltip: 'Làm mới dữ liệu',
                       onPressed: _loading ? null : _load,
                       icon: const Icon(Icons.refresh_rounded),
@@ -888,6 +893,7 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
                     onResolveAlert: _resolveAlert,
                     onSelectSpecies: (sp) => setState(() => _species = sp),
                     onViewActionPlan: _showActionPlan,
+                    onSimulate: _openSimulationDialog,
                   ),
           ),
         );
@@ -1052,16 +1058,33 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
       },
     );
 
+    final simulatedSummary = DailySummary(
+      date: '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}',
+      sampleCount: (_summary?.sampleCount ?? 0) + 1,
+      screeningLevel: assessmentLevel,
+      temperature: MetricStats(count: 1, min: temp, average: temp, max: temp),
+      ph: MetricStats(count: 1, min: ph, average: ph, max: ph),
+      oxygen: MetricStats(count: 1, min: doVal, average: doVal, max: doVal),
+      turbidity: MetricStats(count: 1, min: turb, average: turb, max: turb),
+      tds: MetricStats(count: 1, min: tds, average: tds, max: tds),
+    );
+
     setState(() {
       _latest = simulated;
+      _summary = simulatedSummary;
       _history = [simulated, ..._history];
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Đã nạp số đo mô phỏng IoT thành công ($assessmentLevel)! Bấm "Phác đồ kỹ thuật AI" để xem khuyến nghị.'),
+        content: Text('Đã nạp số đo mô phỏng IoT thành công ($assessmentLevel)!'),
         backgroundColor: const Color(0xFF0F62FE),
         behavior: SnackBarBehavior.floating,
+        action: SnackBarAction(
+          label: 'Xem phác đồ AI',
+          textColor: Colors.white,
+          onPressed: _showActionPlan,
+        ),
       ),
     );
   }
