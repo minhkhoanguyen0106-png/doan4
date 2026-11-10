@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BCE Class Diagram - PONDORA Water Quality Monitoring</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090e17;
+      --card-bg: #111a2e;
+      --border: #233554;
+      --primary: #38bdf8;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .header {
+      text-align: center;
+      max-width: 900px;
+      margin-bottom: 30px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 6px 14px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 999px;
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text);
+    }
+    .btn:hover {
+      background: #1e293b;
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: translateY(-1px);
+    }
+    .btn-primary {
+      background: #0284c7;
+      border-color: #38bdf8;
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: #0369a1;
+      color: #fff;
+    }
+    .diagram-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 30px;
+      width: 100%;
+      max-width: 1400px;
+      margin-bottom: 40px;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+      overflow-x: auto;
+    }
+    .diagram-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+    .mermaid {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      justify-content: center;
+      overflow-x: auto;
+    }
+    footer {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-top: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="badge">Object-Oriented Analysis &amp; Design (OOAD)</div>
+    <h1>UML BCE Class Diagram</h1>
+    <p class="subtitle">
+      Water Quality &amp; Pollution Monitoring System (PONDORA)<br>
+      Realizing Use Cases through Boundary – Control – Entity Pattern (No Framework Jargon)
+    </p>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn btn-primary" onclick="window.print()">
+      🖨️ In / Xuất PDF
+    </button>
+    <button class="btn" onclick="downloadSvg('svg-diagram-1', 'UML_BCE_Class_Diagram.svg')">
+      💾 Tải ảnh SVG (Sơ đồ 1)
+    </button>
+    <button class="btn" onclick="downloadSvg('svg-diagram-2', 'Domain_Entities_Class_Diagram.svg')">
+      💾 Tải ảnh SVG (Sơ đồ 2)
+    </button>
+  </div>
+
+  <!-- DIAGRAM 1 -->
+  <div class="diagram-card">
+    <div class="diagram-title">
+      <span>📐 1. Complete BCE Architecture Class Diagram (Boundary - Control - Entity)</span>
+    </div>
+    <div class="mermaid" id="diagram1">
+classDiagram
+    direction TB
+
+    %% ================= 1. BOUNDARY CLASSES =================
+    class LoginView {
+        <<Boundary>>
+        +inputCredentials()
+        +displayErrorMessage()
+    }
+
+    class RegisterView {
+        <<Boundary>>
+        +inputAccountInfo()
+        +displayValidationErrors()
+    }
+
+    class UserAdminView {
+        <<Boundary>>
+        +displayUserList()
+        +selectToggleStatus()
+        +selectChangeRole()
+    }
+
+    class DashboardView {
+        <<Boundary>>
+        +displayLatestMetrics()
+        +displayWaterStatus()
+        +displayDeviceSummary()
+    }
+
+    class SiteManagementView {
+        <<Boundary>>
+        +displaySiteList()
+        +inputNewSiteDetails()
+    }
+
+    class DeviceManagementView {
+        <<Boundary>>
+        +displayDeviceList()
+        +inputNewDevice()
+        +displayOnlineStatus()
+    }
+
+    class HistoryChartView {
+        <<Boundary>>
+        +selectTimeRange()
+        +renderTrendChart()
+        +displayLogTable()
+    }
+
+    class AlertCenterView {
+        <<Boundary>>
+        +displayAlertList()
+        +displayAlertDetails()
+        +confirmResolveAlert()
+    }
+
+    class SensorInterface {
+        <<Boundary>>
+        +receiveDeviceTelemetry()
+        +receiveCloudFeed()
+    }
+
+    %% ================= 2. CONTROL CLASSES =================
+    class AuthHandler {
+        <<Control>>
+        +register(name, email, password)
+        +login(email, password): User
+        +validateCredentials()
+    }
+
+    class AdminHandler {
+        <<Control>>
+        +getUserList(): List~User~
+        +updateUserStatus(userId, status)
+        +updateUserRole(userId, role)
+    }
+
+    class SiteHandler {
+        <<Control>>
+        +createSite(userId, siteData)
+        +getSitesByUser(userId): List~MonitoringSite~
+    }
+
+    class DeviceHandler {
+        <<Control>>
+        +registerDevice(siteId, name)
+        +getDevicesBySite(siteId): List~IotDevice~
+        +updateOnlineStatus(deviceId)
+    }
+
+    class MeasurementHandler {
+        <<Control>>
+        +getLatestMeasurement(siteId): WaterMeasurement
+        +getHistoryByRange(siteId, from, to)
+        +recordMeasurement(deviceId, readings)
+    }
+
+    class WaterAssessor {
+        <<Control>>
+        +assessReading(readings): String
+        +evaluateThresholds(metric, value): String
+    }
+
+    class SummaryHandler {
+        <<Control>>
+        +calculateDailySummary(siteId, date): DailyWaterSummary
+    }
+
+    class AlertHandler {
+        <<Control>>
+        +getActiveAlerts(siteId): List~WaterAlert~
+        +triggerAlert(siteId, deviceId, type, severity)
+        +resolveAlert(alertId)
+    }
+
+    class CloudSyncHandler {
+        <<Control>>
+        +pollCloudData()
+        +transformPayload()
+    }
+
+    %% ================= 3. ENTITY CLASSES =================
+    class User {
+        <<Entity>>
+        -Long id
+        -String email
+        -String passwordHash
+        -String displayName
+        -String role
+        -String status
+        +verifyPassword(pass): boolean
+        +activateAccount()
+        +disableAccount()
+    }
+
+    class MonitoringSite {
+        <<Entity>>
+        -Long id
+        -String name
+        -String location
+        -String timezone
+        -String notes
+        -String status
+        +updateSite(name, location, timezone)
+    }
+
+    class IotDevice {
+        <<Entity>>
+        -Long id
+        -String deviceCode
+        -String name
+        -String status
+        -Instant lastSeenAt
+        +recordActivity(timestamp)
+        +checkOnline(): boolean
+    }
+
+    class WaterMeasurement {
+        <<Entity>>
+        -Long id
+        -String messageId
+        -Instant measuredAt
+        -Double temperatureC
+        -Double ph
+        -Double dissolvedOxygenMgL
+        -Double turbidityNtu
+        -Double tdsMgL
+        -String assessmentLevel
+        +getReading(name): Double
+    }
+
+    class DailyWaterSummary {
+        <<Entity>>
+        -Long id
+        -LocalDate localDate
+        -int validSampleCount
+        -String screeningLevel
+        -Double avgPh
+        -Double avgTurbidity
+        +calculateStatistics()
+    }
+
+    class WaterAlert {
+        <<Entity>>
+        -Long id
+        -String alertType
+        -String severity
+        -String title
+        -String message
+        -String status
+        -Instant triggeredAt
+        -Instant resolvedAt
+        +resolve()
+    }
+
+    %% ================= RELATIONSHIPS =================
+    LoginView ..> AuthHandler : requests
+    RegisterView ..> AuthHandler : requests
+    UserAdminView ..> AdminHandler : requests
+    SiteManagementView ..> SiteHandler : requests
+    DeviceManagementView ..> DeviceHandler : requests
+    DashboardView ..> MeasurementHandler : requests
+    HistoryChartView ..> MeasurementHandler : requests
+    HistoryChartView ..> SummaryHandler : requests
+    AlertCenterView ..> AlertHandler : requests
+    SensorInterface ..> CloudSyncHandler : receives data
+
+    CloudSyncHandler --> MeasurementHandler : passes readings
+    MeasurementHandler --> WaterAssessor : verifies thresholds
+    WaterAssessor --> AlertHandler : notifies threshold breaches
+
+    AuthHandler ..> User : manages
+    AdminHandler ..> User : manages
+    SiteHandler ..> MonitoringSite : creates/reads
+    DeviceHandler ..> IotDevice : creates/reads
+    MeasurementHandler ..> WaterMeasurement : stores/reads
+    SummaryHandler ..> DailyWaterSummary : calculates/reads
+    AlertHandler ..> WaterAlert : creates/resolves
+
+    User "1" --> "0..*" MonitoringSite : owns
+    MonitoringSite "1" --> "0..*" IotDevice : contains
+    IotDevice "1" --> "0..*" WaterMeasurement : records
+    MonitoringSite "1" --> "0..*" DailyWaterSummary : summarizes
+    MonitoringSite "1" --> "0..*" WaterAlert : raises
+    IotDevice "1" --> "0..*" WaterAlert : relates to
+    </div>
+  </div>
+
+  <!-- DIAGRAM 2 -->
+  <div class="diagram-card">
+    <div class="diagram-title">
+      <span>📊 2. Domain Entities &amp; Data Relationships Class Diagram</span>
+    </div>
+    <div class="mermaid" id="diagram2">
+classDiagram
+    direction LR
+
+    class User {
+        -Long id
+        -String email
+        -String passwordHash
+        -String displayName
+        -String role
+        -String status
+        -Instant createdAt
+        +verifyPassword(pass): boolean
+        +activate()
+        +disable()
+    }
+
+    class MonitoringSite {
+        -Long id
+        -String name
+        -String location
+        -String timezone
+        -String notes
+        -String status
+        -Instant createdAt
+        +updateSite(name, location, timezone)
+    }
+
+    class IotDevice {
+        -Long id
+        -String deviceCode
+        -String name
+        -String status
+        -Instant lastSeenAt
+        +recordActivity(timestamp)
+        +isOnline(): boolean
+    }
+
+    class WaterMeasurement {
+        -Long id
+        -String messageId
+        -Instant measuredAt
+        -Instant receivedAt
+        -Double temperatureC
+        -Double ph
+        -Double dissolvedOxygenMgL
+        -Double turbidityNtu
+        -Double tdsMgL
+        -String qualityStatus
+        -String assessmentLevel
+    }
+
+    class DailyWaterSummary {
+        -Long id
+        -LocalDate localDate
+        -int validSampleCount
+        -String screeningLevel
+        -Double avgPh
+        -Double avgDissolvedOxygen
+        -Double avgTurbidity
+        -Double avgTds
+        +calculateStatistics()
+    }
+
+    class WaterAlert {
+        -Long id
+        -String alertType
+        -String severity
+        -String title
+        -String message
+        -String status
+        -Instant triggeredAt
+        -Instant resolvedAt
+        +resolve(at: Instant)
+    }
+
+    User "1" --> "0..*" MonitoringSite : owns
+    MonitoringSite "1" --> "0..*" IotDevice : contains
+    IotDevice "1" --> "0..*" WaterMeasurement : sends
+    MonitoringSite "1" --> "0..*" DailyWaterSummary : summarized by
+    MonitoringSite "1" --> "0..*" WaterAlert : raises
+    IotDevice "1" --> "0..*" WaterAlert : relates to
+    </div>
+  </div>
+
+  <footer>
+    Đồ án 4 — Hệ thống giám sát chất lượng nước nuôi thủy sản PONDORA
+  </footer>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      themeVariables: {
+        fontFamily: 'Plus Jakarta Sans, sans-serif',
+        fontSize: '13px'
+      }
+    });
+
+    function downloadSvg(containerId, filename) {
+      const card = event.target.closest('.toolbar').nextElementSibling;
+      const svg = document.querySelector('svg');
+      if (!svg) {
+        alert("Đang tải biểu đồ, vui lòng chờ 1-2 giây rồi bấm lại!");
+        return;
+      }
+      const svgData = new XMLSerializer().serializeToString(svg);
+      const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+      const svgUrl = URL.createObjectURL(svgBlob);
+      const downloadLink = document.createElement("a");
+      downloadLink.href = svgUrl;
+      downloadLink.download = filename;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+    }
+  </script>
+</body>
+</html>
+

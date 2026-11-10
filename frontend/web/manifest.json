@@ -1,0 +1,35 @@
+{
+    "name": "Pondora - Hệ Thống Giám Sát Ao Tôm Thông Minh",
+    "short_name": "Pondora",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#0284C7",
+    "theme_color": "#0284C7",
+    "description": "Hệ thống IoT giám sát chất lượng nước và số hóa nhật ký nuôi tôm thông minh.",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}
