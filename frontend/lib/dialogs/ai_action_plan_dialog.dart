@@ -217,11 +217,11 @@ class AiActionPlanDialog extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Tiêu chuẩn tham chiếu: QCVN 02-19:2014/BNNPTNT',
+                    'Tham chiếu: QCVN 02-19:2014 & Tạp chí Thủy sản VN',
                     style: TextStyle(
                       fontSize: 11,
-                      color: const Color(0xFF94A3B8),
-                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF64748B),
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   FilledButton.icon(

@@ -280,15 +280,15 @@ class AquacultureIntervention {
     final ph = m.readings['ph'];
     final doVal = m.readings['dissolvedOxygenMgL'];
 
-    if (ph != null && ph > 9.0) {
+    if (ph != null && ph > species.optimalPhMax) {
       return AquacultureIntervention(
         title: 'Nước có tính Kiềm cao (pH = ${ph.toStringAsFixed(1)}) — Nguy cơ độc tính NH₃',
         severityLabel: 'NGUY CẤP',
-        diagnosis: 'Tảo nở hoa quang hợp mạnh lúc trưa chiều làm pH vọt cao, chuyển hóa ion NH₄⁺ thành khí độc NH₃ gây bỏng mang và tổn thương thần kinh ${species.name.toLowerCase()}.',
-        immediateStep: 'Bật toàn bộ hệ thống quạt nước để tăng lưu chuyển nước tầng mặt và xua tan khí độc tích tụ.',
-        chemicalTreatment: 'Tạt rỉ đường (3–5 kg/1000m³) kết hợp chế phẩm sinh học vi sinh EM lúc 8–10h sáng để ức chế mật độ tảo. Nếu cấp bách có thể bổ sung Acid Citric 1–2 kg/1000m³.',
-        feedingGuidance: 'Cắt giảm 50% lượng thức ăn trong ngày, tuyệt đối không cho ăn cữ trưa chiều.',
-        preventiveMeasure: 'Thay 15–20% lượng nước tầng đáy nếu ao có hố xi-phông, kiểm soát màu nước trà nhạt.',
+        diagnosis: 'Tảo nở hoa quang hợp mạnh lúc trưa chiều làm pH vọt cao, chuyển hóa ion NH₄⁺ thành khí độc tự do NH₃ gây bỏng mang, ngạt khí và tổn thương thần kinh ${species.name.toLowerCase()}.',
+        immediateStep: 'Bật 100% hệ thống quạt nước để tăng lưu chuyển nước tầng mặt, đẩy khí độc tích tụ thoát ra không khí.',
+        chemicalTreatment: '1. Giải độc & giảm sốc cấp bách: Dùng EDTA (2–3 kg/1000m³) hòa nước tạt đều ao để khử kim loại, làm mềm nước và giảm độc tính khí độc.\n2. Hạ pH & cắt tảo sinh học: Tạt men vi sinh ủ mật rỉ đường (chế phẩm sinh học EM / Bacillus subtilis) liều 3–5 kg/1000m³ lúc 8–10h sáng để hạ pH an toàn về 7.8–8.2. Trường hợp kiềm quá cao có thể bổ sung Acid Citric 1–2 kg/1000m³.',
+        feedingGuidance: 'Cắt giảm ngay 50% lượng thức ăn trong ngày, tuyệt đối không cho ăn các cữ trưa và chiều gắt.',
+        preventiveMeasure: 'Thay 15–20% lượng nước tầng đáy nếu ao có hố xi-phông, kiểm soát màu nước trà nhạt (theo khuyến cáo Tạp chí Thủy sản Việt Nam).',
       );
     }
 
@@ -297,8 +297,8 @@ class AquacultureIntervention {
         title: 'Nước nhiễm Axit / Phèn (pH = ${ph.toStringAsFixed(1)}) — Dưới ngưỡng sinh trưởng',
         severityLabel: 'CẢNH BÁO CAO',
         diagnosis: 'Nước chua, xì phèn sau mưa hoặc đáy ao tích tụ hữu cơ phân hủy sinh acid, làm ${species.name.toLowerCase()} mềm vỏ, giảm bắt mồi và dễ nhiễm nấm ký sinh.',
-        immediateStep: 'Sục khí tăng cường để hỗ trợ hô hấp, rải vôi nông nghiệp quanh bờ ao tránh nước mưa tràn bờ.',
-        chemicalTreatment: 'Tạt vôi CaCO₃ hoặc Dolomite liều lượng 15–20 kg/1000m³ hòa nước tạt đều ao lúc chiều mát để nâng hệ đệm và tăng kiềm.',
+        immediateStep: 'Sục khí tăng cường để hỗ trợ hô hấp, rải vôi nông nghiệp quanh bờ ao tránh nước mưa rửa trôi phèn vào ao.',
+        chemicalTreatment: '1. Khử phèn & kết tủa kim loại: Tạt EDTA liều 2–3 kg/1000m³ để khử phèn sắt/nhôm, chống nhớt nước.\n2. Nâng kiềm & ổn định pH: Sau 2 tiếng tạt vôi CaCO₃ hoặc Dolomite liều 15–20 kg/1000m³ hòa nước tạt đều ao lúc chiều mát.',
         feedingGuidance: 'Giảm 30% thức ăn, trộn thêm Vitamin C và Beta-Glucan để tăng đề kháng chống sốc phèn.',
         preventiveMeasure: 'Bón vôi định kỳ dọc bờ ao trước các cơn mưa dông lớn.',
       );
