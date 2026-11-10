@@ -12,6 +12,7 @@ class AdminTab extends StatefulWidget {
     required this.onRefresh,
     required this.onToggleUserStatus,
     required this.onToggleUserRole,
+    this.onSimulate,
   });
 
   final AccountUser account;
@@ -20,6 +21,7 @@ class AdminTab extends StatefulWidget {
   final Future<void> Function() onRefresh;
   final ValueChanged<AccountUser> onToggleUserStatus;
   final ValueChanged<AccountUser> onToggleUserRole;
+  final VoidCallback? onSimulate;
 
   @override
   State<AdminTab> createState() => _AdminTabState();
@@ -202,6 +204,106 @@ class _AdminTabState extends State<AdminTab> {
                 );
               }
             },
+          ),
+
+          const SizedBox(height: 18),
+
+          // Admin AI & IoT Simulation Banner
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: const Color(0xFF334155), width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF0F172A).withValues(alpha: 0.12),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isMobile = constraints.maxWidth < 620;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(9),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0284C7).withValues(alpha: 0.25),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(Icons.science_outlined, color: Color(0xFF38BDF8), size: 22),
+                        ),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Kiểm định & Mô phỏng phản ứng AI thời gian thực',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 14.5,
+                                ),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                'Công cụ Quản trị viên: Nạp kịch bản mẫu để kiểm thử chẩn đoán AI & phác đồ kỹ thuật tức thì.',
+                                style: TextStyle(
+                                  color: Color(0xFF94A3B8),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (!isMobile && widget.onSimulate != null) ...[
+                          const SizedBox(width: 12),
+                          FilledButton.icon(
+                            onPressed: widget.onSimulate,
+                            icon: const Icon(Icons.play_circle_outline_rounded, size: 16),
+                            label: const Text('Bật kịch bản AI'),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFF0284C7),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    if (isMobile && widget.onSimulate != null) ...[
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: widget.onSimulate,
+                          icon: const Icon(Icons.play_circle_outline_rounded, size: 16),
+                          label: const Text('Bật kịch bản kiểm thử AI'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFF0284C7),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                );
+              },
+            ),
           ),
 
           const SizedBox(height: 22),

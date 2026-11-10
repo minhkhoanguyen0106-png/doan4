@@ -813,6 +813,7 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
                     onRefresh: _loadAdminUsers,
                     onToggleUserStatus: _toggleUser,
                     onToggleUserRole: _toggleUserRole,
+                    onSimulate: _openSimulationDialog,
                   )
                 : _tab == 6
                 ? AquacultureDiaryTab(
@@ -1073,13 +1074,15 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
       _latest = simulated;
       _summary = simulatedSummary;
       _history = [simulated, ..._history];
+      _tab = 0; // Tự động chuyển ngay về tab Tổng quan để cập nhật giao diện
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Đã nạp số đo mô phỏng IoT thành công ($assessmentLevel)!'),
+        content: Text('Đã nạp số đo mô phỏng IoT thành công ($assessmentLevel)! Đang chuyển về Tổng quan.'),
         backgroundColor: const Color(0xFF0F62FE),
         behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 4),
         action: SnackBarAction(
           label: 'Xem phác đồ AI',
           textColor: Colors.white,
@@ -1087,6 +1090,13 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
         ),
       ),
     );
+
+    // Mở ngay Hộp thoại Phác đồ AI cho tình huống vừa mô phỏng
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _showActionPlan();
+      }
+    });
   }
 }
 
