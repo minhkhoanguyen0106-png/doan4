@@ -67,3 +67,4 @@ Mở file `firmware/esp32_water_monitor/esp32_water_monitor.ino` bằng **Arduin
 - MySQL 8.0
 - Node.js 18+
 - Arduino IDE 2.x (để nạp firmware)
+

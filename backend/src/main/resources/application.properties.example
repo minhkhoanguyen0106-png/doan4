@@ -35,3 +35,4 @@ thingspeak.enabled=true
 thingspeak.channel-id=YOUR_CHANNEL_ID
 thingspeak.read-api-key=YOUR_READ_API_KEY
 thingspeak.poll-interval-ms=15000
+

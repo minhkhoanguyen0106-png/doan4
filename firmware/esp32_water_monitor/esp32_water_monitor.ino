@@ -113,17 +113,21 @@ void readPHSensor(
 // 7. TINH GIA TRI pH
 // =========================================================
 
-float calculatePH(float sensorVoltage) {
+float calculatePH(float voltage) {
 
   // Tinh he so goc tu hai diem hieu chuan
   float slope =
-(PH_VALUE_AT_6_86 - PH_VALUE_AT_4_01) /
+    (PH_VALUE_AT_6_86 - PH_VALUE_AT_4_01) /
     (PH_VOLT_AT_6_86 - PH_VOLT_AT_4_01);
 
   // Noi suy tuyen tinh
   float phValue =
     PH_VALUE_AT_4_01 +
-    (sensorVoltage - PH_VOLT_AT_4_01) * slope;
+    (voltage - PH_VOLT_AT_4_01) * slope;
+
+  // Gioi han trong thang do pH tieu chuan (0 - 14)
+  if (phValue < 0.0f) phValue = 0.0f;
+  if (phValue > 14.0f) phValue = 14.0f;
 
   return phValue;
 }
@@ -298,8 +302,8 @@ void loop() {
     sensorVoltage
   );
 
-  // Tinh gia tri pH
-  float phValue = calculatePH(sensorVoltage);
+  // Tinh gia tri pH (dung dien ap tren GPIO35 vi diem hieu chuan duoc do tai chan nay)
+  float phValue = calculatePH(gpioVoltage);
 
   // Hien thi du lieu
   Serial.println();

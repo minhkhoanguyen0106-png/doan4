@@ -1169,12 +1169,12 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
               const SizedBox(width: 8),
               FilledButton.icon(
                 onPressed: _openAddFeeding,
-                icon: const Icon(Icons.add, size: 16),
-                label: const Text('Thêm cữ ăn'),
+                icon: const Icon(Icons.add, size: 15),
+                label: const Text('Thêm cữ'),
                 style: FilledButton.styleFrom(
                   backgroundColor: const Color(0xFFD97706),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  textStyle: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -1185,60 +1185,90 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                 ? const Center(child: Text('Chưa có cữ ăn nào được ghi nhận.'))
                 : ListView.separated(
                     itemCount: _feedings.length,
-                    separatorBuilder: (_, _) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                    separatorBuilder: (_, _) => const SizedBox(height: 10),
                     itemBuilder: (ctx, i) {
                       final f = _feedings[i];
-                      return ListTile(
-                        dense: true,
-                        leading: CircleAvatar(
-                          backgroundColor: const Color(0xFFFEF3C7),
-                          child: const Icon(Icons.restaurant, color: Color(0xFFD97706), size: 18),
+                      return Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
                         ),
-                        title: Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(_formatMeal(f.feedMeal), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
-                            const SizedBox(width: 8),
+                            Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 16,
+                                  backgroundColor: const Color(0xFFFEF3C7),
+                                  child: const Icon(Icons.restaurant, color: Color(0xFFD97706), size: 16),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Wrap(
+                                    crossAxisAlignment: WrapCrossAlignment.center,
+                                    spacing: 6,
+                                    runSpacing: 4,
+                                    children: [
+                                      Text(
+                                        _formatMeal(f.feedMeal),
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: (f.feedTrayStatus == 'HẾT' || f.feedTrayStatus.contains('H'))
+                                              ? const Color(0xFFDCFCE7)
+                                              : const Color(0xFFFEF3C7),
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          _formatTrayStatus(f.feedTrayStatus),
+                                          style: TextStyle(
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.bold,
+                                            color: (f.feedTrayStatus == 'HẾT' || f.feedTrayStatus.contains('H'))
+                                                ? const Color(0xFF16A34A)
+                                                : const Color(0xFFD97706),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Text(
+                                  '${formatNumber(f.amountKg)} kg',
+                                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Color(0xFFD97706)),
+                                ),
+                                const SizedBox(width: 4),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline, size: 18, color: Color(0xFF94A3B8)),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                  onPressed: () async {
+                                    final site = widget.selectedSite;
+                                    if (site != null) {
+                                      await widget.api.deleteFeeding(site.id, f.id);
+                                      _loadData();
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                               decoration: BoxDecoration(
-                                color: (f.feedTrayStatus == 'HẾT' || f.feedTrayStatus.contains('H'))
-                                    ? const Color(0xFFDCFCE7)
-                                    : const Color(0xFFFEF3C7),
-                                borderRadius: BorderRadius.circular(6),
+                                color: const Color(0xFFF8FAFC),
+                                borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
-                                _formatTrayStatus(f.feedTrayStatus),
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: (f.feedTrayStatus == 'HẾT' || f.feedTrayStatus.contains('H'))
-                                      ? const Color(0xFF16A34A)
-                                      : const Color(0xFFD97706),
-                                ),
+                                '${f.feedBrand ?? 'Thức ăn chuẩn'} · ${f.notes ?? 'Không có ghi chú'} · ${dateLabel(f.fedAt.toLocal())} ${timeLabel(f.fedAt.toLocal())}',
+                                style: const TextStyle(fontSize: 11.5, color: Color(0xFF475569)),
                               ),
-                            ),
-                          ],
-                        ),
-                        subtitle: Text(
-                          '${f.feedBrand ?? 'Thức ăn chuẩn'} · ${f.notes ?? 'Không có ghi chú'} · ${dateLabel(f.fedAt.toLocal())} ${timeLabel(f.fedAt.toLocal())}',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              '${formatNumber(f.amountKg)} kg',
-                              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Color(0xFFD97706)),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline, size: 18, color: Color(0xFF94A3B8)),
-                              onPressed: () async {
-                                final site = widget.selectedSite;
-                                if (site != null) {
-                                  await widget.api.deleteFeeding(site.id, f.id);
-                                  _loadData();
-                                }
-                              },
                             ),
                           ],
                         ),
@@ -1260,7 +1290,7 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
             children: [
               const Expanded(
                 child: Text(
-                  'Cân mẫu & chẩn đoán sức khỏe',
+                  'Cân mẫu & sức khỏe tôm',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1268,12 +1298,12 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
               const SizedBox(width: 8),
               FilledButton.icon(
                 onPressed: _openAddHealth,
-                icon: const Icon(Icons.add, size: 16),
+                icon: const Icon(Icons.add, size: 15),
                 label: const Text('Cân mẫu'),
                 style: FilledButton.styleFrom(
                   backgroundColor: const Color(0xFF059669),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  textStyle: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -1284,57 +1314,92 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                 ? const Center(child: Text('Chưa có số liệu cân mẫu nào.'))
                 : ListView.separated(
                     itemCount: _healthLogs.length,
-                    separatorBuilder: (_, _) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                    separatorBuilder: (_, _) => const SizedBox(height: 10),
                     itemBuilder: (ctx, i) {
                       final h = _healthLogs[i];
-                      return ListTile(
-                        dense: true,
-                        leading: CircleAvatar(
-                          backgroundColor: const Color(0xFFDCFCE7),
-                          child: const Icon(Icons.monitor_heart, color: Color(0xFF16A34A), size: 18),
+                      return Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
                         ),
-                        title: Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Ngày nuôi DOC: ${h.ageDays ?? 0} ngày', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFE0F2FE),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                _formatHealth(h.healthStatus),
-                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF0284C7)),
-                              ),
-                            ),
-                          ],
-                        ),
-                        subtitle: Text(
-                          'Ruột: ${h.gutCondition ?? 'Bình thường'} | Gan: ${h.hepatopancreas ?? 'Bình thường'} | Vỏ: ${h.shellCondition ?? 'Sáng bóng'}\n${dateLabel(h.loggedAt.toLocal())}',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        isThreeLine: true,
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Text('${h.averageWeightG} g/con', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Color(0xFF059669))),
-                                Text('~${h.sizeCountPerKg ?? 0} con/kg', style: const TextStyle(fontSize: 11, color: Color(0xFF64748B))),
+                                CircleAvatar(
+                                  radius: 16,
+                                  backgroundColor: const Color(0xFFDCFCE7),
+                                  child: const Icon(Icons.monitor_heart, color: Color(0xFF16A34A), size: 16),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Wrap(
+                                    crossAxisAlignment: WrapCrossAlignment.center,
+                                    spacing: 6,
+                                    runSpacing: 4,
+                                    children: [
+                                      Text(
+                                        'DOC: ${h.ageDays ?? 0} ngày',
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFE0F2FE),
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          _formatHealth(h.healthStatus),
+                                          style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Color(0xFF0284C7)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      '${h.averageWeightG} g/con',
+                                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Color(0xFF059669)),
+                                    ),
+                                    Text(
+                                      '~${h.sizeCountPerKg ?? 0} con/kg',
+                                      style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(width: 4),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline, size: 18, color: Color(0xFF94A3B8)),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                  onPressed: () async {
+                                    final site = widget.selectedSite;
+                                    if (site != null) {
+                                      await widget.api.deleteHealthLog(site.id, h.id);
+                                      _loadData();
+                                    }
+                                  },
+                                ),
                               ],
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline, size: 18, color: Color(0xFF94A3B8)),
-                              onPressed: () async {
-                                final site = widget.selectedSite;
-                                if (site != null) {
-                                  await widget.api.deleteHealthLog(site.id, h.id);
-                                  _loadData();
-                                }
-                              },
+                            const SizedBox(height: 8),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF8FAFC),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'Ruột: ${h.gutCondition ?? 'Bình thường'} | Gan: ${h.hepatopancreas ?? 'Bình thường'} | Vỏ: ${h.shellCondition ?? 'Sáng bóng'}\nNgày đo: ${dateLabel(h.loggedAt.toLocal())}',
+                                style: const TextStyle(fontSize: 12, color: Color(0xFF334155), height: 1.4),
+                              ),
                             ),
                           ],
                         ),
@@ -1356,7 +1421,7 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
             children: [
               const Expanded(
                 child: Text(
-                  'Xử lý men vi sinh, vôi & thuốc',
+                  'Men vi sinh & xử lý nước',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1364,12 +1429,12 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
               const SizedBox(width: 8),
               FilledButton.icon(
                 onPressed: _openAddTreatment,
-                icon: const Icon(Icons.add, size: 16),
+                icon: const Icon(Icons.add, size: 15),
                 label: const Text('Xử lý ao'),
                 style: FilledButton.styleFrom(
                   backgroundColor: const Color(0xFF9333EA),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  textStyle: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -1380,53 +1445,84 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                 ? const Center(child: Text('Chưa có lần xử lý thuốc/vi sinh nào.'))
                 : ListView.separated(
                     itemCount: _treatments.length,
-                    separatorBuilder: (_, _) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                    separatorBuilder: (_, _) => const SizedBox(height: 10),
                     itemBuilder: (ctx, i) {
                       final t = _treatments[i];
-                      return ListTile(
-                        dense: true,
-                        leading: CircleAvatar(
-                          backgroundColor: const Color(0xFFF3E8FF),
-                          child: const Icon(Icons.science, color: Color(0xFF9333EA), size: 18),
+                      return Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
                         ),
-                        title: Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(t.productName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
-                            const SizedBox(width: 8),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                CircleAvatar(
+                                  radius: 16,
+                                  backgroundColor: const Color(0xFFF3E8FF),
+                                  child: const Icon(Icons.science, color: Color(0xFF9333EA), size: 16),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Wrap(
+                                    crossAxisAlignment: WrapCrossAlignment.center,
+                                    spacing: 6,
+                                    runSpacing: 4,
+                                    children: [
+                                      Text(
+                                        t.productName,
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFF3E8FF),
+                                          borderRadius: BorderRadius.circular(6),
+                                          border: Border.all(color: const Color(0xFFE9D5FF)),
+                                        ),
+                                        child: Text(
+                                          _formatTreatment(t.treatmentType),
+                                          style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Color(0xFF7E22CE)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Text(
+                                  '${formatNumber(t.dosage)} ${t.unit}',
+                                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF9333EA)),
+                                ),
+                                const SizedBox(width: 4),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline, size: 18, color: Color(0xFF94A3B8)),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                  onPressed: () async {
+                                    final site = widget.selectedSite;
+                                    if (site != null) {
+                                      await widget.api.deleteTreatment(site.id, t.id);
+                                      _loadData();
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF3E8FF),
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: const Color(0xFFE9D5FF)),
+                                color: const Color(0xFFF8FAFC),
+                                borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
-                                _formatTreatment(t.treatmentType),
-                                style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Color(0xFF7E22CE)),
+                                'Mục đích: ${t.purpose ?? 'Xử lý định kỳ'}${t.notes != null && t.notes!.isNotEmpty ? ' · ${t.notes}' : ''}\nNgày xử lý: ${dateLabel(t.treatedAt.toLocal())}',
+                                style: const TextStyle(fontSize: 12, color: Color(0xFF334155), height: 1.4),
                               ),
-                            ),
-                          ],
-                        ),
-                        subtitle: Text(
-                          'Mục đích: ${t.purpose ?? 'Xử lý định kỳ'} · ${t.notes ?? ''} · ${dateLabel(t.treatedAt.toLocal())}',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              '${formatNumber(t.dosage)} ${t.unit}',
-                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF9333EA)),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline, size: 18, color: Color(0xFF94A3B8)),
-                              onPressed: () async {
-                                final site = widget.selectedSite;
-                                if (site != null) {
-                                  await widget.api.deleteTreatment(site.id, t.id);
-                                  _loadData();
-                                }
-                              },
                             ),
                           ],
                         ),
@@ -1448,7 +1544,7 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
             children: [
               const Expanded(
                 child: Text(
-                  'Xifong đáy & thay nước ao',
+                  'Xifong & thay nước ao',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1456,12 +1552,12 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
               const SizedBox(width: 8),
               FilledButton.icon(
                 onPressed: _openAddWaterOp,
-                icon: const Icon(Icons.add, size: 16),
+                icon: const Icon(Icons.add, size: 15),
                 label: const Text('Thay nước'),
                 style: FilledButton.styleFrom(
                   backgroundColor: const Color(0xFF0891B2),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  textStyle: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -1472,32 +1568,62 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                 ? const Center(child: Text('Chưa có hoạt động thay nước/xifong nào.'))
                 : ListView.separated(
                     itemCount: _waterOps.length,
-                    separatorBuilder: (_, _) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                    separatorBuilder: (_, _) => const SizedBox(height: 10),
                     itemBuilder: (ctx, i) {
                       final w = _waterOps[i];
-                      return ListTile(
-                        dense: true,
-                        leading: CircleAvatar(
-                          backgroundColor: const Color(0xFFCFFAFE),
-                          child: const Icon(Icons.waves, color: Color(0xFF0891B2), size: 18),
+                      return Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
                         ),
-                        title: Text(
-                          _formatWaterOp(w.operationType, w.volumeM3),
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
-                        ),
-                        subtitle: Text(
-                          'Nguồn: ${w.waterSource ?? 'Ao lắng'} · ${w.notes ?? ''} · ${dateLabel(w.operatedAt.toLocal())}',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete_outline, size: 18, color: Color(0xFF94A3B8)),
-                          onPressed: () async {
-                            final site = widget.selectedSite;
-                            if (site != null) {
-                              await widget.api.deleteWaterOp(site.id, w.id);
-                              _loadData();
-                            }
-                          },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                CircleAvatar(
+                                  radius: 16,
+                                  backgroundColor: const Color(0xFFCFFAFE),
+                                  child: const Icon(Icons.waves, color: Color(0xFF0891B2), size: 16),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    _formatWaterOp(w.operationType, w.volumeM3),
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline, size: 18, color: Color(0xFF94A3B8)),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                  onPressed: () async {
+                                    final site = widget.selectedSite;
+                                    if (site != null) {
+                                      await widget.api.deleteWaterOp(site.id, w.id);
+                                      _loadData();
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF8FAFC),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'Nguồn: ${w.waterSource ?? 'Ao lắng'}${w.notes != null && w.notes!.isNotEmpty ? ' · ${w.notes}' : ''}\nNgày thực hiện: ${dateLabel(w.operatedAt.toLocal())}',
+                                style: const TextStyle(fontSize: 12, color: Color(0xFF334155), height: 1.4),
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     },

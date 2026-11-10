@@ -406,7 +406,7 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
           appBar: desktop
               ? null
               : AppBar(
-                  titleSpacing: 0,
+                  titleSpacing: 8,
                   title: Row(
                     children: [
                       const Icon(
@@ -414,9 +414,12 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
                         color: Color(0xFF1769D2),
                       ),
                       const SizedBox(width: 8),
-                      Text(
-                        title,
-                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17),
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16.5),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),
