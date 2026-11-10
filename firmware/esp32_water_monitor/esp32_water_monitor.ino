@@ -137,13 +137,18 @@ void readTempSensor(int &tempAdc, float &tempVoltage, float &tempC) {
   tempAdc = adcTotal / ADC_SAMPLES;
   tempVoltage = (voltTotal / (float)ADC_SAMPLES) / 1000.0f;
 
-  // Đặc tuyến NTC trên bo pH-4502C:
-  // Ở ~26-28°C điện áp khoảng 1.5V - 1.7V
-  tempC = 25.0f + (tempVoltage - 1.55f) * 20.0f;
-  
-  // Chặn biên vật lý hợp lý
-  if (tempC < 15.0f) tempC = 15.0f;
-  if (tempC > 45.0f) tempC = 45.0f;
+  // Kiểm tra đầu dò nhiệt độ:
+  // Que đo pH BNC tiêu chuẩn thông thường KHÔNG tích hợp nhiệt điện trở NTC bên trong,
+  // do đó chân To trên bo bị treo lên mức cao (ADC kịch trần ~4095 / 3.15V).
+  // Khi không có đầu dò nhiệt độ riêng, ta giữ nhiệt độ môi trường ao nuôi chuẩn (28.5 °C).
+  if (tempAdc >= 3900 || tempAdc <= 50) {
+    tempC = 28.5f; // Mức nhiệt độ ao tôm tiêu chuẩn (28.5 °C)
+  } else {
+    // Trường hợp có gắn cảm biến nhiệt độ tương thích
+    tempC = 25.0f + (tempVoltage - 1.55f) * 20.0f;
+    if (tempC < 15.0f) tempC = 15.0f;
+    if (tempC > 40.0f) tempC = 40.0f;
+  }
 }
 
 // =========================================================
