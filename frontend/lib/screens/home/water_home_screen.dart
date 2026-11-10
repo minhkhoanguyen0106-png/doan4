@@ -146,9 +146,29 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
     );
   }
 
+  // Chuyển đổi index BottomNav (mobile) <-> tab index thực
+  // Mobile destinations: 0=Tổng quan, 1=Điểm đo, 2=Thiết bị, 3=Lịch sử,
+  //   4=Cảnh báo, 5=Nhật ký, 6=Quản trị (nếu isAdmin)
+  // Tab index thực: 0=TQ,1=Điểm,2=TB,3=LS,4=CB,5=Admin,6=NhậtKý
+  int _tabToNavIndex(int tab) {
+    if (tab == 6) return 5; // Nhật ký -> vị trí 5
+    if (tab == 5) return widget.account.isAdmin ? 6 : 0; // Admin -> vị trí 6
+    return tab; // 0-4 giữ nguyên
+  }
+
+  int _navIndexToTab(int navIndex) {
+    if (navIndex == 5) return 6; // Nhật ký
+    if (navIndex == 6) return 5; // Admin
+    return navIndex;
+  }
+
   void _selectTab(int value) {
     setState(() => _tab = value);
     if (value == 5) _loadAdminUsers();
+  }
+
+  void _selectNavDestination(int navIndex) {
+    _selectTab(_navIndexToTab(navIndex));
   }
 
   Future<void> _loadAdminUsers() async {
@@ -386,17 +406,17 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
           appBar: desktop
               ? null
               : AppBar(
-                  titleSpacing: 20,
+                  titleSpacing: 0,
                   title: Row(
                     children: [
                       const Icon(
                         Icons.water_drop_rounded,
                         color: Color(0xFF1769D2),
                       ),
-                      const SizedBox(width: 9),
+                      const SizedBox(width: 8),
                       Text(
                         title,
-                        style: const TextStyle(fontWeight: FontWeight.w800),
+                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17),
                       ),
                     ],
                   ),
@@ -409,6 +429,32 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
                     _accountMenu(),
                     const SizedBox(width: 8),
                   ],
+                ),
+          drawer: desktop
+              ? null
+              : Drawer(
+                  width: 280,
+                  backgroundColor: const Color(0xFF060912),
+                  child: SafeArea(
+                    child: WaterSidebar(
+                      selectedIndex: _tab,
+                      onSelect: (idx) {
+                        Navigator.of(context).pop();
+                        _selectTab(idx);
+                      },
+                      isAdmin: widget.account.isAdmin,
+                      account: widget.account,
+                      onCreateSite: () {
+                        Navigator.of(context).pop();
+                        _createSite();
+                      },
+                      onLogout: () {
+                        Navigator.of(context).pop();
+                        widget.onLogout();
+                      },
+                      activeAlertCount: activeAlertCount,
+                    ),
+                  ),
                 ),
           body: desktop
               ? Row(
@@ -487,40 +533,65 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
               : null,
           bottomNavigationBar: desktop
               ? null
-              : NavigationBar(
-                  selectedIndex: _tab > (widget.account.isAdmin ? 5 : 4) ? 0 : _tab,
-                  onDestinationSelected: _selectTab,
-                  destinations: [
-                    const NavigationDestination(
-                      icon: Icon(Icons.grid_view_rounded),
-                      label: 'Tổng quan',
-                    ),
-                    const NavigationDestination(
-                      icon: Icon(Icons.place_outlined),
-                      label: 'Điểm đo',
-                    ),
-                    const NavigationDestination(
-                      icon: Icon(Icons.sensors_outlined),
-                      label: 'Thiết bị',
-                    ),
-                    const NavigationDestination(
-                      icon: Icon(Icons.history_rounded),
-                      label: 'Lịch sử',
-                    ),
-                    NavigationDestination(
-                      icon: Badge(
-                        isLabelVisible: activeAlertCount > 0,
-                        label: Text('$activeAlertCount'),
-                        child: const Icon(Icons.warning_amber_rounded),
-                      ),
-                      label: 'Cảnh báo',
-                    ),
-                    if (widget.account.isAdmin)
+              : NavigationBarTheme(
+                  data: NavigationBarThemeData(
+                    height: 64,
+                    labelTextStyle: WidgetStateProperty.resolveWith((states) {
+                      final selected = states.contains(WidgetState.selected);
+                      return TextStyle(
+                        fontSize: 9.5,
+                        fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                        color: selected ? const Color(0xFF0284C7) : const Color(0xFF64748B),
+                      );
+                    }),
+                    iconTheme: WidgetStateProperty.resolveWith((states) {
+                      final selected = states.contains(WidgetState.selected);
+                      return IconThemeData(
+                        size: 21,
+                        color: selected ? const Color(0xFF0284C7) : const Color(0xFF64748B),
+                      );
+                    }),
+                  ),
+                  child: NavigationBar(
+                    selectedIndex: _tabToNavIndex(_tab).clamp(0, widget.account.isAdmin ? 6 : 5),
+                    onDestinationSelected: _selectNavDestination,
+                    labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+                    destinations: [
                       const NavigationDestination(
-                        icon: Icon(Icons.admin_panel_settings_outlined),
-                        label: 'Quản trị',
+                        icon: Icon(Icons.grid_view_rounded),
+                        label: 'Tổng quan',
                       ),
-                  ],
+                      const NavigationDestination(
+                        icon: Icon(Icons.place_outlined),
+                        label: 'Điểm đo',
+                      ),
+                      const NavigationDestination(
+                        icon: Icon(Icons.sensors_outlined),
+                        label: 'Thiết bị',
+                      ),
+                      const NavigationDestination(
+                        icon: Icon(Icons.history_rounded),
+                        label: 'Lịch sử',
+                      ),
+                      NavigationDestination(
+                        icon: Badge(
+                          isLabelVisible: activeAlertCount > 0,
+                          label: Text('$activeAlertCount'),
+                          child: const Icon(Icons.warning_amber_rounded),
+                        ),
+                        label: 'Cảnh báo',
+                      ),
+                      const NavigationDestination(
+                        icon: Icon(Icons.menu_book_rounded),
+                        label: 'Nhật ký',
+                      ),
+                      if (widget.account.isAdmin)
+                        const NavigationDestination(
+                          icon: Icon(Icons.admin_panel_settings_outlined),
+                          label: 'Quản trị',
+                        ),
+                    ],
+                  ),
                 ),
         );
       },
