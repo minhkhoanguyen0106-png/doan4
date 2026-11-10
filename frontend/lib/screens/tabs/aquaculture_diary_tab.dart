@@ -377,178 +377,120 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
     final profile = _profile;
     final analytics = _analytics;
 
+    final isMobile = MediaQuery.of(context).size.width < 768;
+    final hPadding = isMobile ? 12.0 : 24.0;
+
     return ListView(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 36),
+      padding: EdgeInsets.fromLTRB(hPadding, 12, hPadding, 36),
       children: [
         // Subheader & Site Selector Strip
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'PONDORA · AQUACULTURE DIARY & SHRIMP MANAGEMENT',
-                  style: TextStyle(
-                    color: Color(0xFF0284C7),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.2,
-                  ),
+        if (isMobile) ...[
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'PONDORA · AQUACULTURE DIARY',
+                style: TextStyle(
+                  color: Color(0xFF0284C7),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.1,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Số hóa Ao nuôi & Nhật ký chăm sóc',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        color: const Color(0xFF0F172A),
-                        letterSpacing: -0.5,
-                      ),
-                ),
-                const SizedBox(height: 3),
-                const Text(
-                  'Quản lý thức ăn, theo dõi đường cong tăng trưởng tôm, xử lý thuốc và xifong đáy ao.',
-                  style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
-                ),
-              ],
-            ),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                // Modern Site Dropdown
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFCBD5E1)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF0F172A).withValues(alpha: 0.04),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<MonitoringSite>(
-                      value: widget.sites.firstWhere(
-                        (s) => s.id == site.id,
-                        orElse: () => widget.sites.first,
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                      elevation: 8,
-                      dropdownColor: Colors.white,
-                      icon: const Padding(
-                        padding: EdgeInsets.only(left: 6),
-                        child: Icon(Icons.unfold_more_rounded, color: Color(0xFF0284C7), size: 18),
-                      ),
-                      selectedItemBuilder: (context) {
-                        return widget.sites.map((s) {
-                          return Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFE0F2FE),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: const Icon(Icons.water_rounded, size: 14, color: Color(0xFF0284C7)),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                s.name,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFF0F172A),
-                                ),
-                              ),
-                            ],
-                          );
-                        }).toList();
-                      },
-                      items: widget.sites.map((s) {
-                        final isSelected = s.id == site.id;
-                        return DropdownMenuItem(
-                          value: s,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  width: 28,
-                                  height: 28,
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? const Color(0xFF0284C7).withValues(alpha: 0.12)
-                                        : const Color(0xFFF1F5F9),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: isSelected ? const Color(0xFF0284C7) : const Color(0xFFE2E8F0),
-                                    ),
-                                  ),
-                                  child: Icon(
-                                    Icons.water_rounded,
-                                    size: 15,
-                                    color: isSelected ? const Color(0xFF0284C7) : const Color(0xFF64748B),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      s.name,
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                                        color: isSelected ? const Color(0xFF0284C7) : const Color(0xFF0F172A),
-                                      ),
-                                    ),
-                                    if (s.location != null && s.location!.isNotEmpty)
-                                      Text(
-                                        s.location!,
-                                        style: const TextStyle(fontSize: 10.5, color: Color(0xFF94A3B8)),
-                                      ),
-                                  ],
-                                ),
-                                const SizedBox(width: 16),
-                                if (isSelected)
-                                  const Icon(Icons.check_circle_rounded, size: 16, color: Color(0xFF0284C7)),
-                              ],
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (val) {
-                        if (val != null) widget.onSelectSite(val);
-                      },
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'Số hóa Ao nuôi & Nhật ký',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      color: const Color(0xFF0F172A),
+                    ),
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  _buildSiteDropdown(site),
+                  OutlinedButton.icon(
+                    onPressed: _openEditProfile,
+                    icon: const Icon(Icons.tune_rounded, size: 15),
+                    label: const Text('Cấu hình'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      textStyle: const TextStyle(fontSize: 12),
                     ),
                   ),
-                ),
-                OutlinedButton.icon(
-                  onPressed: _openEditProfile,
-                  icon: const Icon(Icons.tune_rounded, size: 16),
-                  label: const Text('Cấu hình ao'),
-                ),
-                FilledButton.icon(
-                  onPressed: _exportCsv,
-                  style: FilledButton.styleFrom(backgroundColor: const Color(0xFF0284C7)),
-                  icon: const Icon(Icons.file_download_outlined, size: 16),
-                  label: const Text('Xuất Excel / CSV'),
-                ),
-              ],
-            ),
-          ],
-        ),
+                  FilledButton.icon(
+                    onPressed: _exportCsv,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF0284C7),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      textStyle: const TextStyle(fontSize: 12),
+                    ),
+                    icon: const Icon(Icons.file_download_outlined, size: 15),
+                    label: const Text('Xuất CSV'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ] else ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'PONDORA · AQUACULTURE DIARY & SHRIMP MANAGEMENT',
+                    style: TextStyle(
+                      color: Color(0xFF0284C7),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Số hóa Ao nuôi & Nhật ký chăm sóc',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          color: const Color(0xFF0F172A),
+                          letterSpacing: -0.5,
+                        ),
+                  ),
+                  const SizedBox(height: 3),
+                  const Text(
+                    'Quản lý thức ăn, theo dõi đường cong tăng trưởng tôm, xử lý thuốc và xifong đáy ao.',
+                    style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                  ),
+                ],
+              ),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _buildSiteDropdown(site),
+                  OutlinedButton.icon(
+                    onPressed: _openEditProfile,
+                    icon: const Icon(Icons.tune_rounded, size: 16),
+                    label: const Text('Cấu hình ao'),
+                  ),
+                  FilledButton.icon(
+                    onPressed: _exportCsv,
+                    style: FilledButton.styleFrom(backgroundColor: const Color(0xFF0284C7)),
+                    icon: const Icon(Icons.file_download_outlined, size: 16),
+                    label: const Text('Xuất Excel / CSV'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
 
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
 
         if (_loading && profile == null)
           const Padding(
@@ -575,22 +517,139 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
           // SECTION 1: Digital Pond Profile Card
           _buildPondProfileCard(profile, analytics),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
 
           // SECTION 2: Key Operational Metrics Strip (KPIs)
-          _buildKpiMetricsStrip(analytics),
+          _buildKpiMetricsStrip(analytics, isMobile),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
           // SECTION 3: Visual Analytics & Growth Curves
-          _buildAnalyticsCharts(analytics),
+          _buildAnalyticsCharts(analytics, isMobile),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
 
           // SECTION 4: Interactive Activity Diary (Tabs)
           _buildDiaryActivitiesPanel(),
         ],
       ],
+    );
+  }
+
+  Widget _buildSiteDropdown(MonitoringSite site) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFCBD5E1)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<MonitoringSite>(
+          value: widget.sites.firstWhere(
+            (s) => s.id == site.id,
+            orElse: () => widget.sites.first,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          elevation: 8,
+          dropdownColor: Colors.white,
+          icon: const Padding(
+            padding: EdgeInsets.only(left: 6),
+            child: Icon(Icons.unfold_more_rounded, color: Color(0xFF0284C7), size: 18),
+          ),
+          selectedItemBuilder: (context) {
+            return widget.sites.map((s) {
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE0F2FE),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Icon(Icons.water_rounded, size: 14, color: Color(0xFF0284C7)),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    s.name,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                ],
+              );
+            }).toList();
+          },
+          items: widget.sites.map((s) {
+            final isSelected = s.id == site.id;
+            return DropdownMenuItem(
+              value: s,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? const Color(0xFF0284C7).withValues(alpha: 0.12)
+                            : const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isSelected ? const Color(0xFF0284C7) : const Color(0xFFE2E8F0),
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.water_rounded,
+                        size: 15,
+                        color: isSelected ? const Color(0xFF0284C7) : const Color(0xFF64748B),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          s.name,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                            color: isSelected ? const Color(0xFF0284C7) : const Color(0xFF0F172A),
+                          ),
+                        ),
+                        if (s.location != null && s.location!.isNotEmpty)
+                          Text(
+                            s.location!,
+                            style: const TextStyle(fontSize: 10.5, color: Color(0xFF94A3B8)),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(width: 16),
+                    if (isSelected)
+                      const Icon(Icons.check_circle_rounded, size: 16, color: Color(0xFF0284C7)),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+          onChanged: (val) {
+            if (val != null) widget.onSelectSite(val);
+          },
+        ),
+      ),
     );
   }
 
@@ -737,60 +796,77 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
     );
   }
 
-  Widget _buildKpiMetricsStrip(DiaryAnalytics? a) {
+  Widget _buildKpiMetricsStrip(DiaryAnalytics? a, bool isMobile) {
     if (a == null) return const SizedBox.shrink();
+
+    final card1 = _kpiCard(
+      title: 'TỔNG THỨC ĂN',
+      value: '${formatNumber(a.totalFeedKg)} kg',
+      sub: 'Lũy kế cả vụ',
+      icon: Icons.restaurant_rounded,
+      color: const Color(0xFFD97706),
+      bg: const Color(0xFFFEF3C7),
+    );
+    final card2 = _kpiCard(
+      title: 'SINH KHỐI',
+      value: a.estimatedBiomassKg != null ? '${formatNumber(a.estimatedBiomassKg!)} kg' : '---',
+      sub: 'Sống ~${a.survivalRatePercent ?? 85}%',
+      icon: Icons.pets_rounded,
+      color: const Color(0xFF059669),
+      bg: const Color(0xFFD1FAE5),
+    );
+    final card3 = _kpiCard(
+      title: 'HỆ SỐ FCR',
+      value: a.fcr != null ? a.fcr!.toStringAsFixed(2) : '---',
+      sub: a.fcr != null && a.fcr! < 1.3 ? 'Tối ưu' : 'Bình thường',
+      icon: Icons.trending_up_rounded,
+      color: const Color(0xFF2563EB),
+      bg: const Color(0xFFDBEAFE),
+    );
+    final card4 = _kpiCard(
+      title: 'SIZE TÔM',
+      value: a.currentAvgWeightG != null
+          ? '${a.currentAvgWeightG!.toStringAsFixed(1)} g/con'
+          : '---',
+      sub: a.currentSizeCountPerKg != null
+          ? '~${a.currentSizeCountPerKg} con/kg'
+          : 'Chưa có số đo',
+      icon: Icons.scale_rounded,
+      color: const Color(0xFF7C3AED),
+      bg: const Color(0xFFEDE9FE),
+    );
+
+    if (isMobile) {
+      return Column(
+        children: [
+          Row(
+            children: [
+              Expanded(child: card1),
+              const SizedBox(width: 8),
+              Expanded(child: card2),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(child: card3),
+              const SizedBox(width: 8),
+              Expanded(child: card4),
+            ],
+          ),
+        ],
+      );
+    }
 
     return Row(
       children: [
-        Expanded(
-          child: _kpiCard(
-            title: 'TỔNG THỨC ĂN ĐÃ DÙNG',
-            value: '${formatNumber(a.totalFeedKg)} kg',
-            sub: 'Lũy kế cả vụ',
-            icon: Icons.restaurant_rounded,
-            color: const Color(0xFFD97706),
-            bg: const Color(0xFFFEF3C7),
-          ),
-        ),
+        Expanded(child: card1),
         const SizedBox(width: 12),
-        Expanded(
-          child: _kpiCard(
-            title: 'SINH KHỐI ƯỚC TÍNH',
-            value: a.estimatedBiomassKg != null ? '${formatNumber(a.estimatedBiomassKg!)} kg' : '---',
-            sub: 'Sống ~${a.survivalRatePercent ?? 85}%',
-            icon: Icons.pets_rounded,
-            color: const Color(0xFF059669),
-            bg: const Color(0xFFD1FAE5),
-          ),
-        ),
+        Expanded(child: card2),
         const SizedBox(width: 12),
-        Expanded(
-          child: _kpiCard(
-            title: 'HỆ SỐ FCR ƯỚC TÍNH',
-            value: a.fcr != null ? a.fcr!.toStringAsFixed(2) : '---',
-            sub: a.fcr != null && a.fcr! < 1.3
-                ? 'Hiệu quả tối ưu'
-                : 'Mức bình thường',
-            icon: Icons.trending_up_rounded,
-            color: const Color(0xFF2563EB),
-            bg: const Color(0xFFDBEAFE),
-          ),
-        ),
+        Expanded(child: card3),
         const SizedBox(width: 12),
-        Expanded(
-          child: _kpiCard(
-            title: 'TRỌNG LƯỢNG / SIZE TÔM',
-            value: a.currentAvgWeightG != null
-                ? '${a.currentAvgWeightG!.toStringAsFixed(1)} g/con'
-                : '---',
-            sub: a.currentSizeCountPerKg != null
-                ? 'Size ~${a.currentSizeCountPerKg} con/kg'
-                : 'Chưa có số đo',
-            icon: Icons.scale_rounded,
-            color: const Color(0xFF7C3AED),
-            bg: const Color(0xFFEDE9FE),
-          ),
-        ),
+        Expanded(child: card4),
       ],
     );
   }
@@ -804,36 +880,50 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
     required Color bg,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x040F172A),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12)),
-            child: Icon(icon, color: color, size: 22),
+            padding: const EdgeInsets.all(7),
+            decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(10)),
+            child: Icon(icon, color: color, size: 19),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF64748B)),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Color(0xFF64748B)),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 1),
                 Text(
                   value,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: color),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: color),
                 ),
                 Text(
                   sub,
-                  style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8)),
                 ),
               ],
             ),
@@ -843,169 +933,179 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
     );
   }
 
-  Widget _buildAnalyticsCharts(DiaryAnalytics? a) {
+  Widget _buildAnalyticsCharts(DiaryAnalytics? a, bool isMobile) {
     if (a == null) return const SizedBox.shrink();
+
+    final feedChart = Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.bar_chart_rounded, color: Color(0xFFD97706), size: 18),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'LƯỢNG THỨC ĂN TIÊU THỤ (KG/NGÀY)',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFFD97706),
+                    letterSpacing: 0.6,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          if (a.dailyFeedTrend.isEmpty)
+            const SizedBox(
+              height: 130,
+              child: Center(child: Text('Chưa có số liệu cho ăn gần đây.')),
+            )
+          else
+            SizedBox(
+              height: 130,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: a.dailyFeedTrend.map((p) {
+                  final maxVal = a.dailyFeedTrend.map((e) => e.amountKg).reduce((x, y) => x > y ? x : y);
+                  final heightFactor = maxVal > 0 ? (p.amountKg / maxVal) : 0.5;
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        '${p.amountKg.toStringAsFixed(0)}k',
+                        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        width: 28,
+                        height: 80 * heightFactor,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                            colors: [Color(0xFFF59E0B), Color(0xFFFBBF24)],
+                          ),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        p.dateLabel,
+                        style: const TextStyle(fontSize: 9.5, color: Color(0xFF64748B), fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  );
+                }).toList(),
+              ),
+            ),
+        ],
+      ),
+    );
+
+    final growthChart = Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.show_chart_rounded, color: Color(0xFF059669), size: 18),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'ĐƯỜNG CONG TĂNG TRƯỞNG (G/CON THEO DOC)',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF059669),
+                    letterSpacing: 0.6,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          if (a.growthCurve.isEmpty)
+            const SizedBox(
+              height: 130,
+              child: Center(child: Text('Chưa có mẫu cân đo trọng lượng.')),
+            )
+          else
+            SizedBox(
+              height: 130,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: a.growthCurve.map((c) {
+                  final maxW = a.growthCurve.map((e) => e.actualWeightG).reduce((x, y) => x > y ? x : y);
+                  final hFactor = maxW > 0 ? (c.actualWeightG / maxW) : 0.5;
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        '${c.actualWeightG.toStringAsFixed(1)}g',
+                        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF059669)),
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        width: 26,
+                        height: 80 * hFactor,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                            colors: [Color(0xFF10B981), Color(0xFF34D399)],
+                          ),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        'D${c.doc}',
+                        style: const TextStyle(fontSize: 9.5, color: Color(0xFF64748B), fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  );
+                }).toList(),
+              ),
+            ),
+        ],
+      ),
+    );
+
+    if (isMobile) {
+      return Column(
+        children: [
+          feedChart,
+          const SizedBox(height: 12),
+          growthChart,
+        ],
+      );
+    }
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Left: Daily Feed Trend Chart
-        Expanded(
-          flex: 1,
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Row(
-                  children: [
-                    Icon(Icons.bar_chart_rounded, color: Color(0xFFD97706), size: 18),
-                    SizedBox(width: 8),
-                    Text(
-                      'LƯỢNG THỨC ĂN TIÊU THỤ HÀNG NGÀY (KG/NGÀY)',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFFD97706),
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                if (a.dailyFeedTrend.isEmpty)
-                  const SizedBox(
-                    height: 140,
-                    child: Center(child: Text('Chưa có số liệu cho ăn gần đây.')),
-                  )
-                else
-                  SizedBox(
-                    height: 140,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: a.dailyFeedTrend.map((p) {
-                        final maxVal = a.dailyFeedTrend.map((e) => e.amountKg).reduce((x, y) => x > y ? x : y);
-                        final heightFactor = maxVal > 0 ? (p.amountKg / maxVal) : 0.5;
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text(
-                              '${p.amountKg.toStringAsFixed(0)}k',
-                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
-                            ),
-                            const SizedBox(height: 4),
-                            Container(
-                              width: 32,
-                              height: 85 * heightFactor,
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  begin: Alignment.bottomCenter,
-                                  end: Alignment.topCenter,
-                                  colors: [Color(0xFFF59E0B), Color(0xFFFBBF24)],
-                                ),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              p.dateLabel,
-                              style: const TextStyle(fontSize: 10, color: Color(0xFF64748B), fontWeight: FontWeight.w600),
-                            ),
-                          ],
-                        );
-                      }).toList(),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-
-        const SizedBox(width: 16),
-
-        // Right: Growth Curve Chart (Actual vs VietGAP Standard)
-        Expanded(
-          flex: 1,
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Row(
-                  children: [
-                    Icon(Icons.show_chart_rounded, color: Color(0xFF059669), size: 18),
-                    SizedBox(width: 8),
-                    Text(
-                      'ĐƯỜNG CONG TĂNG TRƯỞNG TÔM (G/CON THEO DOC)',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF059669),
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                if (a.growthCurve.isEmpty)
-                  const SizedBox(
-                    height: 140,
-                    child: Center(child: Text('Chưa có mẫu cân đo trọng lượng.')),
-                  )
-                else
-                  SizedBox(
-                    height: 140,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: a.growthCurve.map((c) {
-                        final maxW = a.growthCurve.map((e) => e.actualWeightG).reduce((x, y) => x > y ? x : y);
-                        final hFactor = maxW > 0 ? (c.actualWeightG / maxW) : 0.5;
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text(
-                              '${c.actualWeightG.toStringAsFixed(1)}g',
-                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF059669)),
-                            ),
-                            const SizedBox(height: 4),
-                            Container(
-                              width: 30,
-                              height: 85 * hFactor,
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  begin: Alignment.bottomCenter,
-                                  end: Alignment.topCenter,
-                                  colors: [Color(0xFF10B981), Color(0xFF34D399)],
-                                ),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              'D${c.doc}',
-                              style: const TextStyle(fontSize: 10, color: Color(0xFF64748B), fontWeight: FontWeight.w600),
-                            ),
-                          ],
-                        );
-                      }).toList(),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
+        Expanded(child: feedChart),
+        const SizedBox(width: 14),
+        Expanded(child: growthChart),
       ],
     );
   }
@@ -1058,14 +1158,24 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
       child: Column(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Nhật ký theo dõi các cữ ăn và kiểm tra nhá', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Expanded(
+                child: Text(
+                  'Nhật ký cữ ăn & kiểm tra nhá',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
               FilledButton.icon(
                 onPressed: _openAddFeeding,
                 icon: const Icon(Icons.add, size: 16),
-                label: const Text('Ghi nhận cữ ăn'),
-                style: FilledButton.styleFrom(backgroundColor: const Color(0xFFD97706)),
+                label: const Text('Thêm cữ ăn'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFFD97706),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),
@@ -1147,14 +1257,24 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
       child: Column(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Lịch sử cân mẫu, size tôm và chẩn đoán sức khỏe', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Expanded(
+                child: Text(
+                  'Cân mẫu & chẩn đoán sức khỏe',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
               FilledButton.icon(
                 onPressed: _openAddHealth,
                 icon: const Icon(Icons.add, size: 16),
-                label: const Text('Cân mẫu & Khám tôm'),
-                style: FilledButton.styleFrom(backgroundColor: const Color(0xFF059669)),
+                label: const Text('Cân mẫu'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF059669),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),
@@ -1233,14 +1353,24 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
       child: Column(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Nhật ký sử dụng men vi sinh, vôi, khoáng và thuốc trị bệnh', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Expanded(
+                child: Text(
+                  'Xử lý men vi sinh, vôi & thuốc',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
               FilledButton.icon(
                 onPressed: _openAddTreatment,
                 icon: const Icon(Icons.add, size: 16),
-                label: const Text('Ghi nhận xử lý ao'),
-                style: FilledButton.styleFrom(backgroundColor: const Color(0xFF9333EA)),
+                label: const Text('Xử lý ao'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF9333EA),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),
@@ -1315,14 +1445,24 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
       child: Column(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Nhật ký hút mùn đáy xifong, cấp bù và thay nước ao', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Expanded(
+                child: Text(
+                  'Xifong đáy & thay nước ao',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
               FilledButton.icon(
                 onPressed: _openAddWaterOp,
                 icon: const Icon(Icons.add, size: 16),
-                label: const Text('Ghi nhận thay nước'),
-                style: FilledButton.styleFrom(backgroundColor: const Color(0xFF0891B2)),
+                label: const Text('Thay nước'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF0891B2),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),
