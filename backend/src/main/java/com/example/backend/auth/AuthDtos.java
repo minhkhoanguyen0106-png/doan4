@@ -18,6 +18,12 @@ public final class AuthDtos {
 
     public record LoginRequest(@NotBlank @Email String email, @NotBlank String password) { }
 
+    public record GoogleAuthRequest(
+            @NotBlank @Email @Size(max = 254) String email,
+            @Size(max = 100) String displayName) { }
+
+    public record GoogleAuthResponse(UserResponse user, String sessionToken) { }
+
     public record UserResponse(Long id, String email, String displayName, UserRole role, UserStatus status, Instant createdAt) {
         public static UserResponse from(User user) {
             return new UserResponse(user.getId(), user.getEmail(), user.getDisplayName(), user.getRole(), user.getStatus(), user.getCreatedAt());

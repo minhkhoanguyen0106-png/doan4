@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Locale;
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -48,6 +49,35 @@ public class AuthService {
         User user = users.findByEmail(authentication.getName())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
         return AuthDtos.UserResponse.from(user);
+    }
+
+    @Transactional
+    public AuthDtos.GoogleAuthResponse loginWithGoogle(AuthDtos.GoogleAuthRequest request) {
+        String email = normalizeEmail(request.email());
+        if (!email.contains("@")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email không hợp lệ");
+        }
+        String sessionToken = UUID.randomUUID().toString().replace("-", "");
+        String encoded = passwordEncoder.encode(sessionToken);
+
+        User user = users.findByEmail(email).orElse(null);
+        if (user == null) {
+            String name = request.displayName();
+            if (name == null || name.isBlank()) {
+                name = email.split("@")[0];
+            }
+            user = new User(email, encoded, name.trim());
+        } else {
+            if (user.getStatus() != com.example.backend.user.UserStatus.ACTIVE) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Tài khoản đang bị vô hiệu hóa");
+            }
+            user.setPasswordHash(encoded);
+            if (request.displayName() != null && !request.displayName().isBlank()) {
+                user.setDisplayName(request.displayName().trim());
+            }
+        }
+        User saved = users.saveAndFlush(user);
+        return new AuthDtos.GoogleAuthResponse(AuthDtos.UserResponse.from(saved), sessionToken);
     }
 
     @Transactional(readOnly = true)

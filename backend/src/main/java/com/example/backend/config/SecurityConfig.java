@@ -47,7 +47,7 @@ public class SecurityConfig {
                                                    @Qualifier("corsConfigurationSource") CorsConfigurationSource cors) throws Exception {
         return http.csrf(csrf -> csrf.disable()).cors(c -> c.configurationSource(cors)).authenticationProvider(provider)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login", "/api/auth/google").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/device-ingest/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/**").authenticated().anyRequest().permitAll())

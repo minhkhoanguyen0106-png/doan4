@@ -50,6 +50,36 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _signInWithGoogle() async {
+    final result = await showDialog<Map<String, String>>(
+      context: context,
+      builder: (ctx) => _GoogleAuthModal(
+        isRegistering: _registering,
+        initialEmail: _email.text.trim().isNotEmpty && _email.text.contains('@')
+            ? _email.text.trim()
+            : '',
+      ),
+    );
+    if (result == null || !mounted) return;
+
+    final email = result['email']!;
+    final name = result['name'] ?? '';
+
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+
+    try {
+      await widget.api.loginWithGoogle(email: email, displayName: name);
+      await widget.onSignedIn();
+    } catch (e) {
+      if (mounted) setState(() => _error = e.toString());
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
@@ -387,7 +417,67 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
 
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 18),
+
+                            // Modern Divider
+                            Row(
+                              children: const [
+                                Expanded(child: Divider(color: Color(0xFFE2E8F0))),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 12),
+                                  child: Text(
+                                    'HOẶC TIẾP TỤC VỚI',
+                                    style: TextStyle(
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF94A3B8),
+                                      letterSpacing: 0.8,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(child: Divider(color: Color(0xFFE2E8F0))),
+                              ],
+                            ),
+
+                            const SizedBox(height: 16),
+
+                            // Google / Gmail Auth Button
+                            SizedBox(
+                              width: double.infinity,
+                              height: 48,
+                              child: OutlinedButton(
+                                onPressed: _busy ? null : _signInWithGoogle,
+                                style: OutlinedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  side: const BorderSide(color: Color(0xFFCBD5E1), width: 1.2),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  elevation: 0,
+                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const _GoogleLogoIcon(size: 20),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      _registering
+                                          ? 'Đăng ký bằng Google / Gmail'
+                                          : 'Đăng nhập bằng Google / Gmail',
+                                      style: const TextStyle(
+                                        color: Color(0xFF1E293B),
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: -0.2,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 22),
 
                             const Center(
                               child: Text(
@@ -731,6 +821,328 @@ class _OrganicWaveBorderPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _GoogleLogoIcon extends StatelessWidget {
+  const _GoogleLogoIcon({this.size = 20});
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: CustomPaint(
+        painter: const _GooglePainter(),
+      ),
+    );
+  }
+}
+
+class _GooglePainter extends CustomPainter {
+  const _GooglePainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    final strokeWidth = w * 0.22;
+    final center = Offset(w / 2, h / 2);
+    final radius = (w - strokeWidth) / 2;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.butt;
+
+    // Blue arc (from ~ -45° to ~ 45°)
+    paint.color = const Color(0xFF4285F4);
+    canvas.drawArc(rect, -0.785, 1.57, false, paint);
+
+    // Green arc (from ~ 45° to ~ 135°)
+    paint.color = const Color(0xFF34A853);
+    canvas.drawArc(rect, 0.785, 1.57, false, paint);
+
+    // Yellow arc (from ~ 135° to ~ 225°)
+    paint.color = const Color(0xFFFBBC05);
+    canvas.drawArc(rect, 2.356, 1.57, false, paint);
+
+    // Red arc (from ~ 225° to ~ 315°)
+    paint.color = const Color(0xFFEA4335);
+    canvas.drawArc(rect, 3.927, 1.57, false, paint);
+
+    // Blue horizontal bar
+    final barPaint = Paint()
+      ..color = const Color(0xFF4285F4)
+      ..style = PaintingStyle.fill;
+    canvas.drawRect(
+      Rect.fromLTRB(
+          w * 0.45, h * 0.5 - strokeWidth / 2, w * 0.95, h * 0.5 + strokeWidth / 2),
+      barPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _GoogleAuthModal extends StatefulWidget {
+  const _GoogleAuthModal({
+    required this.isRegistering,
+    this.initialEmail = '',
+  });
+
+  final bool isRegistering;
+  final String initialEmail;
+
+  @override
+  State<_GoogleAuthModal> createState() => _GoogleAuthModalState();
+}
+
+class _GoogleAuthModalState extends State<_GoogleAuthModal> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _gmailCtrl;
+  late final TextEditingController _nameCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _gmailCtrl = TextEditingController(text: widget.initialEmail);
+    _nameCtrl = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _gmailCtrl.dispose();
+    _nameCtrl.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (!_formKey.currentState!.validate()) return;
+    Navigator.of(context).pop({
+      'email': _gmailCtrl.text.trim(),
+      'name': _nameCtrl.text.trim(),
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      backgroundColor: Colors.white,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(28, 28, 28, 24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header with Google Logo
+                Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.04),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      alignment: Alignment.center,
+                      child: const _GoogleLogoIcon(size: 26),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.isRegistering
+                                ? 'Đăng ký với Google'
+                                : 'Đăng nhập với Google',
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFF0F172A),
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          const Text(
+                            'Sử dụng tài khoản Gmail của bạn',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF64748B),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+                const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                const SizedBox(height: 20),
+
+                // Gmail Input
+                const Text(
+                  'Địa chỉ Gmail',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF334155),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                TextFormField(
+                  controller: _gmailCtrl,
+                  keyboardType: TextInputType.emailAddress,
+                  autofocus: true,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    hintText: 'vidu@gmail.com',
+                    prefixIcon: const Icon(Icons.mail_outline_rounded, size: 20),
+                    suffixIcon: _gmailCtrl.text.isEmpty
+                        ? TextButton(
+                            onPressed: () {
+                              _gmailCtrl.text = 'admin@gmail.com';
+                              _gmailCtrl.selection = TextSelection.fromPosition(
+                                TextPosition(offset: _gmailCtrl.text.length),
+                              );
+                              setState(() {});
+                            },
+                            child: const Text('@gmail',
+                                style: TextStyle(
+                                    fontSize: 11, fontWeight: FontWeight.w700)),
+                          )
+                        : null,
+                  ),
+                  validator: (v) {
+                    final val = v?.trim() ?? '';
+                    if (val.isEmpty) return 'Vui lòng nhập địa chỉ Gmail.';
+                    if (!val.contains('@') || !val.contains('.')) {
+                      return 'Địa chỉ email không hợp lệ.';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                // Display Name Input (optional / name)
+                const Text(
+                  'Tên hiển thị người dùng',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF334155),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                TextFormField(
+                  controller: _nameCtrl,
+                  textCapitalization: TextCapitalization.words,
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) => _submit(),
+                  decoration: const InputDecoration(
+                    hintText: 'Nhập họ và tên (hoặc để trống tự lấy theo Gmail)',
+                    prefixIcon: Icon(Icons.person_outline_rounded, size: 20),
+                  ),
+                ),
+
+                const SizedBox(height: 14),
+
+                // Reassurance note
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEFF6FF),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFBFDBFE)),
+                  ),
+                  child: Row(
+                    children: const [
+                      Icon(Icons.shield_outlined,
+                          size: 16, color: Color(0xFF0F62FE)),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Xác thực an toàn tức thì. Không cần nhớ mật khẩu thủ công.',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Color(0xFF1E40AF),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Action Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                      ),
+                      child: const Text(
+                        'Hủy',
+                        style: TextStyle(
+                          color: Color(0xFF64748B),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    FilledButton.icon(
+                      onPressed: _submit,
+                      icon: const _GoogleLogoIcon(size: 16),
+                      label: Text(
+                        widget.isRegistering
+                            ? 'Đăng ký ngay'
+                            : 'Đăng nhập ngay',
+                        style: const TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF0F62FE),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 18, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 

@@ -62,6 +62,27 @@ class ApiClient {
     await _storage.write(key: _passwordKey, value: password);
   }
 
+  Future<void> loginWithGoogle({
+    required String email,
+    String? displayName,
+  }) async {
+    final response = await _http.post(
+      Uri.parse('$baseUrl/api/auth/google'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email.trim(),
+        if (displayName != null && displayName.trim().isNotEmpty)
+          'displayName': displayName.trim(),
+      }),
+    );
+    if (response.statusCode != 200) _throwApiError(response);
+    final data =
+        jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+    final sessionToken = data['sessionToken'] as String;
+    await _storage.write(key: _emailKey, value: email.trim());
+    await _storage.write(key: _passwordKey, value: sessionToken);
+  }
+
   Future<void> logout() async {
     await _storage.delete(key: _emailKey);
     await _storage.delete(key: _passwordKey);

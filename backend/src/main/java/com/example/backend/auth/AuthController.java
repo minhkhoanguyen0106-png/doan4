@@ -28,6 +28,11 @@ public class AuthController {
         return authService.login(request);
     }
 
+    @PostMapping("/google")
+    public AuthDtos.GoogleAuthResponse loginWithGoogle(@Valid @RequestBody AuthDtos.GoogleAuthRequest request) {
+        return authService.loginWithGoogle(request);
+    }
+
     @GetMapping("/me")
     public AuthDtos.UserResponse me(Authentication authentication) { return authService.currentUser(authentication.getName()); }
 }
