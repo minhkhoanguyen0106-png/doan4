@@ -284,7 +284,7 @@ void loop() {
 
   // 1. Đọc cảm biến pH (Po)
   readPHSensor(phAdc, phGpioVolt, phSensorVolt);
-  float phValue = calculatePH(phGpioVolt);
+  float phValue = calculatePH(phSensorVolt);
 
   // 2. Đọc cảm biến nhiệt độ (To)
   readTempSensor(tempAdc, tempVolt, tempC);
