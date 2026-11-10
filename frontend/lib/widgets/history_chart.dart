@@ -366,7 +366,7 @@ class HistoryChart extends StatelessWidget {
                   ),
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 40, right: 16),
+            padding: const EdgeInsets.only(left: 48, right: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -435,7 +435,7 @@ class HistoryChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    const leftMargin = 40.0;
+    const leftMargin = 48.0;
     const rightMargin = 16.0;
     const topMargin = 22.0;
     const bottomMargin = 14.0;
@@ -460,18 +460,32 @@ class HistoryChartPainter extends CustomPainter {
       maxValue += pad;
     }
 
+    final span = maxValue - minValue;
+    int decimals = 1;
+    if (span < 1.2) {
+      decimals = 2;
+    } else if (span >= 20.0) {
+      decimals = 0;
+    }
+
+    final rawVals = List.generate(4, (i) => maxValue - span * (i / 3.0));
+    // Ensure no two grid labels collide due to rounding (e.g. avoid duplicate "6.8")
+    while (decimals < 3 && rawVals.map((v) => v.toStringAsFixed(decimals)).toSet().length < 4) {
+      decimals++;
+    }
+
     final gridPaint = Paint()
       ..color = const Color(0xFFE2E8F0)
       ..strokeWidth = 1;
 
-    // Draw 4 horizontal grid lines with clear Y-axis numbers
+    // Draw 4 horizontal grid lines with distinct, non-duplicate Y-axis numbers
     for (var i = 0; i < 4; i++) {
       final y = plot.top + plot.height * i / 3;
       canvas.drawLine(Offset(plot.left, y), Offset(plot.right, y), gridPaint);
 
-      final val = maxValue - (maxValue - minValue) * (i / 3.0);
+      final val = rawVals[i];
       final textSpan = TextSpan(
-        text: val.toStringAsFixed(1),
+        text: val.toStringAsFixed(decimals),
         style: const TextStyle(
           color: Color(0xFF64748B),
           fontSize: 10,
