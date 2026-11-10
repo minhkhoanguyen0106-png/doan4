@@ -294,10 +294,12 @@ void loop() {
   // 2. Đọc cảm biến nhiệt độ (To)
   readTempSensor(tempAdc, tempVolt, tempC);
 
-  // 3. Đọc tín hiệu cảnh báo phần cứng (Do)
-  // Khi kích hoạt cảnh báo, chân Do thường kéo xuống mức LOW (0)
+  // 3. Hệ thống cảnh báo thông minh 2 lớp (Phần mềm + Phần cứng Do)
+  // Ngưỡng an toàn ao nuôi tôm chuẩn: 6.8 <= pH <= 8.5
   int alarmRaw = digitalRead(ALARM_PIN);
-  bool alarmActive = (alarmRaw == LOW);
+  bool hardwareAlarm = (alarmRaw == LOW);
+  bool phAbnormal = (phValue < 6.8f || phValue > 8.5f);
+  bool alarmActive = phAbnormal || hardwareAlarm;
 
   // 4. In thông tin ra Serial Monitor
   Serial.println();
@@ -306,8 +308,18 @@ void loop() {
                 phValue, phAdc, phGpioVolt, phSensorVolt);
   Serial.printf("2. Nhiet do: %.1f °C (ADC: %d | GPIO34: %.3f V)\n", 
                 tempC, tempAdc, tempVolt);
-  Serial.printf("3. Canh bao: %s (Do = %d)\n", 
-                alarmActive ? "[!] KICH HOAT CANH BAO" : "[OK] Binh thuong", alarmRaw);
+  
+  if (phValue < 6.8f) {
+    Serial.printf("3. Canh bao: [!] KICH HOAT CANH BAO (pH = %.2f: Nuoc bi axit hoa nguy hiem! | Do = %d)\n", 
+                  phValue, alarmRaw);
+  } else if (phValue > 8.5f) {
+    Serial.printf("3. Canh bao: [!] KICH HOAT CANH BAO (pH = %.2f: Nuoc bi kiem hoa qua cao! | Do = %d)\n", 
+                  phValue, alarmRaw);
+  } else if (hardwareAlarm) {
+    Serial.printf("3. Canh bao: [!] KICH HOAT CANH BAO (Ngat phan cung Do = %d)\n", alarmRaw);
+  } else {
+    Serial.printf("3. Canh bao: [OK] Binh thuong (pH an toan: 6.8 - 8.5 | Do = %d)\n", alarmRaw);
+  }
   Serial.println("=====================================================");
 
   // 5. Gửi lên ThingSpeak định kỳ mỗi 20 giây
