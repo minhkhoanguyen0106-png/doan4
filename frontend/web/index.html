@@ -34,43 +34,68 @@
 
   <!-- PONDORA Early Warning System Web Audio Synthesizer -->
   <script>
+    let _pondoraCtx = null;
+    function getAudioCtx() {
+      if (!_pondoraCtx) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) _pondoraCtx = new AudioCtx();
+      }
+      if (_pondoraCtx && _pondoraCtx.state === 'suspended') {
+        _pondoraCtx.resume();
+      }
+      return _pondoraCtx;
+    }
+
+    // Auto unlock AudioContext on any user interaction with the browser
+    ['click', 'touchstart', 'pointerdown', 'keydown'].forEach(evt => {
+      document.addEventListener(evt, function() {
+        const c = getAudioCtx();
+        if (c && c.state === 'suspended') c.resume();
+      }, { passive: true });
+    });
+
     window.playPondoraAlarm = function(severity) {
       try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        const ctx = new AudioCtx();
-        if (ctx.state === 'suspended') {
-          ctx.resume();
-        }
-        const now = ctx.currentTime;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
+        const ctx = getAudioCtx();
+        if (!ctx) return;
 
-        if (severity === 'CRITICAL') {
-          // Urgent 3-pulse Siren Alert for CRITICAL
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(880, now);
-          osc.frequency.linearRampToValueAtTime(587, now + 0.2);
-          osc.frequency.linearRampToValueAtTime(920, now + 0.4);
-          osc.frequency.linearRampToValueAtTime(587, now + 0.6);
-          gain.gain.setValueAtTime(0.35, now);
-          gain.gain.linearRampToValueAtTime(0.01, now + 0.75);
-          osc.start(now);
-          osc.stop(now + 0.75);
+        const playTone = () => {
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          if (severity === 'CRITICAL') {
+            // Urgent 3-pulse Siren Alert for CRITICAL
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(880, now);
+            osc.frequency.linearRampToValueAtTime(587, now + 0.2);
+            osc.frequency.linearRampToValueAtTime(920, now + 0.4);
+            osc.frequency.linearRampToValueAtTime(587, now + 0.6);
+            gain.gain.setValueAtTime(0.5, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.75);
+            osc.start(now);
+            osc.stop(now + 0.75);
+          } else {
+            // Dual harmonic alert beep for HIGH / WARNING
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, now);
+            osc.frequency.setValueAtTime(1050, now + 0.15);
+            gain.gain.setValueAtTime(0.4, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.45);
+            osc.start(now);
+            osc.stop(now + 0.45);
+          }
+        };
+
+        if (ctx.state === 'suspended') {
+          ctx.resume().then(playTone).catch(() => {});
         } else {
-          // Dual harmonic alert beep for HIGH / WARNING
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(700, now);
-          osc.frequency.setValueAtTime(880, now + 0.15);
-          gain.gain.setValueAtTime(0.28, now);
-          gain.gain.linearRampToValueAtTime(0.01, now + 0.45);
-          osc.start(now);
-          osc.stop(now + 0.45);
+          playTone();
         }
       } catch (e) {
-        console.warn('AudioContext playback blocked or unsupported:', e);
+        console.warn('AudioContext playback error:', e);
       }
     };
   </script>

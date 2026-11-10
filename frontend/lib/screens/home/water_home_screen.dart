@@ -51,6 +51,7 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
   DailySummary? _summary;
   List<WaterAlert> _alerts = [];
   Timer? _realtimeTimer;
+  DateTime? _lastAlarmSoundTime;
   List<AccountUser> _adminUsers = [];
   bool _adminLoading = false;
   DateTime _day = DateTime.now();
@@ -305,13 +306,16 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
         history = results[3] as List<WaterMeasurement>;
         alerts = results[4] as List<WaterAlert>;
 
-        final prevActiveCount = _alerts.where((a) => a.isActive).length;
-        final newActive = alerts.where((a) => a.isActive).toList();
-        if (newActive.length > prevActiveCount && prevActiveCount > 0) {
-          final highestSeverity = newActive.any((a) => a.isCritical)
-              ? 'CRITICAL'
-              : (newActive.any((a) => a.isHigh) ? 'HIGH' : 'WATCH');
-          AlarmSoundService.playAlarm(severity: highestSeverity);
+        final activeAlerts = alerts.where((a) => a.isActive).toList();
+        if (activeAlerts.isNotEmpty) {
+          final now = DateTime.now();
+          if (_lastAlarmSoundTime == null || now.difference(_lastAlarmSoundTime!).inSeconds >= 20) {
+            _lastAlarmSoundTime = now;
+            final highestSeverity = activeAlerts.any((a) => a.isCritical)
+                ? 'CRITICAL'
+                : (activeAlerts.any((a) => a.isHigh) ? 'HIGH' : 'WATCH');
+            AlarmSoundService.playAlarm(severity: highestSeverity);
+          }
         }
       }
       if (!mounted) return;
