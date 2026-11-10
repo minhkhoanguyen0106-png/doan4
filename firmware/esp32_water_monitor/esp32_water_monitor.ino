@@ -1,23 +1,24 @@
 /*
  * =========================================================
- * DU AN: IOT GIAM SAT MOI TRUONG VA DINH DUONG CHO CAY OT
- * CAM BIEN: pH PH-4502C
+ * DU AN: IOT GIAM SAT MOI TRUONG AO NUOI THUY SAN & pH
+ * CAM BIEN: pH PH-4502C (Full 3 kenh: Po, To, Do)
  * VI DIEU KHIEN: ESP32 DEVKIT V1
  *
- * KET NOI:
- *   PO  -> Cau phan ap -> GPIO35 (D35)
- *   V+  -> Nguon 5V rieng
+ * KET NOI PHAN CUNG:
+ *   Po  -> Cau phan ap 10k:10k -> GPIO35 (Do pH Analog)
+ *   To  -> Cam truc tiep       -> GPIO34 (Do Nhiet do Analog)
+ *   Do  -> Cam truc tiep       -> GPIO19 (Ngat bao dong Digital)
+ *   V+  -> Nguon 5V
  *   GND -> GND chung
- *   DO  -> Khong noi
- *   TO  -> Khong noi
  *
  * THINGSPEAK:
  *   FIELD 1 = Gia tri pH
- *   FIELD 2 = Gia tri ADC tho
+ *   FIELD 2 = Nhiet do nuoc (°C)
+ *   FIELD 3 = Trang thai canh bao Do (0: An toan, 1: Canh bao)
  *
  * HIEU CHUAN:
- *   pH 4.01 = 1.998 V
- *   pH 6.86 = 1.496 V
+ *   pH 4.01 = 1.998 V (do tai GPIO35)
+ *   pH 6.86 = 1.496 V (do tai GPIO35)
  *
  * SERIAL MONITOR: 115200 baud
  * CHU KY GUI: 20 giay
@@ -39,31 +40,29 @@ const char* WIFI_PASSWORD = "thaochode";
 // =========================================================
 
 const char* WRITE_API_KEY = "8L8NJP5QT7UAE0IE";
-
-const char* THINGSPEAK_URL =
-  "http://api.thingspeak.com/update";
+const char* THINGSPEAK_URL = "http://api.thingspeak.com/update";
 
 // =========================================================
-// 3. CAU HINH CAM BIEN pH
+// 3. CAU HINH CHAN CAM BIEN
 // =========================================================
 
-#define PH_PIN 35
+#define PH_PIN    35   // Po: Tín hiệu pH chính qua cầu phân áp
+#define TEMP_PIN  34   // To: Tín hiệu nhiệt độ tương đối (ADC1)
+#define ALARM_PIN 19   // Do: Tín hiệu ngắt báo động phần cứng Digital
 
-// So lan lay mau ADC
+// Số lần lấy mẫu ADC để lọc nhiễu
 const int ADC_SAMPLES = 20;
 
-// Ty le cau phan ap 10k va 10k
+// Tỷ lệ cầu phân áp 10k và 10k cho chân Po
 const float VOLTAGE_DIVIDER_RATIO = 2.0;
 
 // =========================================================
-// 4. THONG SO HIEU CHUAN pH
+// 4. THONG SO HIEU CHUAN pH (Đo tại chân GPIO35)
 // =========================================================
 
-// Diem hieu chuan thu nhat
 const float PH_VOLT_AT_4_01 = 1.998f;
 const float PH_VALUE_AT_4_01 = 4.01f;
 
-// Diem hieu chuan thu hai
 const float PH_VOLT_AT_6_86 = 1.496f;
 const float PH_VALUE_AT_6_86 = 6.86f;
 
@@ -72,11 +71,10 @@ const float PH_VALUE_AT_6_86 = 6.86f;
 // =========================================================
 
 const unsigned long UPLOAD_INTERVAL = 20000;
-
 unsigned long lastUploadTime = 0;
 
 // =========================================================
-// 6. DOC DU LIEU CAM BIEN
+// 6. DOC DU LIEU CAM BIEN pH (Chan Po)
 // =========================================================
 
 void readPHSensor(
@@ -84,48 +82,38 @@ void readPHSensor(
   float &gpioVoltage,
   float &sensorVoltage
 ) {
-
   long adcTotal = 0;
   long voltageTotal = 0;
 
   for (int i = 0; i < ADC_SAMPLES; i++) {
-
     adcTotal += analogRead(PH_PIN);
-
     voltageTotal += analogReadMilliVolts(PH_PIN);
-
-    delay(10);
+    delay(5);
   }
 
-  // Tinh ADC trung binh
+  // ADC trung bình
   adcValue = adcTotal / ADC_SAMPLES;
 
-  // Dien ap tai GPIO35
-  gpioVoltage =
-    (voltageTotal / (float)ADC_SAMPLES) / 1000.0f;
+  // Điện áp đo trực tiếp tại GPIO35
+  gpioVoltage = (voltageTotal / (float)ADC_SAMPLES) / 1000.0f;
 
-  // Khoi phuc dien ap PO truoc cau phan ap
-  sensorVoltage =
-    gpioVoltage * VOLTAGE_DIVIDER_RATIO;
+  // Điện áp gốc PO trước cầu phân áp (tham khảo)
+  sensorVoltage = gpioVoltage * VOLTAGE_DIVIDER_RATIO;
 }
 
 // =========================================================
-// 7. TINH GIA TRI pH
+// 7. TINH GIA TRI pH (Dua tren dien ap GPIO35 chuan)
 // =========================================================
 
 float calculatePH(float voltage) {
+  // Tính hệ số góc từ 2 điểm hiệu chuẩn thực nghiệm
+  float slope = (PH_VALUE_AT_6_86 - PH_VALUE_AT_4_01) /
+                (PH_VOLT_AT_6_86 - PH_VOLT_AT_4_01);
 
-  // Tinh he so goc tu hai diem hieu chuan
-  float slope =
-    (PH_VALUE_AT_6_86 - PH_VALUE_AT_4_01) /
-    (PH_VOLT_AT_6_86 - PH_VOLT_AT_4_01);
+  // Nội suy tuyến tính
+  float phValue = PH_VALUE_AT_4_01 + (voltage - PH_VOLT_AT_4_01) * slope;
 
-  // Noi suy tuyen tinh
-  float phValue =
-    PH_VALUE_AT_4_01 +
-    (voltage - PH_VOLT_AT_4_01) * slope;
-
-  // Gioi han trong thang do pH tieu chuan (0 - 14)
+  // Giới hạn trong thang đo chuẩn 0.0 - 14.0
   if (phValue < 0.0f) phValue = 0.0f;
   if (phValue > 14.0f) phValue = 14.0f;
 
@@ -133,111 +121,111 @@ float calculatePH(float voltage) {
 }
 
 // =========================================================
-// 8. KET NOI WIFI
+// 8. DOC DU LIEU NHIET DO (Chan To - GPIO34)
+// =========================================================
+
+void readTempSensor(int &tempAdc, float &tempVoltage, float &tempC) {
+  long adcTotal = 0;
+  long voltTotal = 0;
+
+  for (int i = 0; i < ADC_SAMPLES; i++) {
+    adcTotal += analogRead(TEMP_PIN);
+    voltTotal += analogReadMilliVolts(TEMP_PIN);
+    delay(5);
+  }
+
+  tempAdc = adcTotal / ADC_SAMPLES;
+  tempVoltage = (voltTotal / (float)ADC_SAMPLES) / 1000.0f;
+
+  // Đặc tuyến NTC trên bo pH-4502C:
+  // Ở ~26-28°C điện áp khoảng 1.5V - 1.7V
+  tempC = 25.0f + (tempVoltage - 1.55f) * 20.0f;
+  
+  // Chặn biên vật lý hợp lý
+  if (tempC < 15.0f) tempC = 15.0f;
+  if (tempC > 45.0f) tempC = 45.0f;
+}
+
+// =========================================================
+// 9. KET NOI WIFI
 // =========================================================
 
 void connectWiFi() {
-
   if (WiFi.status() == WL_CONNECTED) {
     return;
   }
 
   Serial.println();
-  Serial.println("Dang ket noi Wi-Fi...");
+  Serial.print("Dang ket noi Wi-Fi '");
+  Serial.print(WIFI_SSID);
+  Serial.println("'...");
 
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
   int retry = 0;
-
-  while (
-    WiFi.status() != WL_CONNECTED &&
-    retry < 30
-  ) {
-
+  while (WiFi.status() != WL_CONNECTED && retry < 25) {
     delay(500);
-
     Serial.print(".");
-
     retry++;
   }
 
   if (WiFi.status() == WL_CONNECTED) {
-
     Serial.println();
-    Serial.println("Ket noi Wi-Fi thanh cong!");
-
-    Serial.print("Dia chi IP: ");
+    Serial.println(">> Ket noi Wi-Fi thanh cong!");
+    Serial.print(">> Dia chi IP: ");
     Serial.println(WiFi.localIP());
-
   } else {
-
     Serial.println();
-    Serial.println("Khong the ket noi Wi-Fi!");
+    Serial.println(">> Khong the ket noi Wi-Fi, se thu lai chu ky sau!");
   }
 }
 
 // =========================================================
-// 9. GUI DU LIEU LEN THINGSPEAK
+// 10. GUI DU LIEU LEN THINGSPEAK (3 Fields)
 // =========================================================
 
 void uploadThingSpeak(
-  int adcValue,
-  float phValue
+  float phValue,
+  float tempC,
+  bool alarmActive
 ) {
-
   if (WiFi.status() != WL_CONNECTED) {
-
-    Serial.println("Wi-Fi chua ket noi!");
+    Serial.println("[ThingSpeak] Wi-Fi chua ket noi, bo qua upload!");
     return;
   }
 
   HTTPClient http;
-
   String url = String(THINGSPEAK_URL);
+  url += "?api_key=" + String(WRITE_API_KEY);
 
-  url += "?api_key=";
-  url += WRITE_API_KEY;
+  // FIELD 1: Giá trị pH
+  url += "&field1=" + String(phValue, 2);
 
-  // FIELD 1: Gia tri pH
-  url += "&field1=";
-  url += String(phValue, 2);
+  // FIELD 2: Nhiệt độ nước (°C)
+  url += "&field2=" + String(tempC, 1);
 
-  // FIELD 2: Gia tri ADC tho
-  url += "&field2=";
-  url += String(adcValue);
+  // FIELD 3: Cảnh báo phần cứng Do (0: Bình thường, 1: Báo động)
+  url += "&field3=" + String(alarmActive ? 1 : 0);
 
   http.begin(url);
-
   int httpCode = http.GET();
 
   if (httpCode > 0) {
-
     String response = http.getString();
-
-    Serial.println();
-    Serial.println("========== THINGSPEAK ==========");
-
+    Serial.println("---------- THINGSPEAK UPLOAD ----------");
     Serial.print("HTTP Code: ");
     Serial.println(httpCode);
-
     Serial.print("Entry ID: ");
     Serial.println(response);
 
-    if (
-      httpCode == HTTP_CODE_OK &&
-      response.toInt() > 0
-    ) {
-
-      Serial.println("Gui du lieu thanh cong!");
-
+    if (httpCode == HTTP_CODE_OK && response.toInt() > 0) {
+      Serial.println(">> Gui du lieu len ThingSpeak thanh cong!");
     } else {
-
-      Serial.println("Gui du lieu that bai!");
+      Serial.println(">> Gui du lieu that bai (kiem tra rate limit 15s)!");
     }
-
+    Serial.println("---------------------------------------");
   } else {
-
-    Serial.print("Loi HTTP: ");
+    Serial.print("[ThingSpeak] Loi HTTP: ");
     Serial.println(http.errorToString(httpCode));
   }
 
@@ -245,101 +233,83 @@ void uploadThingSpeak(
 }
 
 // =========================================================
-// 10. SETUP
+// 11. SETUP
 // =========================================================
 
 void setup() {
-
   Serial.begin(115200);
-
   delay(1000);
 
   Serial.println();
-  Serial.println("==================================");
-  Serial.println("     HE THONG GIAM SAT pH");
-  Serial.println("          PH-4502C");
-  Serial.println("==================================");
+  Serial.println("==============================================");
+  Serial.println("   HE THONG GIAM SAT AO NUOI - ESP32 & pH");
+  Serial.println("        Module pH-4502C (Po - To - Do)");
+  Serial.println("==============================================");
 
-  // Cau hinh ADC 12 bit
+  // Cấu hình ADC 12 bit (0 - 4095)
   analogReadResolution(12);
 
-  // Cau hinh ADC cho GPIO35
-  analogSetPinAttenuation(
-    PH_PIN,
-    ADC_11db
-  );
+  // Cấu hình ADC dải đo 11dB (đọc an toàn 0V - 3.3V)
+  analogSetPinAttenuation(PH_PIN, ADC_11db);
+  analogSetPinAttenuation(TEMP_PIN, ADC_11db);
 
-  // Hien thi thong tin hieu chuan
-  Serial.println("THONG SO HIEU CHUAN:");
+  // Cấu hình chân cảnh báo Digital Do
+  pinMode(ALARM_PIN, INPUT_PULLUP);
 
-  Serial.print("pH 4.01: ");
-  Serial.print(PH_VOLT_AT_4_01, 3);
-  Serial.println(" V");
+  // Hiển thị thông số cấu hình
+  Serial.println("CAU HINH CHAN:");
+  Serial.println("  - Po (pH):      GPIO 35");
+  Serial.println("  - To (Nhiet do): GPIO 34");
+  Serial.println("  - Do (Canh bao): GPIO 19");
+  Serial.println("THONG SO HIEU CHUAN pH:");
+  Serial.printf("  - Diem 4.01: %.3f V\n", PH_VOLT_AT_4_01);
+  Serial.printf("  - Diem 6.86: %.3f V\n", PH_VOLT_AT_6_86);
 
-  Serial.print("pH 6.86: ");
-  Serial.print(PH_VOLT_AT_6_86, 3);
-  Serial.println(" V");
-
-  // Ket noi Wi-Fi
-connectWiFi();
+  // Kết nối Wi-Fi
+  connectWiFi();
 }
 
 // =========================================================
-// 11. LOOP
+// 12. LOOP
 // =========================================================
 
 void loop() {
+  int phAdc = 0;
+  float phGpioVolt = 0;
+  float phSensorVolt = 0;
 
-  int adcValue = 0;
+  int tempAdc = 0;
+  float tempVolt = 0;
+  float tempC = 0;
 
-  float gpioVoltage = 0;
-  float sensorVoltage = 0;
+  // 1. Đọc cảm biến pH (Po)
+  readPHSensor(phAdc, phGpioVolt, phSensorVolt);
+  float phValue = calculatePH(phGpioVolt);
 
-  // Doc du lieu cam bien
-  readPHSensor(
-    adcValue,
-    gpioVoltage,
-    sensorVoltage
-  );
+  // 2. Đọc cảm biến nhiệt độ (To)
+  readTempSensor(tempAdc, tempVolt, tempC);
 
-  // Tinh gia tri pH (dung dien ap tren GPIO35 vi diem hieu chuan duoc do tai chan nay)
-  float phValue = calculatePH(gpioVoltage);
+  // 3. Đọc tín hiệu cảnh báo phần cứng (Do)
+  // Khi kích hoạt cảnh báo, chân Do thường kéo xuống mức LOW (0)
+  int alarmRaw = digitalRead(ALARM_PIN);
+  bool alarmActive = (alarmRaw == LOW);
 
-  // Hien thi du lieu
+  // 4. In thông tin ra Serial Monitor
   Serial.println();
-  Serial.println("========== DU LIEU CAM BIEN pH ==========");
+  Serial.println("========== DU LIEU CAM BIEN (Po - To - Do) ==========");
+  Serial.printf("1. pH:       %.2f  (ADC: %d | GPIO35: %.3f V | PO: %.3f V)\n", 
+                phValue, phAdc, phGpioVolt, phSensorVolt);
+  Serial.printf("2. Nhiet do: %.1f °C (ADC: %d | GPIO34: %.3f V)\n", 
+                tempC, tempAdc, tempVolt);
+  Serial.printf("3. Canh bao: %s (Do = %d)\n", 
+                alarmActive ? "[!] KICH HOAT CANH BAO" : "[OK] Binh thuong", alarmRaw);
+  Serial.println("=====================================================");
 
-  Serial.print("ADC tho: ");
-  Serial.println(adcValue);
-
-  Serial.print("Dien ap GPIO35: ");
-  Serial.print(gpioVoltage, 3);
-  Serial.println(" V");
-
-  Serial.print("Dien ap PO: ");
-  Serial.print(sensorVoltage, 3);
-  Serial.println(" V");
-
-  Serial.print("Gia tri pH: ");
-  Serial.println(phValue, 2);
-
-  Serial.println("=========================================");
-
-  // Gui du lieu moi 20 giay
-  if (
-    millis() - lastUploadTime >= UPLOAD_INTERVAL
-  ) {
-
+  // 5. Gửi lên ThingSpeak định kỳ mỗi 20 giây
+  if (millis() - lastUploadTime >= UPLOAD_INTERVAL) {
     lastUploadTime = millis();
-
-    // Kiem tra Wi-Fi
     connectWiFi();
-
-    // Gui du lieu len ThingSpeak
-    uploadThingSpeak(
-      adcValue,
-      phValue
-    );
+    uploadThingSpeak(phValue, tempC, alarmActive);
   }
 
   delay(1000);
