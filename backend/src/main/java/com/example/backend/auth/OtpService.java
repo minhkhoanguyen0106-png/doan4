@@ -24,14 +24,17 @@ public class OtpService {
 
     private final JavaMailSender mailSender;
     private final String senderEmail;
+    private final String senderPassword;
     private final SecureRandom random = new SecureRandom();
 
     private final Map<String, OtpEntry> otpStorage = new ConcurrentHashMap<>();
 
     public OtpService(JavaMailSender mailSender,
-                      @Value("${spring.mail.username:}") String senderEmail) {
+                      @Value("${spring.mail.username:}") String senderEmail,
+                      @Value("${spring.mail.password:}") String senderPassword) {
         this.mailSender = mailSender;
         this.senderEmail = senderEmail != null ? senderEmail.trim() : "";
+        this.senderPassword = senderPassword != null ? senderPassword.trim() : "";
     }
 
     public record OtpEntry(String code, Instant expiresAt, int attempts) {
@@ -55,9 +58,10 @@ public class OtpService {
         log.info("[PONDORA OTP] Generated OTP for [{}]: {}", email, code);
         log.info("--------------------------------------------------");
 
-        if (senderEmail.isEmpty()) {
-            log.warn("[PONDORA OTP] spring.mail.username is not configured. Email not sent via SMTP. OTP code is: {}", code);
-            return;
+        if (senderEmail.isEmpty() || senderPassword.isEmpty()) {
+            log.warn("[PONDORA OTP] spring.mail.username or password is not configured. Email not sent via SMTP. OTP code is: {}", code);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Chưa cấu hình tài khoản gửi thư trong backend/src/main/resources/application.properties. Vui lòng điền 'spring.mail.username' (địa chỉ Gmail) và 'spring.mail.password' (Mật khẩu ứng dụng 16 số của Google) để gửi email thật.");
         }
 
         try {
