@@ -11,12 +11,12 @@ public class WaterAssessmentService {
     private final BigDecimal doWatchMin, doHighMin, doCriticalMin, turbidityWatchMax, turbidityHighMax, turbidityCriticalMax;
     private final BigDecimal tdsWatchMax, tdsHighMax, tdsCriticalMax;
     public WaterAssessmentService(
-            @Value("${monitoring.thresholds.ph-watch-min:6.5}") BigDecimal phWatchMin,
+            @Value("${monitoring.thresholds.ph-watch-min:7.5}") BigDecimal phWatchMin,
             @Value("${monitoring.thresholds.ph-watch-max:8.5}") BigDecimal phWatchMax,
-            @Value("${monitoring.thresholds.ph-high-min:6.0}") BigDecimal phHighMin,
+            @Value("${monitoring.thresholds.ph-high-min:7.0}") BigDecimal phHighMin,
             @Value("${monitoring.thresholds.ph-high-max:9.0}") BigDecimal phHighMax,
-            @Value("${monitoring.thresholds.ph-critical-min:5.0}") BigDecimal phCriticalMin,
-            @Value("${monitoring.thresholds.ph-critical-max:10.0}") BigDecimal phCriticalMax,
+            @Value("${monitoring.thresholds.ph-critical-min:6.5}") BigDecimal phCriticalMin,
+            @Value("${monitoring.thresholds.ph-critical-max:9.5}") BigDecimal phCriticalMax,
             @Value("${monitoring.thresholds.do-watch-min:5.0}") BigDecimal doWatchMin,
             @Value("${monitoring.thresholds.do-high-min:4.0}") BigDecimal doHighMin,
             @Value("${monitoring.thresholds.do-critical-min:2.0}") BigDecimal doCriticalMin,

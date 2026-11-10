@@ -68,25 +68,61 @@ public class AlertService {
             return;
         }
 
+        String title;
+        StringBuilder detail = new StringBuilder();
+
+        // Custom domain logic for aquaculture parameters
+        if (readings.ph() != null && readings.ph().compareTo(new java.math.BigDecimal("7.5")) < 0) {
+            if ("CRITICAL".equals(assessmentLevel)) {
+                title = "Nguy cấp: pH ao chạm đáy (" + readings.ph() + ") - Sốc axit/nhiễm phèn!";
+            } else if ("HIGH".equals(assessmentLevel)) {
+                title = "Cảnh báo cao: pH tụt thấp (" + readings.ph() + ") - Dưới ngưỡng an toàn 7.5!";
+            } else {
+                title = "Lưu ý: pH ao nuôi giảm (" + readings.ph() + ") - Cần theo dõi";
+            }
+            detail.append("Chỉ số pH thực tế: ").append(readings.ph()).append(" (Ngưỡng tối ưu ao nuôi: 7.5 - 8.5).\n")
+                  .append("• Rủi ro sinh học: Nước mang tính axit làm gia tăng độc tính khí H2S từ bùn đáy ao, ức chế hấp thụ khoáng khiến tôm khó lột xác, mềm vỏ và bỏ ăn.\n")
+                  .append("• Phác đồ xử lý tức thời:\n")
+                  .append("  1. Bón vôi nông nghiệp CaCO3 hoặc Dolomite (10-15 kg/1000m³) để nâng pH và ổn định kiềm.\n")
+                  .append("  2. Bật tối đa quạt nước và sục khí oxy đáy ao giải phóng khí độc.\n")
+                  .append("  3. Sử dụng EDTA (2-3 kg/1000m³) để khử phèn, khử kim loại nặng, làm mềm nước hỗ trợ tôm lột xác an toàn.");
+        } else if (readings.ph() != null && readings.ph().compareTo(new java.math.BigDecimal("8.5")) > 0) {
+            if ("CRITICAL".equals(assessmentLevel)) {
+                title = "Nguy cấp: pH kiềm hóa cực đại (" + readings.ph() + ") - Khí độc NH3 bộc phát!";
+            } else if ("HIGH".equals(assessmentLevel)) {
+                title = "Cảnh báo cao: pH quá cao (" + readings.ph() + ") - Nguy cơ ngộ độc Amonia!";
+            } else {
+                title = "Lưu ý: pH ao nuôi tăng cao (" + readings.ph() + ")";
+            }
+            detail.append("Chỉ số pH thực tế: ").append(readings.ph()).append(" (Ngưỡng tối ưu ao nuôi: 7.5 - 8.5).\n")
+                  .append("• Rủi ro sinh học: Theo mô hình Soft Sensor cân bằng NH4+ <-> NH3, pH cao chuyển hóa ion Amoni thành khí độc Amonia (NH3) tự do cực độc gây tổn thương mang tôm và hoại tử gan tụy.\n")
+                  .append("• Phác đồ xử lý tức thời:\n")
+                  .append("  1. Đánh mật rỉ đường (3-5 kg/1000m³) kết hợp ủ men vi sinh Probiotics (Bacillus) vào 9-10h sáng để hạ pH tự nhiên.\n")
+                  .append("  2. Sử dụng EDTA giải độc nước ao, giảm nhớt và lắng bọt váng.\n")
+                  .append("  3. Cắt giảm 30-50% lượng thức ăn, cấp thêm nước sạch.");
+        } else {
+            title = switch (assessmentLevel) {
+                case "CRITICAL" -> "Nguy cấp: Chất lượng nước vượt ngưỡng an toàn nghiêm trọng!";
+                case "HIGH" -> "Cảnh báo cao: Chỉ số nước ao bất thường!";
+                case "WATCH" -> "Lưu ý: Chỉ số nước cần theo dõi";
+                default -> "Chỉ số nước bất thường";
+            };
+            detail.append("Chỉ số đo được: ");
+            if (readings.ph() != null) detail.append("pH=").append(readings.ph()).append("; ");
+            if (readings.dissolvedOxygenMgL() != null) detail.append("DO=").append(readings.dissolvedOxygenMgL()).append(" mg/L; ");
+            if (readings.turbidityNtu() != null) detail.append("Độ đục=").append(readings.turbidityNtu()).append(" NTU; ");
+            if (readings.tdsMgL() != null) detail.append("TDS=").append(readings.tdsMgL()).append(" mg/L; ");
+            if (readings.temperatureC() != null) detail.append("Nhiệt độ=").append(readings.temperatureC()).append("°C; ");
+        }
+
         // Only create or update if WATCH, HIGH, or CRITICAL
         var existing = alerts.findFirstBySite_IdAndDevice_IdAndAlertTypeAndStatus(site.getId(), device.getId(), "WATER_QUALITY", "ACTIVE");
         if (existing.isPresent()) {
-            return; // Already actively alerted for this device
+            WaterAlert alert = existing.get();
+            alert.updateDetails(assessmentLevel, title, detail.toString().trim(), measuredAt);
+            alerts.save(alert);
+            return;
         }
-
-        StringBuilder detail = new StringBuilder("Phát hiện bất thường: ");
-        if (readings.ph() != null) detail.append("pH=").append(readings.ph()).append("; ");
-        if (readings.dissolvedOxygenMgL() != null) detail.append("DO=").append(readings.dissolvedOxygenMgL()).append(" mg/L; ");
-        if (readings.turbidityNtu() != null) detail.append("Độ đục=").append(readings.turbidityNtu()).append(" NTU; ");
-        if (readings.tdsMgL() != null) detail.append("TDS=").append(readings.tdsMgL()).append(" mg/L; ");
-        if (readings.temperatureC() != null) detail.append("Nhiệt độ=").append(readings.temperatureC()).append("°C; ");
-
-        String title = switch (assessmentLevel) {
-            case "CRITICAL" -> "Nguy cấp: Chất lượng nước vượt ngưỡng nghiêm trọng!";
-            case "HIGH" -> "Cảnh báo cao: Chỉ số nước ô nhiễm cao!";
-            case "WATCH" -> "Lưu ý: Chỉ số nước cần theo dõi";
-            default -> "Chỉ số nước bất thường";
-        };
 
         WaterAlert alert = new WaterAlert(site, device, "WATER_QUALITY", assessmentLevel, title, detail.toString().trim(), measuredAt);
         alerts.save(alert);

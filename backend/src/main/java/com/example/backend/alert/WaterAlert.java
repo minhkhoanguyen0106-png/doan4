@@ -64,6 +64,14 @@ public class WaterAlert {
         this.resolvedAt = at;
     }
 
+    public void updateDetails(String severity, String title, String message, Instant triggeredAt) {
+        this.severity = severity;
+        this.title = title;
+        this.message = message;
+        this.triggeredAt = triggeredAt;
+        this.status = "ACTIVE";
+    }
+
     public Long getId() { return id; }
     public MonitoringSite getSite() { return site; }
     public IotDevice getDevice() { return device; }

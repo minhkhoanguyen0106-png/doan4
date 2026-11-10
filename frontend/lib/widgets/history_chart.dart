@@ -75,6 +75,13 @@ class HistoryChart extends StatelessWidget {
     final change = points.length < 2
         ? null
         : points.last.readings[metric]! - points.first.readings[metric]!;
+    final double? minVal = points.isEmpty
+        ? null
+        : points.map((p) => p.readings[metric]!.toDouble()).reduce((a, b) => a < b ? a : b);
+    final double? maxVal = points.isEmpty
+        ? null
+        : points.map((p) => p.readings[metric]!.toDouble()).reduce((a, b) => a > b ? a : b);
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -111,7 +118,7 @@ class HistoryChart extends StatelessWidget {
                     Text(
                       latest == null
                           ? 'Chưa có mẫu hợp lệ'
-                          : '${formatNumber(latest)} ${config.unit} hiện tại · ${points.length} mẫu',
+                          : '${formatNumber(latest)} ${config.unit} hiện tại · ${points.length} mẫu đo',
                       style: const TextStyle(
                         color: Color(0xFF64748B),
                         fontSize: 12,
@@ -250,69 +257,103 @@ class HistoryChart extends StatelessWidget {
               _rangeChip(context, const Duration(days: 7), '7 ngày'),
             ],
           ),
-            const SizedBox(height: 12),
-            if (change != null)
-              Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 7,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEAF2FF),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      change > 0
-                          ? Icons.trending_up
-                          : change < 0
-                          ? Icons.trending_down
-                          : Icons.trending_flat,
-                      size: 16,
-                      color: const Color(0xFF1769D2),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Biến động ${change > 0 ? '+' : ''}${formatNumber(change)} ${config.unit} trong kỳ',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: Color(0xFF3B5F8A),
-                        fontWeight: FontWeight.w600,
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              if (change != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEAF2FF),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        change > 0
+                            ? Icons.trending_up
+                            : change < 0
+                                ? Icons.trending_down
+                                : Icons.trending_flat,
+                        size: 14,
+                        color: const Color(0xFF1769D2),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            SizedBox(
-              height: 160,
-              width: double.infinity,
-              child: points.length < 2
-                  ? const Center(
-                      child: Text(
-                        'Cần ít nhất 2 mẫu để vẽ biểu đồ.',
-                        style: TextStyle(
-                          color: Color(0xFF8390A4),
-                          fontSize: 12,
+                      const SizedBox(width: 4),
+                      Text(
+                        'Biến động ${change > 0 ? '+' : ''}${formatNumber(change)} ${config.unit}',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Color(0xFF1E40AF),
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    )
-                  : CustomPaint(
-                      painter: HistoryChartPainter(
-                        points
-                            .map(
-                              (p) => (
-                                p.measuredAt,
-                                p.readings[metric]!.toDouble(),
-                              ),
-                            )
-                            .toList(),
+                    ],
+                  ),
+                ),
+              if (minVal != null && maxVal != null) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Text(
+                    'Đáy: ${minVal.toStringAsFixed(2)}${config.unit.isNotEmpty ? ' ${config.unit}' : ''}',
+                    style: const TextStyle(fontSize: 11, color: Color(0xFF475569), fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Text(
+                    'Đỉnh: ${maxVal.toStringAsFixed(2)}${config.unit.isNotEmpty ? ' ${config.unit}' : ''}',
+                    style: const TextStyle(fontSize: 11, color: Color(0xFF475569), fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 180,
+            width: double.infinity,
+            child: points.length < 2
+                ? const Center(
+                    child: Text(
+                      'Cần ít nhất 2 mẫu để vẽ biểu đồ.',
+                      style: TextStyle(
+                        color: Color(0xFF8390A4),
+                        fontSize: 12,
                       ),
                     ),
-            ),
-            Row(
+                  )
+                : CustomPaint(
+                    painter: HistoryChartPainter(
+                      points
+                          .map(
+                            (p) => (
+                              p.measuredAt,
+                              p.readings[metric]!.toDouble(),
+                            ),
+                          )
+                          .toList(),
+                      unit: config.unit,
+                      primaryColor: config.color,
+                    ),
+                  ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 40, right: 16),
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
@@ -320,8 +361,9 @@ class HistoryChart extends StatelessWidget {
                       ? '—'
                       : measurementTimeLabel(points.first.measuredAt, range),
                   style: const TextStyle(
-                    color: Color(0xFF8390A4),
+                    color: Color(0xFF64748B),
                     fontSize: 11,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
@@ -329,15 +371,17 @@ class HistoryChart extends StatelessWidget {
                       ? '—'
                       : measurementTimeLabel(points.last.measuredAt, range),
                   style: const TextStyle(
-                    color: Color(0xFF8390A4),
+                    color: Color(0xFF64748B),
                     fontSize: 11,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
-          ],
-        ),
-      );
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _rangeChip(BuildContext context, Duration value, String label) {
@@ -365,47 +409,83 @@ class HistoryChart extends StatelessWidget {
 }
 
 class HistoryChartPainter extends CustomPainter {
-  HistoryChartPainter(this.samples);
+  HistoryChartPainter(
+    this.samples, {
+    this.unit = '',
+    this.primaryColor = const Color(0xFF1769D2),
+  });
+
   final List<(DateTime, double)> samples;
+  final String unit;
+  final Color primaryColor;
 
   @override
   void paint(Canvas canvas, Size size) {
-    const left = 8.0, right = 8.0, top = 12.0, bottom = 12.0;
+    const leftMargin = 40.0;
+    const rightMargin = 16.0;
+    const topMargin = 22.0;
+    const bottomMargin = 14.0;
+
     final plot = Rect.fromLTRB(
-      left,
-      top,
-      size.width - right,
-      size.height - bottom,
+      leftMargin,
+      topMargin,
+      size.width - rightMargin,
+      size.height - bottomMargin,
     );
-    final values = samples.map((sample) => sample.$2);
+
+    final values = samples.map((sample) => sample.$2).toList();
     var minValue = values.reduce((a, b) => a < b ? a : b);
     var maxValue = values.reduce((a, b) => a > b ? a : b);
-    if (minValue == maxValue) {
-      minValue -= 1;
-      maxValue += 1;
+
+    if ((maxValue - minValue).abs() < 0.05) {
+      minValue -= 0.5;
+      maxValue += 0.5;
+    } else {
+      final pad = (maxValue - minValue) * 0.12;
+      minValue -= pad;
+      maxValue += pad;
     }
+
     final gridPaint = Paint()
-      ..color = const Color(0xFFE5EBF4)
+      ..color = const Color(0xFFE2E8F0)
       ..strokeWidth = 1;
+
+    // Draw 4 horizontal grid lines with clear Y-axis numbers
     for (var i = 0; i < 4; i++) {
       final y = plot.top + plot.height * i / 3;
       canvas.drawLine(Offset(plot.left, y), Offset(plot.right, y), gridPaint);
+
+      final val = maxValue - (maxValue - minValue) * (i / 3.0);
+      final textSpan = TextSpan(
+        text: val.toStringAsFixed(1),
+        style: const TextStyle(
+          color: Color(0xFF64748B),
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+        ),
+      );
+      final tp = TextPainter(
+        text: textSpan,
+        textDirection: TextDirection.ltr,
+      )..layout();
+      tp.paint(canvas, Offset(plot.left - tp.width - 6, y - tp.height / 2));
     }
+
     final start = samples.first.$1.millisecondsSinceEpoch.toDouble();
     final duration = samples.last.$1.millisecondsSinceEpoch - start;
     final offsets = <Offset>[];
     for (var i = 0; i < samples.length; i++) {
-      final x =
-          plot.left +
+      final x = plot.left +
           (duration == 0
-                  ? i / (samples.length - 1)
+                  ? (samples.length == 1 ? 0.5 : i / (samples.length - 1))
                   : (samples[i].$1.millisecondsSinceEpoch - start) / duration) *
               plot.width;
-      final y =
-          plot.bottom -
+      final y = plot.bottom -
           (samples[i].$2 - minValue) / (maxValue - minValue) * plot.height;
       offsets.add(Offset(x, y));
     }
+
+    // Bezier smooth curve
     final path = Path()..moveTo(offsets.first.dx, offsets.first.dy);
     for (var i = 1; i < offsets.length; i++) {
       final previous = offsets[i - 1];
@@ -426,6 +506,8 @@ class HistoryChartPainter extends CustomPainter {
         );
       }
     }
+
+    // Gradient fill under the curve
     final fill = Path.from(path)
       ..lineTo(plot.right, plot.bottom)
       ..lineTo(plot.left, plot.bottom)
@@ -433,31 +515,100 @@ class HistoryChartPainter extends CustomPainter {
     canvas.drawPath(
       fill,
       Paint()
-        ..shader = const LinearGradient(
+        ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0x551769D2), Color(0x081769D2)],
+          colors: [
+            primaryColor.withValues(alpha: 0.22),
+            primaryColor.withValues(alpha: 0.02),
+          ],
         ).createShader(plot),
     );
+
+    // Stroke line curve
     canvas.drawPath(
       path,
       Paint()
-        ..color = const Color(0xFF1769D2)
+        ..color = primaryColor
         ..strokeWidth = 2.5
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round,
     );
-    canvas.drawCircle(offsets.last, 4, Paint()..color = Colors.white);
+
+    // Draw small dots at each data point if samples count <= 35
+    if (samples.length <= 35) {
+      for (var i = 0; i < offsets.length - 1; i++) {
+        canvas.drawCircle(offsets[i], 3, Paint()..color = Colors.white);
+        canvas.drawCircle(
+          offsets[i],
+          2,
+          Paint()..color = primaryColor.withValues(alpha: 0.7),
+        );
+      }
+    }
+
+    // Draw the latest / last data point (prominent dot with pulse ring)
+    final lastOffset = offsets.last;
     canvas.drawCircle(
-      offsets.last,
-      3,
-      Paint()..color = const Color(0xFF1769D2),
+      lastOffset,
+      6,
+      Paint()..color = primaryColor.withValues(alpha: 0.25),
     );
+    canvas.drawCircle(lastOffset, 4, Paint()..color = Colors.white);
+    canvas.drawCircle(lastOffset, 3, Paint()..color = primaryColor);
+
+    // Draw value badge on the latest point so user sees the exact number!
+    final lastVal = samples.last.$2;
+    final badgeText = '${lastVal.toStringAsFixed(2)}${unit.isNotEmpty ? ' $unit' : ''}';
+    final badgeSpan = TextSpan(
+      text: badgeText,
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 10.5,
+        fontWeight: FontWeight.w800,
+      ),
+    );
+    final badgeTp = TextPainter(
+      text: badgeSpan,
+      textDirection: TextDirection.ltr,
+    )..layout();
+
+    final badgeWidth = badgeTp.width + 12;
+    final badgeHeight = badgeTp.height + 6;
+
+    var badgeX = lastOffset.dx - badgeWidth / 2;
+    if (badgeX + badgeWidth > size.width - 4) {
+      badgeX = size.width - badgeWidth - 4;
+    }
+    if (badgeX < plot.left) {
+      badgeX = plot.left;
+    }
+
+    var badgeY = lastOffset.dy - badgeHeight - 8;
+    if (badgeY < 2) {
+      badgeY = lastOffset.dy + 8;
+    }
+
+    final badgeRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(badgeX, badgeY, badgeWidth, badgeHeight),
+      const Radius.circular(6),
+    );
+
+    // Badge shadow
+    canvas.drawRRect(
+      badgeRect.shift(const Offset(0, 2)),
+      Paint()..color = Colors.black.withValues(alpha: 0.12),
+    );
+    // Badge pill background
+    canvas.drawRRect(badgeRect, Paint()..color = primaryColor);
+    badgeTp.paint(canvas, Offset(badgeX + 6, badgeY + 3));
   }
 
   @override
   bool shouldRepaint(covariant HistoryChartPainter oldDelegate) =>
-      oldDelegate.samples != samples;
+      oldDelegate.samples != samples ||
+      oldDelegate.unit != unit ||
+      oldDelegate.primaryColor != primaryColor;
 }
 
