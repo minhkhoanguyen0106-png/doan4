@@ -24,6 +24,7 @@ class AssessmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
     final statusColor = levelColor(level);
     final isPending = level == 'INSUFFICIENT_DATA' || level.isEmpty || sampleCount == 0;
     final accentColor = isPending ? const Color(0xFF0F62FE) : statusColor;
@@ -228,18 +229,38 @@ class AssessmentCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: const Color(0xFFE2E8F0)),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _aiParamPill('pH tối ưu', '${species?.optimalPhMin ?? 6.5} – ${species?.optimalPhMax ?? 8.5}', const Color(0xFF0284C7)),
-                      Container(width: 1, height: 20, color: const Color(0xFFE2E8F0)),
-                      _aiParamPill('Oxy hòa tan (DO)', '≥ ${species?.optimalDoMin ?? 4.0} mg/L', const Color(0xFF10B981)),
-                      Container(width: 1, height: 20, color: const Color(0xFFE2E8F0)),
-                      _aiParamPill('Độ đục tối đa', '≤ ${species?.maxTurbidity ?? 25.0} NTU', const Color(0xFFF59E0B)),
-                      Container(width: 1, height: 20, color: const Color(0xFFE2E8F0)),
-                      _aiParamPill('Nhiệt độ ao', '${species?.optimalTempMin ?? 26.0} – ${species?.optimalTempMax ?? 31.5} °C', const Color(0xFFEF4444)),
-                    ],
-                  ),
+                  child: isMobile
+                      ? Column(
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(child: _aiParamPill('pH tối ưu', '${species?.optimalPhMin ?? 6.5} – ${species?.optimalPhMax ?? 8.5}', const Color(0xFF0284C7))),
+                                Container(width: 1, height: 24, color: const Color(0xFFE2E8F0)),
+                                Expanded(child: _aiParamPill('Oxy (DO)', '≥ ${species?.optimalDoMin ?? 4.0} mg/L', const Color(0xFF10B981))),
+                              ],
+                            ),
+                            const Divider(height: 12, color: Color(0xFFF1F5F9)),
+                            Row(
+                              children: [
+                                Expanded(child: _aiParamPill('Độ đục', '≤ ${species?.maxTurbidity ?? 25.0} NTU', const Color(0xFFF59E0B))),
+                                Container(width: 1, height: 24, color: const Color(0xFFE2E8F0)),
+                                Expanded(child: _aiParamPill('Nhiệt độ ao', '${species?.optimalTempMin ?? 26.0} – ${species?.optimalTempMax ?? 31.5} °C', const Color(0xFFEF4444))),
+                              ],
+                            ),
+                          ],
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            _aiParamPill('pH tối ưu', '${species?.optimalPhMin ?? 6.5} – ${species?.optimalPhMax ?? 8.5}', const Color(0xFF0284C7)),
+                            Container(width: 1, height: 20, color: const Color(0xFFE2E8F0)),
+                            _aiParamPill('Oxy hòa tan (DO)', '≥ ${species?.optimalDoMin ?? 4.0} mg/L', const Color(0xFF10B981)),
+                            Container(width: 1, height: 20, color: const Color(0xFFE2E8F0)),
+                            _aiParamPill('Độ đục tối đa', '≤ ${species?.maxTurbidity ?? 25.0} NTU', const Color(0xFFF59E0B)),
+                            Container(width: 1, height: 20, color: const Color(0xFFE2E8F0)),
+                            _aiParamPill('Nhiệt độ ao', '${species?.optimalTempMin ?? 26.0} – ${species?.optimalTempMax ?? 31.5} °C', const Color(0xFFEF4444)),
+                          ],
+                        ),
                 ),
 
                 if (onViewActionPlan != null) ...[
@@ -251,30 +272,34 @@ class AssessmentCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: accentColor.withValues(alpha: 0.22)),
                     ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(7),
-                          decoration: BoxDecoration(
-                            color: accentColor.withValues(alpha: 0.14),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Icon(Icons.psychology_rounded, color: accentColor, size: 20),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
+                    child: isMobile
+                        ? Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'Khuyến nghị kỹ thuật xử lý nước (${species?.name ?? "Mô hình nuôi"})',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 12.5,
-                                  color: Color(0xFF0F172A),
-                                ),
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(7),
+                                    decoration: BoxDecoration(
+                                      color: accentColor.withValues(alpha: 0.14),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Icon(Icons.psychology_rounded, color: accentColor, size: 20),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      'Khuyến nghị xử lý (${species?.name ?? "Mô hình nuôi"})',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 12.5,
+                                        color: Color(0xFF0F172A),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 1),
+                              const SizedBox(height: 6),
                               const Text(
                                 'Xem phác đồ sục khí, liều lượng vôi, rỉ đường & chế phẩm sinh học',
                                 style: TextStyle(
@@ -282,25 +307,76 @@ class AssessmentCard extends StatelessWidget {
                                   color: Color(0xFF64748B),
                                 ),
                               ),
+                              const SizedBox(height: 8),
+                              SizedBox(
+                                width: double.infinity,
+                                child: FilledButton.icon(
+                                  onPressed: onViewActionPlan,
+                                  icon: const Icon(Icons.arrow_forward_rounded, size: 15),
+                                  label: const Text('Xem phác đồ AI'),
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: accentColor,
+                                    foregroundColor: Colors.white,
+                                    visualDensity: VisualDensity.compact,
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(7),
+                                decoration: BoxDecoration(
+                                  color: accentColor.withValues(alpha: 0.14),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Icon(Icons.psychology_rounded, color: accentColor, size: 20),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Khuyến nghị kỹ thuật xử lý nước (${species?.name ?? "Mô hình nuôi"})',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 12.5,
+                                        color: Color(0xFF0F172A),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 1),
+                                    const Text(
+                                      'Xem phác đồ sục khí, liều lượng vôi, rỉ đường & chế phẩm sinh học',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Color(0xFF64748B),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              FilledButton.icon(
+                                onPressed: onViewActionPlan,
+                                icon: const Icon(Icons.arrow_forward_rounded, size: 15),
+                                label: const Text('Phác đồ AI'),
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: accentColor,
+                                  foregroundColor: Colors.white,
+                                  visualDensity: VisualDensity.compact,
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
-                        ),
-                        FilledButton.icon(
-                          onPressed: onViewActionPlan,
-                          icon: const Icon(Icons.arrow_forward_rounded, size: 15),
-                          label: const Text('Phác đồ AI'),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: accentColor,
-                            foregroundColor: Colors.white,
-                            visualDensity: VisualDensity.compact,
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
                 ],
 
@@ -639,10 +715,15 @@ class MetricCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      safeLabel ?? 'Tối ưu: $safeMin – $safeMax',
-                      style: const TextStyle(fontSize: 9.5, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
+                    Expanded(
+                      child: Text(
+                        safeLabel ?? 'Tối ưu: $safeMin – $safeMax',
+                        style: const TextStyle(fontSize: 9.5, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
+                    const SizedBox(width: 4),
                     _buildStatusChip(value!.toDouble(), safeMin!, safeMax!),
                   ],
                 ),

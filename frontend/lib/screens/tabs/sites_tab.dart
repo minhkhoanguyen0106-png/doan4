@@ -56,59 +56,110 @@ class _SitesTabState extends State<SitesTab> {
       return true;
     }).toList();
 
+    final isMobile = MediaQuery.of(context).size.width < 650;
+
     return ListView(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 36),
+      padding: EdgeInsets.fromLTRB(24, 16, 24, isMobile ? 96 : 36),
       children: [
         // Subheader & System Identity
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'PONDORA · MONITORING SITES & PONDS',
-                  style: TextStyle(
-                    color: Color(0xFF0284C7),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.2,
-                  ),
+        if (isMobile) ...[
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'PONDORA · MONITORING SITES & PONDS',
+                style: TextStyle(
+                  color: Color(0xFF0284C7),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.2,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Điểm quan trắc & Nguồn nước',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        color: const Color(0xFF0F172A),
-                        letterSpacing: -0.5,
-                      ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Điểm quan trắc & Nguồn nước',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      color: const Color(0xFF0F172A),
+                      letterSpacing: -0.5,
+                    ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                'Quản lý và giám sát dữ liệu ${widget.sites.length} vị trí ao nuôi trong hệ thống.',
+                style: const TextStyle(
+                  color: Color(0xFF64748B),
+                  fontSize: 13,
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  'Quản lý và giám sát dữ liệu ${widget.sites.length} vị trí ao nuôi trong hệ thống.',
-                  style: const TextStyle(
-                    color: Color(0xFF64748B),
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-            OutlinedButton.icon(
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
               onPressed: widget.onCreateSite,
               icon: const Icon(Icons.add_rounded, size: 16),
               label: const Text('Thêm điểm mới'),
               style: OutlinedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ] else ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'PONDORA · MONITORING SITES & PONDS',
+                    style: TextStyle(
+                      color: Color(0xFF0284C7),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Điểm quan trắc & Nguồn nước',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          color: const Color(0xFF0F172A),
+                          letterSpacing: -0.5,
+                        ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    'Quản lý và giám sát dữ liệu ${widget.sites.length} vị trí ao nuôi trong hệ thống.',
+                    style: const TextStyle(
+                      color: Color(0xFF64748B),
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+              OutlinedButton.icon(
+                onPressed: widget.onCreateSite,
+                icon: const Icon(Icons.add_rounded, size: 16),
+                label: const Text('Thêm điểm mới'),
+                style: OutlinedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
 
         const SizedBox(height: 20),
 
@@ -201,39 +252,87 @@ class _SitesTabState extends State<SitesTab> {
               ),
             ],
           ),
-          child: Row(
-            children: [
-              const Icon(Icons.search_rounded, size: 20, color: Color(0xFF94A3B8)),
-              const SizedBox(width: 10),
-              Expanded(
-                child: TextField(
-                  onChanged: (v) => setState(() => _query = v),
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF0F172A),
-                    fontWeight: FontWeight.w600,
-                  ),
-                  decoration: const InputDecoration(
-                    hintText: 'Tìm kiếm theo tên ao, vị trí...',
-                    hintStyle: TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF94A3B8),
-                      fontWeight: FontWeight.normal,
+          child: isMobile
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.search_rounded,
+                            size: 20, color: Color(0xFF94A3B8)),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextField(
+                            onChanged: (v) => setState(() => _query = v),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF0F172A),
+                              fontWeight: FontWeight.w600,
+                            ),
+                            decoration: const InputDecoration(
+                              hintText: 'Tìm kiếm theo tên ao, vị trí...',
+                              hintStyle: TextStyle(
+                                fontSize: 13,
+                                color: Color(0xFF94A3B8),
+                                fontWeight: FontWeight.normal,
+                              ),
+                              isDense: true,
+                              contentPadding: EdgeInsets.symmetric(vertical: 8),
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(vertical: 8),
-                    border: InputBorder.none,
-                  ),
+                    const Divider(height: 10, color: Color(0xFFF1F5F9)),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _filterChip('Tất cả ${widget.sites.length}', 'ALL'),
+                          const SizedBox(width: 6),
+                          _filterChip('Hoạt động $activeCount', 'ACTIVE'),
+                          const SizedBox(width: 6),
+                          _filterChip('Tạm ngưng $inactiveCount', 'INACTIVE'),
+                        ],
+                      ),
+                    ),
+                  ],
+                )
+              : Row(
+                  children: [
+                    const Icon(Icons.search_rounded,
+                        size: 20, color: Color(0xFF94A3B8)),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: TextField(
+                        onChanged: (v) => setState(() => _query = v),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF0F172A),
+                          fontWeight: FontWeight.w600,
+                        ),
+                        decoration: const InputDecoration(
+                          hintText: 'Tìm kiếm theo tên ao, vị trí...',
+                          hintStyle: TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF94A3B8),
+                            fontWeight: FontWeight.normal,
+                          ),
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(vertical: 8),
+                          border: InputBorder.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    _filterChip('Tất cả ${widget.sites.length}', 'ALL'),
+                    const SizedBox(width: 6),
+                    _filterChip('Hoạt động $activeCount', 'ACTIVE'),
+                    const SizedBox(width: 6),
+                    _filterChip('Tạm ngưng $inactiveCount', 'INACTIVE'),
+                  ],
                 ),
-              ),
-              const SizedBox(width: 12),
-              _filterChip('Tất cả ${widget.sites.length}', 'ALL'),
-              const SizedBox(width: 6),
-              _filterChip('Hoạt động $activeCount', 'ACTIVE'),
-              const SizedBox(width: 6),
-              _filterChip('Tạm ngưng $inactiveCount', 'INACTIVE'),
-            ],
-          ),
         ),
 
         const SizedBox(height: 20),

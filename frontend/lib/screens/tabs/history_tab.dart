@@ -45,6 +45,7 @@ class HistoryTab extends StatelessWidget {
       );
     }
 
+    final isMobile = MediaQuery.of(context).size.width < 650;
     final rows = [...history]
       ..sort((a, b) => b.measuredAt.compareTo(a.measuredAt));
 
@@ -52,43 +53,43 @@ class HistoryTab extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 36),
       children: [
         // Subheader & System Identity
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'PONDORA · WATER QUALITY TELEMETRY',
-                  style: TextStyle(
-                    color: Color(0xFF0284C7),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.2,
-                  ),
+        if (isMobile) ...[
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'PONDORA · WATER QUALITY TELEMETRY',
+                style: TextStyle(
+                  color: Color(0xFF0284C7),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.2,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Lịch sử dữ liệu quan trắc',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        color: const Color(0xFF0F172A),
-                        letterSpacing: -0.5,
-                      ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Lịch sử dữ liệu quan trắc',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      color: const Color(0xFF0F172A),
+                      letterSpacing: -0.5,
+                    ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                'Truy xuất chuỗi thời gian và đối chiếu ${rows.length} mẫu đo nước đã ghi nhận.',
+                style: const TextStyle(
+                  color: Color(0xFF64748B),
+                  fontSize: 13,
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  'Truy xuất chuỗi thời gian và đối chiếu ${rows.length} mẫu đo nước đã ghi nhận.',
-                  style: const TextStyle(
-                    color: Color(0xFF64748B),
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-            if (rows.isNotEmpty)
-              FilledButton.icon(
+              ),
+            ],
+          ),
+          if (rows.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
                 onPressed: () {
                   CsvExporter.exportMeasurements(rows, selectedSite!.name);
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -109,8 +110,69 @@ class HistoryTab extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
           ],
-        ),
+        ] else ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'PONDORA · WATER QUALITY TELEMETRY',
+                    style: TextStyle(
+                      color: Color(0xFF0284C7),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Lịch sử dữ liệu quan trắc',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          color: const Color(0xFF0F172A),
+                          letterSpacing: -0.5,
+                        ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    'Truy xuất chuỗi thời gian và đối chiếu ${rows.length} mẫu đo nước đã ghi nhận.',
+                    style: const TextStyle(
+                      color: Color(0xFF64748B),
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+              if (rows.isNotEmpty)
+                FilledButton.icon(
+                  onPressed: () {
+                    CsvExporter.exportMeasurements(rows, selectedSite!.name);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Đang tải xuống tệp dữ liệu CSV / Excel...'),
+                        backgroundColor: Color(0xFF0284C7),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.file_download_outlined, size: 18),
+                  label: const Text('Xuất file Excel / CSV'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF0284C7),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
 
         const SizedBox(height: 18),
 
@@ -303,251 +365,271 @@ class HistoryTab extends StatelessWidget {
                 ),
               ],
             ),
-            child: Column(
-              children: [
-                // Table Header
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                  child: Row(
-                    children: const [
-                      Expanded(
-                        flex: 3,
-                        child: Text(
-                          'THỜI GIAN ĐO',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF64748B),
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          'pH',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF64748B),
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          'DO (mg/L)',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF64748B),
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          'ĐỘ ĐỤC (NTU)',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF64748B),
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          'NHIỆT ĐỘ (°C)',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF64748B),
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 3,
-                        child: Text(
-                          'ĐÁNH GIÁ AI',
-                          textAlign: TextAlign.end,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF64748B),
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Divider(height: 1, color: Color(0xFFF1F5F9)),
-
-                // Table Rows (take 50)
-                ...rows.take(50).toList().asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final m = entry.value;
-                  final isLast = index == (rows.length > 50 ? 49 : rows.length - 1);
-                  final local = m.measuredAt.toLocal();
-                  final invalid = m.qualityStatus != 'VALID';
-                  final level = levelColor(m.assessmentLevel);
-
-                  final phVal = m.readings['ph'];
-                  final doVal = m.readings['dissolvedOxygenMgL'];
-                  final turbVal = m.readings['turbidityNtu'];
-                  final tempVal = m.readings['temperatureC'];
-
-                  return Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 14,
-                        ),
-                        child: Row(
-                          children: [
-                            // Time
-                            Expanded(
-                              flex: 3,
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 32,
-                                    height: 32,
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFF1F5F9),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: const Icon(
-                                      Icons.schedule_rounded,
-                                      size: 16,
-                                      color: Color(0xFF64748B),
-                                    ),
+            clipBehavior: Clip.antiAlias,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final tableWidth =
+                    constraints.maxWidth < 620 ? 620.0 : constraints.maxWidth;
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(
+                    width: tableWidth,
+                    child: Column(
+                      children: [
+                        // Table Header
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 14),
+                          child: Row(
+                            children: const [
+                              Expanded(
+                                flex: 3,
+                                child: Text(
+                                  'THỜI GIAN ĐO',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF64748B),
+                                    letterSpacing: 0.8,
                                   ),
-                                  const SizedBox(width: 10),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        timeLabel(local),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  'pH',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF64748B),
+                                    letterSpacing: 0.8,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  'DO (mg/L)',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF64748B),
+                                    letterSpacing: 0.8,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  'ĐỘ ĐỤC (NTU)',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF64748B),
+                                    letterSpacing: 0.8,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  'NHIỆT ĐỘ (°C)',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF64748B),
+                                    letterSpacing: 0.8,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 3,
+                                child: Text(
+                                  'ĐÁNH GIÁ AI',
+                                  textAlign: TextAlign.end,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF64748B),
+                                    letterSpacing: 0.8,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Divider(height: 1, color: Color(0xFFF1F5F9)),
+
+                        // Table Rows (take 50)
+                        ...rows.take(50).toList().asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final m = entry.value;
+                          final isLast =
+                              index == (rows.length > 50 ? 49 : rows.length - 1);
+                          final local = m.measuredAt.toLocal();
+                          final invalid = m.qualityStatus != 'VALID';
+                          final level = levelColor(m.assessmentLevel);
+
+                          final phVal = m.readings['ph'];
+                          final doVal = m.readings['dissolvedOxygenMgL'];
+                          final turbVal = m.readings['turbidityNtu'];
+                          final tempVal = m.readings['temperatureC'];
+
+                          return Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 14,
+                                ),
+                                child: Row(
+                                  children: [
+                                    // Time
+                                    Expanded(
+                                      flex: 3,
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 32,
+                                            height: 32,
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFF1F5F9),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            child: const Icon(
+                                              Icons.schedule_rounded,
+                                              size: 16,
+                                              color: Color(0xFF64748B),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                timeLabel(local),
+                                                style: const TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w800,
+                                                  color: Color(0xFF0F172A),
+                                                ),
+                                              ),
+                                              Text(
+                                                dateLabel(local),
+                                                style: const TextStyle(
+                                                  fontSize: 11,
+                                                  color: Color(0xFF94A3B8),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+
+                                    // pH
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                        phVal != null ? formatNumber(phVal) : '—',
                                         style: const TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w800,
                                           color: Color(0xFF0F172A),
                                         ),
                                       ),
-                                      Text(
-                                        dateLabel(local),
+                                    ),
+
+                                    // DO
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                        doVal != null ? formatNumber(doVal) : '—',
                                         style: const TextStyle(
-                                          fontSize: 11,
-                                          color: Color(0xFF94A3B8),
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w800,
+                                          color: Color(0xFF0F172A),
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            // pH
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                phVal != null ? formatNumber(phVal) : '—',
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFF0F172A),
-                                ),
-                              ),
-                            ),
-
-                            // DO
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                doVal != null ? formatNumber(doVal) : '—',
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFF0F172A),
-                                ),
-                              ),
-                            ),
-
-                            // Turbidity
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                turbVal != null ? formatNumber(turbVal) : '—',
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFF0F172A),
-                                ),
-                              ),
-                            ),
-
-                            // Temperature
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                tempVal != null ? formatNumber(tempVal) : '—',
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFF0F172A),
-                                ),
-                              ),
-                            ),
-
-                            // Assessment Pill
-                            Expanded(
-                              flex: 3,
-                              child: Align(
-                                alignment: Alignment.centerRight,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 9,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: invalid
-                                        ? const Color(0xFFF1F5F9)
-                                        : level.withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Text(
-                                    invalid
-                                        ? '● Mẫu lỗi'
-                                        : '● ${levelTitle(m.assessmentLevel)}',
-                                    style: TextStyle(
-                                      color: invalid
-                                          ? const Color(0xFF64748B)
-                                          : level,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 11,
                                     ),
-                                  ),
+
+                                    // Turbidity
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                        turbVal != null
+                                            ? formatNumber(turbVal)
+                                            : '—',
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w800,
+                                          color: Color(0xFF0F172A),
+                                        ),
+                                      ),
+                                    ),
+
+                                    // Temperature
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                        tempVal != null
+                                            ? formatNumber(tempVal)
+                                            : '—',
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w800,
+                                          color: Color(0xFF0F172A),
+                                        ),
+                                      ),
+                                    ),
+
+                                    // Assessment Pill
+                                    Expanded(
+                                      flex: 3,
+                                      child: Align(
+                                        alignment: Alignment.centerRight,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 9,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: invalid
+                                                ? const Color(0xFFF1F5F9)
+                                                : level.withValues(alpha: 0.12),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                          ),
+                                          child: Text(
+                                            invalid
+                                                ? '● Mẫu lỗi'
+                                                : '● ${levelTitle(m.assessmentLevel)}',
+                                            style: TextStyle(
+                                              color: invalid
+                                                  ? const Color(0xFF64748B)
+                                                  : level,
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 11,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (!isLast)
-                        const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                    ],
-                  );
-                }),
-              ],
+                              if (!isLast)
+                                const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                            ],
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
 

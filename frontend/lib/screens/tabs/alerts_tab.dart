@@ -49,6 +49,7 @@ class _AlertsTabState extends State<AlertsTab> {
       );
     }
 
+    final isMobile = MediaQuery.of(context).size.width < 700;
     final activeAlerts = widget.alerts.where((a) => a.isActive).toList();
     final criticalCount = activeAlerts.where((a) => a.isCritical).length;
     final highCount = activeAlerts.where((a) => a.isHigh).length;
@@ -345,42 +346,89 @@ class _AlertsTabState extends State<AlertsTab> {
                 ),
               ],
             ),
-            child: Row(
-              children: [
-                const Icon(Icons.search_rounded,
-                    size: 20, color: Color(0xFF94A3B8)),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextField(
-                    onChanged: (v) => setState(() => _query = v),
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF0F172A),
-                      fontWeight: FontWeight.w600,
-                    ),
-                    decoration: const InputDecoration(
-                      hintText: 'Tìm kiếm theo sự kiện hoặc nội dung cảnh báo...',
-                      hintStyle: TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFF94A3B8),
-                        fontWeight: FontWeight.normal,
+            child: isMobile
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.search_rounded, size: 20, color: Color(0xFF94A3B8)),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: TextField(
+                              onChanged: (v) => setState(() => _query = v),
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Color(0xFF0F172A),
+                                fontWeight: FontWeight.w600,
+                              ),
+                              decoration: const InputDecoration(
+                                hintText: 'Tìm kiếm sự kiện hoặc nội dung...',
+                                hintStyle: TextStyle(
+                                  fontSize: 12.5,
+                                  color: Color(0xFF94A3B8),
+                                  fontWeight: FontWeight.normal,
+                                ),
+                                isDense: true,
+                                contentPadding: EdgeInsets.symmetric(vertical: 6),
+                                border: InputBorder.none,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(vertical: 8),
-                      border: InputBorder.none,
-                    ),
+                      const Divider(height: 10, color: Color(0xFFF1F5F9)),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _filterChip('Đang mở ${activeAlerts.length}', 'ACTIVE'),
+                            const SizedBox(width: 6),
+                            _filterChip('Tất cả ${widget.alerts.length}', 'ALL'),
+                            const SizedBox(width: 6),
+                            _filterChip('Nguy cấp $criticalCount', 'CRITICAL'),
+                            const SizedBox(width: 6),
+                            _filterChip('Đã xử lý $resolvedCount', 'RESOLVED'),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      const Icon(Icons.search_rounded, size: 20, color: Color(0xFF94A3B8)),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: TextField(
+                          onChanged: (v) => setState(() => _query = v),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF0F172A),
+                            fontWeight: FontWeight.w600,
+                          ),
+                          decoration: const InputDecoration(
+                            hintText: 'Tìm kiếm theo sự kiện hoặc nội dung cảnh báo...',
+                            hintStyle: TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF94A3B8),
+                              fontWeight: FontWeight.normal,
+                            ),
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(vertical: 8),
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      _filterChip('Đang mở ${activeAlerts.length}', 'ACTIVE'),
+                      const SizedBox(width: 6),
+                      _filterChip('Tất cả ${widget.alerts.length}', 'ALL'),
+                      const SizedBox(width: 6),
+                      _filterChip('Nguy cấp $criticalCount', 'CRITICAL'),
+                      const SizedBox(width: 6),
+                      _filterChip('Đã xử lý $resolvedCount', 'RESOLVED'),
+                    ],
                   ),
-                ),
-                const SizedBox(width: 12),
-                _filterChip('Đang mở ${activeAlerts.length}', 'ACTIVE'),
-                const SizedBox(width: 6),
-                _filterChip('Tất cả ${widget.alerts.length}', 'ALL'),
-                const SizedBox(width: 6),
-                _filterChip('Nguy cấp $criticalCount', 'CRITICAL'),
-                const SizedBox(width: 6),
-                _filterChip('Đã xử lý $resolvedCount', 'RESOLVED'),
-              ],
-            ),
           ),
 
           const SizedBox(height: 20),
@@ -442,69 +490,70 @@ class _AlertsTabState extends State<AlertsTab> {
               ),
               child: Column(
                 children: [
-                  // Table Header
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 14,
+                  // Table Header (Desktop only)
+                  if (!isMobile)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 14,
+                      ),
+                      child: Row(
+                        children: const [
+                          Expanded(
+                            flex: 5,
+                            child: Text(
+                              'MỨC ĐỘ & SỰ KIỆN',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF64748B),
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 3,
+                            child: Text(
+                              'THỜI ĐIỂM',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF64748B),
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              'TRẠNG THÁI',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF64748B),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              'THAO TÁC',
+                              textAlign: TextAlign.end,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF64748B),
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    child: Row(
-                      children: const [
-                        Expanded(
-                          flex: 5,
-                          child: Text(
-                            'MỨC ĐỘ & SỰ KIỆN',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF64748B),
-                              letterSpacing: 0.8,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 3,
-                          child: Text(
-                            'THỜI ĐIỂM',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF64748B),
-                              letterSpacing: 0.8,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            'TRẠNG THÁI',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF64748B),
-                              letterSpacing: 0.8,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            'THAO TÁC',
-                            textAlign: TextAlign.end,
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF64748B),
-                              letterSpacing: 0.8,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                  if (!isMobile)
+                    const Divider(height: 1, color: Color(0xFFF1F5F9)),
 
-                  // Table Rows
+                  // Alert Items (Responsive: Mobile card vs Desktop row)
                   ...filtered.asMap().entries.map((entry) {
                     final index = entry.key;
                     final alert = entry.value;
@@ -521,177 +570,104 @@ class _AlertsTabState extends State<AlertsTab> {
                               onResolve: () => widget.onResolveAlert(alert),
                             ),
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 16,
-                            ),
-                            child: Row(
-                              children: [
-                                // Event level & title
-                                Expanded(
-                                  flex: 5,
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        width: 38,
-                                        height: 38,
-                                        decoration: BoxDecoration(
-                                          color: sevColor.withValues(alpha: 0.12),
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                        ),
-                                        child: Icon(
-                                          alert.isCritical
-                                              ? Icons.error_outline_rounded
-                                              : Icons.warning_amber_rounded,
-                                          color: sevColor,
-                                          size: 20,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 14),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Container(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                    horizontal: 7,
-                                                    vertical: 3,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    color: sevColor
-                                                        .withValues(alpha: 0.12),
-                                                    borderRadius:
-                                                        BorderRadius.circular(6),
-                                                  ),
-                                                  child: Text(
-                                                    levelTitle(alert.severity),
-                                                    style: TextStyle(
-                                                      fontSize: 10,
-                                                      fontWeight:
-                                                          FontWeight.w800,
-                                                      color: sevColor,
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 8),
-                                                Expanded(
-                                                  child: Text(
-                                                    alert.title,
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    style: const TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.w800,
-                                                      color: Color(0xFF0F172A),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              alert.message,
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                                color: Color(0xFF64748B),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-
-                                // Timestamp
-                                Expanded(
-                                  flex: 3,
+                          child: isMobile
+                              ? Padding(
+                                  padding: const EdgeInsets.all(16),
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
+                                      Row(
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 3,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: sevColor
+                                                  .withValues(alpha: 0.12),
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
+                                            child: Text(
+                                              levelTitle(alert.severity),
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w800,
+                                                color: sevColor,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            '${timeLabel(alert.triggeredAt.toLocal())} • ${dateLabel(alert.triggeredAt.toLocal())}',
+                                            style: const TextStyle(
+                                              fontSize: 11,
+                                              color: Color(0xFF64748B),
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          const Spacer(),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 3,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: alert.isActive
+                                                  ? const Color(0xFFFEF2F2)
+                                                  : const Color(0xFFECFDF5),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            child: Text(
+                                              alert.isActive
+                                                  ? '● Đang mở'
+                                                  : '● Đã xử lý',
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w700,
+                                                color: alert.isActive
+                                                  ? const Color(0xFFDC2626)
+                                                  : const Color(0xFF059669),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
                                       Text(
-                                        dateLabel(
-                                            alert.triggeredAt.toLocal()),
+                                        alert.title,
                                         style: const TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w700,
+                                          fontSize: 13.5,
+                                          fontWeight: FontWeight.w800,
                                           color: Color(0xFF0F172A),
                                         ),
                                       ),
-                                      const SizedBox(height: 2),
+                                      const SizedBox(height: 4),
                                       Text(
-                                        timeLabel(
-                                            alert.triggeredAt.toLocal()),
+                                        alert.message,
                                         style: const TextStyle(
-                                          fontSize: 11,
+                                          fontSize: 12,
                                           color: Color(0xFF64748B),
+                                          height: 1.35,
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ),
-
-                                // Status Pill
-                                Expanded(
-                                  flex: 2,
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 9,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: alert.isActive
-                                            ? const Color(0xFFFEF2F2)
-                                            : const Color(0xFFECFDF5),
-                                        borderRadius:
-                                            BorderRadius.circular(20),
-                                      ),
-                                      child: Text(
-                                        alert.isActive
-                                            ? '● Đang mở'
-                                            : '● Đã xử lý',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w700,
-                                          color: alert.isActive
-                                              ? const Color(0xFFDC2626)
-                                              : const Color(0xFF059669),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-                                // Actions
-                                Expanded(
-                                  flex: 2,
-                                  child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: alert.isActive
-                                        ? OutlinedButton(
+                                      if (alert.isActive) ...[
+                                        const SizedBox(height: 10),
+                                        Align(
+                                          alignment: Alignment.centerRight,
+                                          child: OutlinedButton(
                                             onPressed: () =>
                                                 widget.onResolveAlert(alert),
                                             style: OutlinedButton.styleFrom(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                horizontal: 12,
-                                                vertical: 8,
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 14,
+                                                vertical: 6,
                                               ),
+                                              minimumSize: Size.zero,
+                                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                               side: const BorderSide(
                                                 color: Color(0xFFCBD5E1),
                                               ),
@@ -708,20 +684,222 @@ class _AlertsTabState extends State<AlertsTab> {
                                                 color: Color(0xFF0F172A),
                                               ),
                                             ),
-                                          )
-                                        : const Text(
-                                            'Đã hoàn tất',
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              color: Color(0xFF94A3B8),
-                                              fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                )
+                              : Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 16,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      // Event level & title
+                                      Expanded(
+                                        flex: 5,
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              width: 38,
+                                              height: 38,
+                                              decoration: BoxDecoration(
+                                                color: sevColor
+                                                    .withValues(alpha: 0.12),
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              child: Icon(
+                                                alert.isCritical
+                                                    ? Icons.error_outline_rounded
+                                                    : Icons.warning_amber_rounded,
+                                                color: sevColor,
+                                                size: 20,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 14),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Container(
+                                                        padding:
+                                                            const EdgeInsets.symmetric(
+                                                          horizontal: 7,
+                                                          vertical: 3,
+                                                        ),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: sevColor
+                                                              .withValues(
+                                                                  alpha: 0.12),
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                  6),
+                                                        ),
+                                                        child: Text(
+                                                          levelTitle(
+                                                              alert.severity),
+                                                          style: TextStyle(
+                                                            fontSize: 10,
+                                                            fontWeight:
+                                                                FontWeight.w800,
+                                                            color: sevColor,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 8),
+                                                      Expanded(
+                                                        child: Text(
+                                                          alert.title,
+                                                          maxLines: 1,
+                                                          overflow:
+                                                              TextOverflow.ellipsis,
+                                                          style: const TextStyle(
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w800,
+                                                            color:
+                                                                Color(0xFF0F172A),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    alert.message,
+                                                    maxLines: 2,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                      fontSize: 12,
+                                                      color: Color(0xFF64748B),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+
+                                      // Timestamp
+                                      Expanded(
+                                        flex: 3,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              dateLabel(
+                                                  alert.triggeredAt.toLocal()),
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w700,
+                                                color: Color(0xFF0F172A),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              timeLabel(
+                                                  alert.triggeredAt.toLocal()),
+                                              style: const TextStyle(
+                                                fontSize: 11,
+                                                color: Color(0xFF64748B),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+
+                                      // Status Pill
+                                      Expanded(
+                                        flex: 2,
+                                        child: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 9,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: alert.isActive
+                                                  ? const Color(0xFFFEF2F2)
+                                                  : const Color(0xFFECFDF5),
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            child: Text(
+                                              alert.isActive
+                                                  ? '● Đang mở'
+                                                  : '● Đã xử lý',
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w700,
+                                                color: alert.isActive
+                                                    ? const Color(0xFFDC2626)
+                                                    : const Color(0xFF059669),
+                                              ),
                                             ),
                                           ),
+                                        ),
+                                      ),
+
+                                      // Actions
+                                      Expanded(
+                                        flex: 2,
+                                        child: Align(
+                                          alignment: Alignment.centerRight,
+                                          child: alert.isActive
+                                              ? OutlinedButton(
+                                                  onPressed: () => widget
+                                                      .onResolveAlert(alert),
+                                                  style: OutlinedButton.styleFrom(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 8,
+                                                    ),
+                                                    side: const BorderSide(
+                                                      color: Color(0xFFCBD5E1),
+                                                    ),
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(8),
+                                                    ),
+                                                  ),
+                                                  child: const Text(
+                                                    'Đã xử lý',
+                                                    style: TextStyle(
+                                                      fontSize: 11,
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                      color: Color(0xFF0F172A),
+                                                    ),
+                                                  ),
+                                                )
+                                              : const Text(
+                                                  'Đã hoàn tất',
+                                                  style: TextStyle(
+                                                    fontSize: 11,
+                                                    color: Color(0xFF94A3B8),
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
                         ),
                         if (!isLast)
                           const Divider(height: 1, color: Color(0xFFF1F5F9)),

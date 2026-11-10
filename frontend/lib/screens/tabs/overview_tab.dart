@@ -366,7 +366,7 @@ class OverviewTab extends StatelessWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   crossAxisCount: cross,
-                  childAspectRatio: cross >= 4 ? 1.35 : 1.28,
+                  childAspectRatio: cross >= 4 ? 1.35 : (cross == 3 ? 1.25 : 1.12),
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
                   children: [
@@ -384,7 +384,7 @@ class OverviewTab extends StatelessWidget {
                       safeLabel: 'Tối ưu: ${species.optimalPhMin} – ${species.optimalPhMax}',
                     ),
                     MetricCard(
-                      label: 'Khí độc NH3 (AI)',
+                      label: 'Khí độc NH3',
                       value: latest!.nh3Percentage,
                       unit: '%',
                       icon: Icons.warning_amber_rounded,
@@ -394,10 +394,10 @@ class OverviewTab extends StatelessWidget {
                       onTap: () => onSelectMetric('nh3Pct'),
                       safeMin: 0.0,
                       safeMax: 5.0,
-                      safeLabel: 'Tối ưu: < 5% (Độc hại: > 10%)',
+                      safeLabel: 'Tối ưu: < 5%',
                     ),
                     MetricCard(
-                      label: 'Độ mặn ao nuôi',
+                      label: 'Độ mặn',
                       value: latest!.salinityPpt ?? (latest!.readings['ph'] != null ? 15.0 : null),
                       unit: '‰',
                       icon: Icons.water_drop_rounded,
