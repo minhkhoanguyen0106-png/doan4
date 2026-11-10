@@ -32,11 +32,46 @@ public class WaterAssessmentService {
         this.turbidityHighMax=turbidityHighMax; this.turbidityCriticalMax=turbidityCriticalMax;
         this.tdsWatchMax=tdsWatchMax; this.tdsHighMax=tdsHighMax; this.tdsCriticalMax=tdsCriticalMax;
     }
+    public static double calculateToxicNH3Percent(double ph, double tempC) {
+        double pKa = 0.09018 + (2729.92 / (273.15 + tempC));
+        return 100.0 / (1.0 + Math.pow(10.0, pKa - ph));
+    }
+
+    public static double calculateSalinityPpt(double tdsMgL) {
+        return (tdsMgL / 1000.0) * 1.05;
+    }
+
     public String assess(MeasurementDtos.Readings r) {
         int level = assessRange(r.ph(), phWatchMin, phWatchMax, phHighMin, phHighMax, phCriticalMin, phCriticalMax);
         level = Math.max(level, assessLow(r.dissolvedOxygenMgL(), doWatchMin, doHighMin, doCriticalMin));
         level = Math.max(level, assessHigh(r.turbidityNtu(), turbidityWatchMax, turbidityHighMax, turbidityCriticalMax));
         level = Math.max(level, assessHigh(r.tdsMgL(), tdsWatchMax, tdsHighMax, tdsCriticalMax));
+
+        // Soft Sensor: Evaluate Toxic NH3
+        if (r.ph() != null) {
+            double temp = r.temperatureC() != null ? r.temperatureC().doubleValue() : 28.0;
+            double nh3 = calculateToxicNH3Percent(r.ph().doubleValue(), temp);
+            if (nh3 >= 20.0) {
+                level = Math.max(level, 3); // CRITICAL
+            } else if (nh3 >= 10.0) {
+                level = Math.max(level, 2); // HIGH
+            } else if (nh3 >= 5.0) {
+                level = Math.max(level, 1); // WATCH
+            }
+        }
+
+        // Evaluate Salinity
+        if (r.tdsMgL() != null) {
+            double sal = calculateSalinityPpt(r.tdsMgL().doubleValue());
+            if (sal < 2.0 || sal > 38.0) {
+                level = Math.max(level, 3); // CRITICAL
+            } else if (sal < 5.0 || sal > 32.0) {
+                level = Math.max(level, 2); // HIGH
+            } else if (sal < 8.0 || sal > 28.0) {
+                level = Math.max(level, 1); // WATCH
+            }
+        }
+
         return switch (level) { case 3 -> "CRITICAL"; case 2 -> "HIGH"; case 1 -> "WATCH"; default -> "GOOD"; };
     }
     private int assessRange(BigDecimal v, BigDecimal watchMin, BigDecimal watchMax, BigDecimal highMin, BigDecimal highMax, BigDecimal criticalMin, BigDecimal criticalMax) {

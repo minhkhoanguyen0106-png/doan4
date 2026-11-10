@@ -4,6 +4,7 @@ import com.example.backend.monitor.IotDevice;
 import com.example.backend.monitor.MeasurementDtos;
 import com.example.backend.monitor.MonitoringService;
 import com.example.backend.monitor.MonitoringSite;
+import com.example.backend.monitor.WaterAssessmentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,8 +72,40 @@ public class AlertService {
         String title;
         StringBuilder detail = new StringBuilder();
 
+        double temp = readings.temperatureC() != null ? readings.temperatureC().doubleValue() : 28.0;
+        double nh3Pct = readings.ph() != null ? WaterAssessmentService.calculateToxicNH3Percent(readings.ph().doubleValue(), temp) : 0.0;
+        Double salinity = readings.tdsMgL() != null ? WaterAssessmentService.calculateSalinityPpt(readings.tdsMgL().doubleValue()) : null;
+
         // Custom domain logic for aquaculture parameters
-        if (readings.ph() != null && readings.ph().compareTo(new java.math.BigDecimal("7.5")) < 0) {
+        if (nh3Pct >= 5.0) {
+            // Ammonia Toxicity Alarm
+            if (nh3Pct >= 20.0) {
+                title = "Nguy cấp: Khí độc NH3 bộc phát cực độ (" + String.format(java.util.Locale.US, "%.1f", nh3Pct) + "%)!";
+            } else if (nh3Pct >= 10.0) {
+                title = "Cảnh báo cao: Khí độc Amonia (NH3) nguy hại (" + String.format(java.util.Locale.US, "%.1f", nh3Pct) + "%)!";
+            } else {
+                title = "Lưu ý: Tỷ lệ khí độc NH3 đang tăng (" + String.format(java.util.Locale.US, "%.1f", nh3Pct) + "%)";
+            }
+            detail.append("Chỉ số khí độc NH3 tự do: ").append(String.format(java.util.Locale.US, "%.2f", nh3Pct)).append("% (Ngưỡng an toàn ao nuôi: < 5%).\n")
+                  .append("• Rủi ro sinh học: Khí NH3 tự do khuếch tán qua màng mang tôm gây hoại tử biểu mô hô hấp, tổn thương gan tụy và ngạt thở.\n")
+                  .append("• Phác đồ xử lý tức thời:\n")
+                  .append("  1. Tạt EDTA liều 2-3 kg/1000m³ để khử độc tố nước, lắng bọt váng và giảm độ nhớt.\n")
+                  .append("  2. Đánh mật rỉ đường (3-5 kg/1000m³) kết hợp vi sinh Probiotics (Bacillus) vào 9-10h sáng để hạ pH và khống chế tảo.\n")
+                  .append("  3. Giảm 30-50% lượng thức ăn, bật tối đa quạt nước để giải phóng khí độc.");
+        } else if (salinity != null && (salinity < 8.0 || salinity > 28.0)) {
+            // Salinity Alarm
+            if (salinity < 5.0) {
+                title = "Cảnh báo: Độ mặn ao tụt thấp (" + String.format(java.util.Locale.US, "%.1f", salinity) + " ‰) - Nguy cơ sốc nước ngọt!";
+                detail.append("Chỉ số độ mặn đo được: ").append(String.format(java.util.Locale.US, "%.1f", salinity)).append(" ‰ (Ngưỡng tối ưu: 10 – 25 ‰).\n")
+                      .append("• Rủi ro: Nước bị ngọt hóa khiến tôm mất cân bằng áp suất thẩm thấu, mềm vỏ, cong thân đục cơ.\n")
+                      .append("• Phác đồ xử lý: Bổ sung khoáng tạt chuyên dụng (CaCl2, MgSO4), cấp thêm nước mặn hoặc bón vôi Dolomite.");
+            } else {
+                title = "Cảnh báo: Độ mặn ao tăng cao (" + String.format(java.util.Locale.US, "%.1f", salinity) + " ‰)!";
+                detail.append("Chỉ số độ mặn đo được: ").append(String.format(java.util.Locale.US, "%.1f", salinity)).append(" ‰ (Ngưỡng tối ưu: 10 – 25 ‰).\n")
+                      .append("• Rủi ro: Tôm bị mất nước tế bào, chậm lớn, vỏ dày cứng khó lột xác.\n")
+                      .append("• Phác đồ xử lý: Cấp bổ sung nước ngọt lắng sạch để hạ dần độ mặn từ từ 1-2 ‰ mỗi ngày.");
+            }
+        } else if (readings.ph() != null && readings.ph().compareTo(new java.math.BigDecimal("7.5")) < 0) {
             if ("CRITICAL".equals(assessmentLevel)) {
                 title = "Nguy cấp: pH ao chạm đáy (" + readings.ph() + ") - Sốc axit/nhiễm phèn!";
             } else if ("HIGH".equals(assessmentLevel)) {

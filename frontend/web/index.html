@@ -31,6 +31,49 @@
 
   <title>Pondora - Giám Sát & Nhật Ký Ao Tôm</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- PONDORA Early Warning System Web Audio Synthesizer -->
+  <script>
+    window.playPondoraAlarm = function(severity) {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        if (ctx.state === 'suspended') {
+          ctx.resume();
+        }
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        if (severity === 'CRITICAL') {
+          // Urgent 3-pulse Siren Alert for CRITICAL
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(880, now);
+          osc.frequency.linearRampToValueAtTime(587, now + 0.2);
+          osc.frequency.linearRampToValueAtTime(920, now + 0.4);
+          osc.frequency.linearRampToValueAtTime(587, now + 0.6);
+          gain.gain.setValueAtTime(0.35, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.75);
+          osc.start(now);
+          osc.stop(now + 0.75);
+        } else {
+          // Dual harmonic alert beep for HIGH / WARNING
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(700, now);
+          osc.frequency.setValueAtTime(880, now + 0.15);
+          gain.gain.setValueAtTime(0.28, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.45);
+          osc.start(now);
+          osc.stop(now + 0.45);
+        }
+      } catch (e) {
+        console.warn('AudioContext playback blocked or unsupported:', e);
+      }
+    };
+  </script>
 </head>
 <body>
   <!--

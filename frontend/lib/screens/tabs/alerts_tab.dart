@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../dialogs/alert_detail_dialog.dart';
 import '../../models/water_models.dart';
+import '../../services/alarm_sound_service.dart';
 import '../../utils/formatters.dart';
 import '../../widgets/common_views.dart';
 import '../../widgets/stat_cards.dart';
@@ -107,17 +108,50 @@ class _AlertsTabState extends State<AlertsTab> {
                   ),
                 ],
               ),
-              OutlinedButton.icon(
-                onPressed: widget.onRefresh,
-                icon: const Icon(Icons.refresh_rounded, size: 16),
-                label: const Text('Làm mới'),
-                style: OutlinedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+              Row(
+                children: [
+                  FilledButton.tonalIcon(
+                    onPressed: () {
+                      setState(() {
+                        AlarmSoundService.soundEnabled = !AlarmSoundService.soundEnabled;
+                      });
+                      if (AlarmSoundService.soundEnabled) {
+                        AlarmSoundService.playAlarm(severity: 'HIGH');
+                      }
+                    },
+                    icon: Icon(
+                      AlarmSoundService.soundEnabled ? Icons.volume_up_rounded : Icons.volume_off_rounded,
+                      size: 16,
+                      color: AlarmSoundService.soundEnabled ? const Color(0xFF0284C7) : const Color(0xFF64748B),
+                    ),
+                    label: Text(
+                      AlarmSoundService.soundEnabled ? 'Còi cảnh báo: BẬT' : 'Còi cảnh báo: TẮT',
+                      style: TextStyle(
+                        color: AlarmSoundService.soundEnabled ? const Color(0xFF0284C7) : const Color(0xFF64748B),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                      ),
+                    ),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AlarmSoundService.soundEnabled ? const Color(0xFFE0F2FE) : const Color(0xFFF1F5F9),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  OutlinedButton.icon(
+                    onPressed: widget.onRefresh,
+                    icon: const Icon(Icons.refresh_rounded, size: 16),
+                    label: const Text('Làm mới'),
+                    style: OutlinedButton.styleFrom(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
