@@ -61,32 +61,49 @@
 
         const playTone = () => {
           const now = ctx.currentTime;
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.connect(gain);
-          gain.connect(ctx.destination);
+          const totalDuration = 2.2;
 
-          if (severity === 'CRITICAL') {
-            // Urgent 3-pulse Siren Alert for CRITICAL
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(880, now);
-            osc.frequency.linearRampToValueAtTime(587, now + 0.2);
-            osc.frequency.linearRampToValueAtTime(920, now + 0.4);
-            osc.frequency.linearRampToValueAtTime(587, now + 0.6);
-            gain.gain.setValueAtTime(0.5, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 0.75);
-            osc.start(now);
-            osc.stop(now + 0.75);
-          } else {
-            // Dual harmonic alert beep for HIGH / WARNING
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(800, now);
-            osc.frequency.setValueAtTime(1050, now + 0.15);
-            gain.gain.setValueAtTime(0.4, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 0.45);
-            osc.start(now);
-            osc.stop(now + 0.45);
+          // Master Gain
+          const masterGain = ctx.createGain();
+          masterGain.connect(ctx.destination);
+          masterGain.gain.setValueAtTime(0.6, now);
+
+          // Oscillator 1: Main piercing siren (sawtooth)
+          const osc1 = ctx.createOscillator();
+          osc1.type = 'sawtooth';
+          osc1.connect(masterGain);
+
+          // Oscillator 2: Sub-octave alarm (square) for industrial acoustic punch
+          const osc2 = ctx.createOscillator();
+          osc2.type = 'square';
+          const subGain = ctx.createGain();
+          subGain.gain.setValueAtTime(0.35, now);
+          osc2.connect(subGain);
+          subGain.connect(masterGain);
+
+          // Rapid 5-cycle Emergency Siren: sweeps between 650Hz and 1150Hz
+          const cycles = 5;
+          const halfCycle = totalDuration / (cycles * 2);
+
+          osc1.frequency.setValueAtTime(650, now);
+          osc2.frequency.setValueAtTime(325, now);
+
+          for (let i = 0; i < cycles * 2; i++) {
+            const t = now + (i + 1) * halfCycle;
+            const targetFreq1 = (i % 2 === 0) ? 1150 : 650;
+            const targetFreq2 = (i % 2 === 0) ? 575 : 325;
+            osc1.frequency.exponentialRampToValueAtTime(targetFreq1, t);
+            osc2.frequency.exponentialRampToValueAtTime(targetFreq2, t);
           }
+
+          // Smooth fade-out at the end
+          masterGain.gain.setValueAtTime(0.6, now + totalDuration - 0.15);
+          masterGain.gain.linearRampToValueAtTime(0.001, now + totalDuration);
+
+          osc1.start(now);
+          osc2.start(now);
+          osc1.stop(now + totalDuration);
+          osc2.stop(now + totalDuration);
         };
 
         if (ctx.state === 'suspended') {
