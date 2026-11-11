@@ -31,7 +31,7 @@
 // 1. CAU HINH WIFI
 // =========================================================
 
-const char* WIFI_SSID = "iPhone";
+const char* WIFI_SSID = "QLAM 1404";
 const char* WIFI_PASSWORD = "thaochode";
 
 // =========================================================
@@ -139,8 +139,12 @@ void connectWiFi() {
   }
 
   Serial.println();
-  Serial.println("Dang ket noi Wi-Fi...");
+  Serial.print("Dang ket noi Wi-Fi: ");
+  Serial.println(WIFI_SSID);
 
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect(true);
+  delay(100);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
   int retry = 0;
@@ -168,7 +172,31 @@ void connectWiFi() {
   } else {
 
     Serial.println();
-    Serial.println("Khong the ket noi Wi-Fi!");
+    Serial.print("Khong the ket noi Wi-Fi! Ma trang thai: ");
+    Serial.println(WiFi.status());
+
+    // Quet cac mang Wi-Fi 2.4GHz kha dung quanh day de chan doan
+    Serial.println("Dang quet mang Wi-Fi 2.4GHz gan day...");
+    int n = WiFi.scanNetworks();
+    bool foundTarget = false;
+    for (int i = 0; i < n; i++) {
+      String ssid = WiFi.SSID(i);
+      if (ssid == String(WIFI_SSID)) {
+        foundTarget = true;
+      }
+      Serial.print("  - ");
+      Serial.print(ssid);
+      Serial.print(" (");
+      Serial.print(WiFi.RSSI(i));
+      Serial.println(" dBm)");
+    }
+    if (!foundTarget) {
+      Serial.println(">> CANH BAO: ESP32 KHONG TIM THAY mang nay o bang tan 2.4GHz!");
+      Serial.println(">> Nguyen nhan: Wi-Fi dang phat o bang tan 5GHz (ESP32 chi bat duoc 2.4GHz).");
+      Serial.println(">> Cach sua: Chuyen diem phat sang 2.4GHz (hoac bat 'Toi da hoa tuong thich' tren iPhone).");
+    } else {
+      Serial.println(">> Tim thay mang 2.4GHz nhung ket noi that bai. Hay kiem tra lai mat khau WIFI_PASSWORD!");
+    }
   }
 }
 
