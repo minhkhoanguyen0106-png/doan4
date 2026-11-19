@@ -6,6 +6,7 @@ import '../../widgets/alert_banner.dart';
 import '../../widgets/common_views.dart';
 import '../../widgets/history_chart.dart';
 import '../../widgets/stat_cards.dart';
+import '../../widgets/underwater_ambient_canvas.dart';
 
 class OverviewTab extends StatelessWidget {
   const OverviewTab({
@@ -35,6 +36,7 @@ class OverviewTab extends StatelessWidget {
     required this.onSelectSpecies,
     required this.onViewActionPlan,
     this.onSimulate,
+    this.lightingMode = OceanLightingMode.abyssal,
   });
 
   final List<MonitoringSite> sites;
@@ -63,6 +65,7 @@ class OverviewTab extends StatelessWidget {
   final ValueChanged<AquacultureSpecies> onSelectSpecies;
   final VoidCallback onViewActionPlan;
   final VoidCallback? onSimulate;
+  final OceanLightingMode lightingMode;
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +84,7 @@ class OverviewTab extends StatelessWidget {
 
     final site = selectedSite!;
     final onlineCount = devices.where((d) => d.online).length;
+    final bool isAbyss = lightingMode == OceanLightingMode.abyssal;
 
     return RefreshIndicator(
       onRefresh: onRefresh,
@@ -97,7 +101,7 @@ class OverviewTab extends StatelessWidget {
                       'PONDORA · SMART AQUACULTURE SYSTEM',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         letterSpacing: 1.2,
-                        color: const Color(0xFF0284C7),
+                        color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
                         fontWeight: FontWeight.w800,
                         fontSize: 11,
                       ),
@@ -107,7 +111,7 @@ class OverviewTab extends StatelessWidget {
                       'Bảng điều khiển giám sát ao nuôi',
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w900,
-                        color: const Color(0xFF0F172A),
+                        color: isAbyss ? Colors.white : const Color(0xFF0F172A),
                         letterSpacing: -0.5,
                       ),
                     ),
@@ -127,8 +131,8 @@ class OverviewTab extends StatelessWidget {
                         const SizedBox(width: 7),
                         Text(
                           '$onlineCount/${devices.length} cảm biến hoạt động · Hôm nay, ${dateLabel(DateTime.now())}',
-                          style: const TextStyle(
-                            color: Color(0xFF64748B),
+                          style: TextStyle(
+                            color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                             fontSize: 12.5,
                             fontWeight: FontWeight.w500,
                           ),
@@ -142,12 +146,15 @@ class OverviewTab extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEAF2FF),
+                  color: isAbyss ? const Color(0x2238BDF8) : const Color(0xFFEAF2FF),
                   borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isAbyss ? const Color(0x4438BDF8) : Colors.transparent,
+                  ),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.water_drop_rounded,
-                  color: Color(0xFF1769D2),
+                  color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF1769D2),
                 ),
               ),
             ],
@@ -158,6 +165,7 @@ class OverviewTab extends StatelessWidget {
             selected: site,
             onChanged: onSelectSite,
             onAdd: onCreateSite,
+            isAbyss: isAbyss,
           ),
           const SizedBox(height: 14),
 
@@ -327,6 +335,7 @@ class OverviewTab extends StatelessWidget {
             species: species,
             onViewActionPlan: onViewActionPlan,
             onSimulate: onSimulate,
+            isAbyss: isAbyss,
           ),
           const SizedBox(height: 20),
           Row(
@@ -385,6 +394,7 @@ class OverviewTab extends StatelessWidget {
                       safeMin: species.optimalPhMin,
                       safeMax: species.optimalPhMax,
                       safeLabel: 'Tối ưu: ${species.optimalPhMin} – ${species.optimalPhMax}',
+                      isAbyss: isAbyss,
                     ),
                     MetricCard(
                       label: 'Khí độc NH3',
@@ -398,6 +408,7 @@ class OverviewTab extends StatelessWidget {
                       safeMin: 0.0,
                       safeMax: 5.0,
                       safeLabel: 'Tối ưu: < 5%',
+                      isAbyss: isAbyss,
                     ),
                     MetricCard(
                       label: 'Độ mặn',
@@ -411,6 +422,7 @@ class OverviewTab extends StatelessWidget {
                       safeMin: 10.0,
                       safeMax: 25.0,
                       safeLabel: 'Tối ưu: 10 – 25 ‰',
+                      isAbyss: isAbyss,
                     ),
                     MetricCard(
                       label: 'Oxy hòa tan',
@@ -424,6 +436,7 @@ class OverviewTab extends StatelessWidget {
                       safeMin: species.optimalDoMin,
                       safeMax: 9.0,
                       safeLabel: 'Tối ưu: ≥ ${species.optimalDoMin} mg/L',
+                      isAbyss: isAbyss,
                     ),
                     MetricCard(
                       label: 'Độ đục',
@@ -437,6 +450,7 @@ class OverviewTab extends StatelessWidget {
                       safeMin: 0.0,
                       safeMax: species.maxTurbidity,
                       safeLabel: 'Tối ưu: ≤ ${species.maxTurbidity} NTU',
+                      isAbyss: isAbyss,
                     ),
                     MetricCard(
                       label: 'Nhiệt độ',
@@ -450,6 +464,7 @@ class OverviewTab extends StatelessWidget {
                       safeMin: species.optimalTempMin,
                       safeMax: species.optimalTempMax,
                       safeLabel: 'Tối ưu: ${species.optimalTempMin} – ${species.optimalTempMax} °C',
+                      isAbyss: isAbyss,
                     ),
                     MetricCard(
                       label: 'Chỉ số TDS',
@@ -463,6 +478,7 @@ class OverviewTab extends StatelessWidget {
                       safeMin: 0.0,
                       safeMax: 800.0,
                       safeLabel: 'Tối ưu: ≤ 800 mg/L',
+                      isAbyss: isAbyss,
                     ),
                   ],
                 );
@@ -470,7 +486,7 @@ class OverviewTab extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 16),
-          _buildSoftSensorCard(context, latest, species),
+          _buildSoftSensorCard(context, latest, species, isAbyss),
           const SizedBox(height: 16),
           HistoryChart(
             measurements: history,
@@ -478,6 +494,7 @@ class OverviewTab extends StatelessWidget {
             range: historyRange,
             onRangeChanged: onSelectRange,
             onMetricChanged: onSelectMetric,
+            isAbyss: isAbyss,
           ),
           const SizedBox(height: 18),
           const DisclaimerWidget(),
@@ -490,6 +507,7 @@ class OverviewTab extends StatelessWidget {
     BuildContext context,
     WaterMeasurement? latest,
     AquacultureSpecies species,
+    bool isAbyss,
   ) {
     final ph = latest?.readings['ph']?.toDouble() ?? 6.9;
     final temp = latest?.readings['temperatureC']?.toDouble() ?? 28.0;
@@ -498,16 +516,18 @@ class OverviewTab extends StatelessWidget {
 
     final isNh3Safe = nh3Pct < 5.0;
     final isNh3Critical = nh3Pct > 10.0;
-    final nh3Color = isNh3Critical ? const Color(0xFFDC2626) : (isNh3Safe ? const Color(0xFF059669) : const Color(0xFFD97706));
+    final nh3Color = isNh3Critical ? const Color(0xFFDC2626) : (isNh3Safe ? const Color(0xFF10B981) : const Color(0xFFF59E0B));
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(
+          color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0),
+        ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0F172A).withValues(alpha: 0.03),
+            color: (isAbyss ? Colors.black : const Color(0xFF0F172A)).withValues(alpha: isAbyss ? 0.35 : 0.03),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -522,13 +542,17 @@ class OverviewTab extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
+                  color: isAbyss ? const Color(0x2238BDF8) : const Color(0xFFEFF6FF),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.psychology_rounded, color: Color(0xFF0284C7), size: 20),
+                child: Icon(
+                  Icons.psychology_rounded,
+                  color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 10),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -537,12 +561,15 @@ class OverviewTab extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
-                        color: Color(0xFF0F172A),
+                        color: isAbyss ? Colors.white : const Color(0xFF0F172A),
                       ),
                     ),
                     Text(
                       'Ứng dụng mô hình hóa lý Emerson suy diễn độc tố NH3 tự do & Độ mặn từ pH, Nhiệt độ và TDS',
-                      style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                      ),
                     ),
                   ],
                 ),
@@ -550,13 +577,19 @@ class OverviewTab extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF1F5F9),
+                  color: isAbyss ? const Color(0x2238BDF8) : const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFCBD5E1)),
+                  border: Border.all(
+                    color: isAbyss ? const Color(0x4438BDF8) : const Color(0xFFCBD5E1),
+                  ),
                 ),
-                child: const Text(
+                child: Text(
                   'Soft Sensor v2.4',
-                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF334155)),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF334155),
+                  ),
                 ),
               ),
             ],
@@ -565,149 +598,209 @@ class OverviewTab extends StatelessWidget {
           LayoutBuilder(
             builder: (context, box) {
               final isWide = box.maxWidth > 650;
-              return Flex(
-                direction: isWide ? Axis.horizontal : Axis.vertical,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // NH3 Column
-                  Expanded(
-                    flex: isWide ? 1 : 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: nh3Color.withValues(alpha: 0.04),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: nh3Color.withValues(alpha: 0.25)),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.warning_amber_rounded, size: 18, color: nh3Color),
-                                  const SizedBox(width: 6),
-                                  const Text(
-                                    'Khí độc Amonia (NH3)',
-                                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: Color(0xFF0F172A)),
-                                  ),
-                                ],
+              final nh3Card = Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isAbyss ? const Color(0x22FFFFFF) : Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: nh3Color.withValues(alpha: isAbyss ? 0.45 : 0.35),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: nh3Color.withValues(alpha: isAbyss ? 0.12 : 0.06),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.warning_amber_rounded, size: 18, color: nh3Color),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Khí độc Amonia (NH3)',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 13,
+                                color: isAbyss ? Colors.white : const Color(0xFF0F172A),
                               ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: nh3Color.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  isNh3Critical ? 'Nguy hại' : (isNh3Safe ? 'An toàn' : 'Cảnh giác'),
-                                  style: TextStyle(color: nh3Color, fontWeight: FontWeight.w800, fontSize: 11),
-                                ),
-                              ),
-                            ],
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: nh3Color.withValues(alpha: isAbyss ? 0.25 : 0.15),
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          const SizedBox(height: 10),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.baseline,
-                            textBaseline: TextBaseline.alphabetic,
-                            children: [
-                              Text(
-                                '${nh3Pct.toStringAsFixed(2)}%',
-                                style: TextStyle(
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.w900,
-                                  color: nh3Color,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'tỷ lệ NH3 tự do',
-                                style: TextStyle(fontSize: 12, color: Color(0xFF64748B), fontWeight: FontWeight.w600),
-                              ),
-                            ],
+                          child: Text(
+                            isNh3Critical ? 'Nguy hại' : (isNh3Safe ? 'An toàn' : 'Cảnh giác'),
+                            style: TextStyle(color: nh3Color, fontWeight: FontWeight.w800, fontSize: 11),
                           ),
-                          const SizedBox(height: 6),
-                          Text(
-                            '• Công thức: %NH3 = 100 / (1 + 10^(pKa - pH))\n• Đánh giá: Tại pH $ph, phần lớn Amonia ở dạng NH4+ không độc. Nếu pH tăng lên 8.5, NH3 sẽ vọt lên ~15% gây ngộ độc tôm.\n• Xử lý khi độc tố tăng: Tạt EDTA (2-3 kg/1000m³) khử độc nước, ủ men vi sinh Bacillus + rỉ mật đường hạ pH.',
-                            style: const TextStyle(fontSize: 11.5, color: Color(0xFF475569), height: 1.4),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          '${nh3Pct.toStringAsFixed(2)}%',
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w900,
+                            color: nh3Color,
                           ),
-                        ],
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'tỷ lệ NH3 tự do',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '• Công thức: %NH3 = 100 / (1 + 10^(pKa - pH))\n• Đánh giá: Tại pH $ph, phần lớn Amonia ở dạng NH4+ không độc. Nếu pH tăng lên 8.5, NH3 sẽ vọt lên ~15% gây ngộ độc tôm.\n• Xử lý khi độc tố tăng: Tạt EDTA (2-3 kg/1000m³) khử độc nước, ủ men vi sinh Bacillus + rỉ mật đường hạ pH.',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+                        height: 1.4,
                       ),
                     ),
-                  ),
-                  if (isWide) const SizedBox(width: 14) else const SizedBox(height: 14),
-                  // Salinity Column
-                  Expanded(
-                    flex: isWide ? 1 : 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF0284C7).withValues(alpha: 0.04),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: const Color(0xFF0284C7).withValues(alpha: 0.25)),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Row(
-                                children: [
-                                  Icon(Icons.water_drop_rounded, size: 18, color: Color(0xFF0284C7)),
-                                  SizedBox(width: 6),
-                                  Text(
-                                    'Độ mặn ao nuôi (Salinity)',
-                                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: Color(0xFF0F172A)),
-                                  ),
-                                ],
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF0284C7).withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  species.name,
-                                  style: const TextStyle(color: Color(0xFF0284C7), fontWeight: FontWeight.w800, fontSize: 11),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.baseline,
-                            textBaseline: TextBaseline.alphabetic,
-                            children: [
-                              Text(
-                                '${salinity.toStringAsFixed(1)} ‰',
-                                style: const TextStyle(
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.w900,
-                                  color: Color(0xFF0284C7),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Text(
-                                '(ppt - phần nghìn)',
-                                style: TextStyle(fontSize: 12, color: Color(0xFF64748B), fontWeight: FontWeight.w600),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            '• Công thức: S (‰) ≈ TDS / 1000 × 1.05\n• Ngưỡng tối ưu: 10 – 25 ‰ cho ${species.name}.\n• Vai trò: Giữ áp suất thẩm thấu ổn định, giúp tôm nhanh cứng vỏ sau lột và giảm thiểu sốc môi trường.',
-                            style: const TextStyle(fontSize: 11.5, color: Color(0xFF475569), height: 1.4),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               );
+
+              final salinityCard = Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isAbyss ? const Color(0x22FFFFFF) : Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: isAbyss ? const Color(0x4438BDF8) : const Color(0xFF0284C7).withValues(alpha: 0.35),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: (isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7)).withValues(alpha: isAbyss ? 0.10 : 0.06),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.water_drop_rounded,
+                              size: 18,
+                              color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Độ mặn ao nuôi (Salinity)',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 13,
+                                color: isAbyss ? Colors.white : const Color(0xFF0F172A),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: isAbyss ? const Color(0x2238BDF8) : const Color(0xFF0284C7).withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: isAbyss ? const Color(0x4438BDF8) : const Color(0xFFBAE6FD),
+                            ),
+                          ),
+                          child: Text(
+                            species.name,
+                            style: TextStyle(
+                              color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                              fontWeight: FontWeight.w800,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          '${salinity.toStringAsFixed(1)} ‰',
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w900,
+                            color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '(ppt - phần nghìn)',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '• Công thức: S (‰) ≈ TDS / 1000 × 1.05\n• Ngưỡng tối ưu: 10 – 25 ‰ cho ${species.name}.\n• Vai trò: Giữ áp suất thẩm thấu ổn định, giúp tôm nhanh cứng vỏ sau lột và giảm thiểu sốc môi trường.',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+
+              if (isWide) {
+                return IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(child: nh3Card),
+                      const SizedBox(width: 14),
+                      Expanded(child: salinityCard),
+                    ],
+                  ),
+                );
+              } else {
+                return Column(
+                  children: [
+                    nh3Card,
+                    const SizedBox(height: 14),
+                    salinityCard,
+                  ],
+                );
+              }
             },
           ),
         ],

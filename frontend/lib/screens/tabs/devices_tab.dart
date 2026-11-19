@@ -3,6 +3,7 @@ import '../../models/water_models.dart';
 import '../../utils/formatters.dart';
 import '../../widgets/common_views.dart';
 import '../../widgets/stat_cards.dart';
+import '../../widgets/underwater_ambient_canvas.dart';
 
 class DevicesTab extends StatefulWidget {
   const DevicesTab({
@@ -13,6 +14,7 @@ class DevicesTab extends StatefulWidget {
     required this.onCreateSite,
     required this.onCreateDevice,
     required this.onSelectSite,
+    this.lightingMode = OceanLightingMode.abyssal,
   });
 
   final List<MonitoringSite> sites;
@@ -21,6 +23,7 @@ class DevicesTab extends StatefulWidget {
   final VoidCallback onCreateSite;
   final VoidCallback onCreateDevice;
   final ValueChanged<MonitoringSite> onSelectSite;
+  final OceanLightingMode lightingMode;
 
   @override
   State<DevicesTab> createState() => _DevicesTabState();
@@ -49,6 +52,7 @@ class _DevicesTabState extends State<DevicesTab> {
     final offlineCount = widget.devices.length - onlineCount;
 
     final query = _query.trim().toLowerCase();
+    final isAbyss = widget.lightingMode == OceanLightingMode.abyssal;
     final filtered = widget.devices.where((d) {
       final matchQuery = query.isEmpty ||
           d.name.toLowerCase().contains(query) ||
@@ -71,10 +75,7 @@ class _DevicesTabState extends State<DevicesTab> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'PONDORA · IOT HARDWARE & SENSORS',
-                  style: TextStyle(
-                    color: Color(0xFF0284C7),
+                Text('PONDORA · IOT HARDWARE & SENSORS', style: TextStyle(color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.2,
@@ -85,17 +86,13 @@ class _DevicesTabState extends State<DevicesTab> {
                   'Thiết bị & Cảm biến quan trắc',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w900,
-                        color: const Color(0xFF0F172A),
-                        letterSpacing: -0.5,
+                        color: isAbyss ? Colors.white : const Color(0xFF0F172A), letterSpacing: -0.5,
                       ),
                 ),
                 const SizedBox(height: 3),
                 Text(
                   'Theo dõi ${widget.devices.length} trạm đo vi điều khiển ESP32 và cảm biến vi lưu.',
-                  style: const TextStyle(
-                    color: Color(0xFF64748B),
-                    fontSize: 13,
-                  ),
+                  style: TextStyle(color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B), fontSize: 13),
                 ),
               ],
             ),
@@ -117,8 +114,7 @@ class _DevicesTabState extends State<DevicesTab> {
         const SizedBox(height: 18),
 
         // Site selector
-        SitePicker(
-          sites: widget.sites,
+        SitePicker(isAbyss: isAbyss, sites: widget.sites,
           selected: widget.selectedSite!,
           onChanged: widget.onSelectSite,
           onAdd: widget.onCreateSite,
@@ -168,7 +164,7 @@ class _DevicesTabState extends State<DevicesTab> {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
                       'AI EDGE TELEMETRY · KIỂM ĐỊNH SỐ ĐO CẢM BIẾN TỰ ĐỘNG',
                       style: TextStyle(
@@ -204,8 +200,7 @@ class _DevicesTabState extends State<DevicesTab> {
               return Row(
                 children: [
                   Expanded(
-                    child: AdminStat(
-                      label: 'Tổng thiết bị',
+                    child: AdminStat(isAbyss: isAbyss, label: 'Tổng thiết bị',
                       value: '${widget.devices.length}',
                       icon: Icons.sensors_rounded,
                       color: const Color(0xFF0F62FE),
@@ -213,8 +208,7 @@ class _DevicesTabState extends State<DevicesTab> {
                   ),
                   const SizedBox(width: 14),
                   Expanded(
-                    child: AdminStat(
-                      label: 'Đang trực tuyến',
+                    child: AdminStat(isAbyss: isAbyss, label: 'Đang trực tuyến',
                       value: '$onlineCount',
                       icon: Icons.wifi_rounded,
                       color: const Color(0xFF10B981),
@@ -222,8 +216,7 @@ class _DevicesTabState extends State<DevicesTab> {
                   ),
                   const SizedBox(width: 14),
                   Expanded(
-                    child: AdminStat(
-                      label: 'Mất kết nối / Offline',
+                    child: AdminStat(isAbyss: isAbyss, label: 'Mất kết nối / Offline',
                       value: '$offlineCount',
                       icon: Icons.wifi_off_rounded,
                       color: const Color(0xFFF59E0B),
@@ -238,8 +231,7 @@ class _DevicesTabState extends State<DevicesTab> {
               children: [
                 SizedBox(
                   width: (constraints.maxWidth - 12) / 2,
-                  child: AdminStat(
-                    label: 'Tổng thiết bị',
+                  child: AdminStat(isAbyss: isAbyss, label: 'Tổng thiết bị',
                     value: '${widget.devices.length}',
                     icon: Icons.sensors_rounded,
                     color: const Color(0xFF0F62FE),
@@ -247,8 +239,7 @@ class _DevicesTabState extends State<DevicesTab> {
                 ),
                 SizedBox(
                   width: (constraints.maxWidth - 12) / 2,
-                  child: AdminStat(
-                    label: 'Đang trực tuyến',
+                  child: AdminStat(isAbyss: isAbyss, label: 'Đang trực tuyến',
                     value: '$onlineCount',
                     icon: Icons.wifi_rounded,
                     color: const Color(0xFF10B981),
@@ -256,8 +247,7 @@ class _DevicesTabState extends State<DevicesTab> {
                 ),
                 SizedBox(
                   width: constraints.maxWidth,
-                  child: AdminStat(
-                    label: 'Mất kết nối / Offline',
+                  child: AdminStat(isAbyss: isAbyss, label: 'Mất kết nối / Offline',
                     value: '$offlineCount',
                     icon: Icons.wifi_off_rounded,
                     color: const Color(0xFFF59E0B),
@@ -273,10 +263,7 @@ class _DevicesTabState extends State<DevicesTab> {
         // Search & Filter Toolbar
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
+          decoration: BoxDecoration(color: isAbyss ? const Color(0x28FFFFFF) : Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0)),
             boxShadow: [
               BoxShadow(
                 color: const Color(0xFF0F172A).withValues(alpha: 0.02),
@@ -292,11 +279,7 @@ class _DevicesTabState extends State<DevicesTab> {
               Expanded(
                 child: TextField(
                   onChanged: (v) => setState(() => _query = v),
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF0F172A),
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 13, color: isAbyss ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w600),
                   decoration: const InputDecoration(
                     hintText: 'Tìm kiếm theo tên thiết bị hoặc mã ESP32...',
                     hintStyle: TextStyle(
@@ -371,11 +354,7 @@ class _DevicesTabState extends State<DevicesTab> {
           )
         else
           Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
-              boxShadow: [
+            decoration: BoxDecoration(color: isAbyss ? const Color(0x28FFFFFF) : Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0)), boxShadow: [
                 BoxShadow(
                   color: const Color(0xFF0F172A).withValues(alpha: 0.02),
                   blurRadius: 16,
@@ -390,7 +369,7 @@ class _DevicesTabState extends State<DevicesTab> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                   child: Row(
-                    children: const [
+                    children: [
                       Expanded(
                         flex: 4,
                         child: Text(
@@ -398,8 +377,7 @@ class _DevicesTabState extends State<DevicesTab> {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
-                            color: Color(0xFF64748B),
-                            letterSpacing: 0.8,
+                            color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF64748B), letterSpacing: 0.8,
                           ),
                         ),
                       ),
@@ -410,8 +388,7 @@ class _DevicesTabState extends State<DevicesTab> {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
-                            color: Color(0xFF64748B),
-                            letterSpacing: 0.8,
+                            color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF64748B), letterSpacing: 0.8,
                           ),
                         ),
                       ),
@@ -422,8 +399,7 @@ class _DevicesTabState extends State<DevicesTab> {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
-                            color: Color(0xFF64748B),
-                            letterSpacing: 0.8,
+                            color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF64748B), letterSpacing: 0.8,
                           ),
                         ),
                       ),
@@ -435,15 +411,14 @@ class _DevicesTabState extends State<DevicesTab> {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
-                            color: Color(0xFF64748B),
-                            letterSpacing: 0.8,
+                            color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF64748B), letterSpacing: 0.8,
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                Divider(height: 1, color: isAbyss ? const Color(0x20FFFFFF) : const Color(0xFFF1F5F9)),
 
                 // Table Rows
                 ...filtered.asMap().entries.map((entry) {
@@ -591,7 +566,7 @@ class _DevicesTabState extends State<DevicesTab> {
                         ),
                       ),
                       if (!isLast)
-                        const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                        Divider(height: 1, color: isAbyss ? const Color(0x20FFFFFF) : const Color(0xFFF1F5F9)),
                     ],
                   );
                 }),
@@ -602,7 +577,7 @@ class _DevicesTabState extends State<DevicesTab> {
     );
   }
 
-  Widget _filterChip(String label, String value) {
+  Widget _filterChip(String label, String value, [bool isAbyss = true]) {
     final active = _filter == value;
     return InkWell(
       onTap: () => setState(() => _filter = value),
@@ -610,15 +585,24 @@ class _DevicesTabState extends State<DevicesTab> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: active ? const Color(0xFF0F62FE) : const Color(0xFFF1F5F9),
+          color: active
+              ? const Color(0xFF0284C7)
+              : (isAbyss ? const Color(0x20FFFFFF) : const Color(0xFFF1F5F9)),
           borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: active
+                ? const Color(0xFF38BDF8)
+                : (isAbyss ? const Color(0x2838BDF8) : Colors.transparent),
+          ),
         ),
         child: Text(
           label,
           style: TextStyle(
             fontSize: 11.5,
             fontWeight: active ? FontWeight.w800 : FontWeight.w600,
-            color: active ? Colors.white : const Color(0xFF475569),
+            color: active
+                ? Colors.white
+                : (isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF475569)),
           ),
         ),
       ),

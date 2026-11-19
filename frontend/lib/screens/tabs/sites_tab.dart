@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/water_models.dart';
 import '../../widgets/common_views.dart';
 import '../../widgets/stat_cards.dart';
+import '../../widgets/underwater_ambient_canvas.dart';
 
 class SitesTab extends StatefulWidget {
   const SitesTab({
@@ -10,12 +11,14 @@ class SitesTab extends StatefulWidget {
     required this.selectedSite,
     required this.onCreateSite,
     required this.onSelectSite,
+    this.lightingMode = OceanLightingMode.abyssal,
   });
 
   final List<MonitoringSite> sites;
   final MonitoringSite? selectedSite;
   final VoidCallback onCreateSite;
   final ValueChanged<MonitoringSite> onSelectSite;
+  final OceanLightingMode lightingMode;
 
   @override
   State<SitesTab> createState() => _SitesTabState();
@@ -57,6 +60,7 @@ class _SitesTabState extends State<SitesTab> {
     }).toList();
 
     final isMobile = MediaQuery.of(context).size.width < 650;
+    final isAbyss = widget.lightingMode == OceanLightingMode.abyssal;
 
     return ListView(
       padding: EdgeInsets.fromLTRB(24, 16, 24, isMobile ? 96 : 36),
@@ -66,10 +70,7 @@ class _SitesTabState extends State<SitesTab> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'PONDORA · MONITORING SITES & PONDS',
-                style: TextStyle(
-                  color: Color(0xFF0284C7),
+              Text('PONDORA · MONITORING SITES & PONDS', style: TextStyle(color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.2,
@@ -80,17 +81,13 @@ class _SitesTabState extends State<SitesTab> {
                 'Điểm quan trắc & Nguồn nước',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w900,
-                      color: const Color(0xFF0F172A),
-                      letterSpacing: -0.5,
+                      color: isAbyss ? Colors.white : const Color(0xFF0F172A), letterSpacing: -0.5,
                     ),
               ),
               const SizedBox(height: 3),
               Text(
                 'Quản lý và giám sát dữ liệu ${widget.sites.length} vị trí ao nuôi trong hệ thống.',
-                style: const TextStyle(
-                  color: Color(0xFF64748B),
-                  fontSize: 13,
-                ),
+                style: TextStyle(color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B), fontSize: 13),
               ),
             ],
           ),
@@ -101,12 +98,7 @@ class _SitesTabState extends State<SitesTab> {
               onPressed: widget.onCreateSite,
               icon: const Icon(Icons.add_rounded, size: 16),
               label: const Text('Thêm điểm mới'),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
+              style: OutlinedButton.styleFrom(foregroundColor: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7), side: BorderSide(color: isAbyss ? const Color(0x6638BDF8) : const Color(0xFFCBD5E1)), padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
             ),
           ),
         ] else ...[
@@ -117,10 +109,7 @@ class _SitesTabState extends State<SitesTab> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'PONDORA · MONITORING SITES & PONDS',
-                    style: TextStyle(
-                      color: Color(0xFF0284C7),
+                  Text('PONDORA · MONITORING SITES & PONDS', style: TextStyle(color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1.2,
@@ -131,17 +120,13 @@ class _SitesTabState extends State<SitesTab> {
                     'Điểm quan trắc & Nguồn nước',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w900,
-                          color: const Color(0xFF0F172A),
-                          letterSpacing: -0.5,
+                          color: isAbyss ? Colors.white : const Color(0xFF0F172A), letterSpacing: -0.5,
                         ),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     'Quản lý và giám sát dữ liệu ${widget.sites.length} vị trí ao nuôi trong hệ thống.',
-                    style: const TextStyle(
-                      color: Color(0xFF64748B),
-                      fontSize: 13,
-                    ),
+                    style: TextStyle(color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B), fontSize: 13),
                   ),
                 ],
               ),
@@ -149,13 +134,7 @@ class _SitesTabState extends State<SitesTab> {
                 onPressed: widget.onCreateSite,
                 icon: const Icon(Icons.add_rounded, size: 16),
                 label: const Text('Thêm điểm mới'),
-                style: OutlinedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
+                style: OutlinedButton.styleFrom(foregroundColor: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7), side: BorderSide(color: isAbyss ? const Color(0x6638BDF8) : const Color(0xFFCBD5E1)), padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
               ),
             ],
           ),
@@ -171,8 +150,7 @@ class _SitesTabState extends State<SitesTab> {
               return Row(
                 children: [
                   Expanded(
-                    child: AdminStat(
-                      label: 'Tổng điểm đo',
+                    child: AdminStat(isAbyss: isAbyss, label: 'Tổng điểm đo',
                       value: '${widget.sites.length}',
                       icon: Icons.location_on_rounded,
                       color: const Color(0xFF0F62FE),
@@ -180,8 +158,7 @@ class _SitesTabState extends State<SitesTab> {
                   ),
                   const SizedBox(width: 14),
                   Expanded(
-                    child: AdminStat(
-                      label: 'Đang hoạt động',
+                    child: AdminStat(isAbyss: isAbyss, label: 'Đang hoạt động',
                       value: '$activeCount',
                       icon: Icons.check_circle_rounded,
                       color: const Color(0xFF10B981),
@@ -189,8 +166,7 @@ class _SitesTabState extends State<SitesTab> {
                   ),
                   const SizedBox(width: 14),
                   Expanded(
-                    child: AdminStat(
-                      label: 'Điểm đang chọn',
+                    child: AdminStat(isAbyss: isAbyss, label: 'Điểm đang chọn',
                       value: widget.selectedSite?.name ?? 'Chưa chọn',
                       icon: Icons.water_drop_rounded,
                       color: const Color(0xFF0284C7),
@@ -205,8 +181,7 @@ class _SitesTabState extends State<SitesTab> {
               children: [
                 SizedBox(
                   width: (constraints.maxWidth - 12) / 2,
-                  child: AdminStat(
-                    label: 'Tổng điểm đo',
+                  child: AdminStat(isAbyss: isAbyss, label: 'Tổng điểm đo',
                     value: '${widget.sites.length}',
                     icon: Icons.location_on_rounded,
                     color: const Color(0xFF0F62FE),
@@ -214,8 +189,7 @@ class _SitesTabState extends State<SitesTab> {
                 ),
                 SizedBox(
                   width: (constraints.maxWidth - 12) / 2,
-                  child: AdminStat(
-                    label: 'Đang hoạt động',
+                  child: AdminStat(isAbyss: isAbyss, label: 'Đang hoạt động',
                     value: '$activeCount',
                     icon: Icons.check_circle_rounded,
                     color: const Color(0xFF10B981),
@@ -223,8 +197,7 @@ class _SitesTabState extends State<SitesTab> {
                 ),
                 SizedBox(
                   width: constraints.maxWidth,
-                  child: AdminStat(
-                    label: 'Điểm đang chọn',
+                  child: AdminStat(isAbyss: isAbyss, label: 'Điểm đang chọn',
                     value: widget.selectedSite?.name ?? 'Chưa chọn',
                     icon: Icons.water_drop_rounded,
                     color: const Color(0xFF0284C7),
@@ -240,10 +213,7 @@ class _SitesTabState extends State<SitesTab> {
         // Search & Filter Toolbar
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
+          decoration: BoxDecoration(color: isAbyss ? const Color(0x28FFFFFF) : Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0)),
             boxShadow: [
               BoxShadow(
                 color: const Color(0xFF0F172A).withValues(alpha: 0.02),
@@ -264,11 +234,7 @@ class _SitesTabState extends State<SitesTab> {
                         Expanded(
                           child: TextField(
                             onChanged: (v) => setState(() => _query = v),
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: Color(0xFF0F172A),
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: TextStyle(fontSize: 13, color: isAbyss ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w600),
                             decoration: const InputDecoration(
                               hintText: 'Tìm kiếm theo tên ao, vị trí...',
                               hintStyle: TextStyle(
@@ -284,7 +250,7 @@ class _SitesTabState extends State<SitesTab> {
                         ),
                       ],
                     ),
-                    const Divider(height: 10, color: Color(0xFFF1F5F9)),
+                    Divider(height: 10, color: isAbyss ? const Color(0x20FFFFFF) : const Color(0xFFF1F5F9)),
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Row(
@@ -307,11 +273,7 @@ class _SitesTabState extends State<SitesTab> {
                     Expanded(
                       child: TextField(
                         onChanged: (v) => setState(() => _query = v),
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF0F172A),
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: TextStyle(fontSize: 13, color: isAbyss ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w600),
                         decoration: const InputDecoration(
                           hintText: 'Tìm kiếm theo tên ao, vị trí...',
                           hintStyle: TextStyle(
@@ -377,15 +339,7 @@ class _SitesTabState extends State<SitesTab> {
               final isSelected = site.id == widget.selectedSite?.id;
               return Container(
                 margin: const EdgeInsets.only(bottom: 14),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isSelected
-                        ? const Color(0xFF0284C7)
-                        : const Color(0xFFE2E8F0),
-                    width: isSelected ? 1.8 : 1.0,
-                  ),
+                decoration: BoxDecoration(color: isAbyss ? const Color(0x28FFFFFF) : Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: isSelected ? const Color(0xFF38BDF8) : (isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0)), width: isSelected ? 1.8 : 1.0),
                   boxShadow: [
                     BoxShadow(
                       color: isSelected
@@ -417,9 +371,7 @@ class _SitesTabState extends State<SitesTab> {
                               ),
                               child: Icon(
                                 Icons.water_drop_rounded,
-                                color: isSelected
-                                    ? const Color(0xFF0284C7)
-                                    : const Color(0xFF475569),
+                                color: isSelected ? const Color(0xFF38BDF8) : (isAbyss ? Colors.white : const Color(0xFF475569)),
                                 size: 22,
                               ),
                             ),
@@ -484,17 +436,13 @@ class _SitesTabState extends State<SitesTab> {
                                     : site.timezone,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Color(0xFF64748B),
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                style: TextStyle(fontSize: 12, color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B), fontWeight: FontWeight.w500),
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 14),
-                        const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                        Divider(height: 1, color: isAbyss ? const Color(0x20FFFFFF) : const Color(0xFFF1F5F9)),
                         const SizedBox(height: 12),
                         Row(
                           children: [
@@ -504,9 +452,7 @@ class _SitesTabState extends State<SitesTab> {
                                   : 'Mở bảng quan trắc',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: isSelected
-                                    ? const Color(0xFF0284C7)
-                                    : const Color(0xFF475569),
+                                color: isSelected ? const Color(0xFF38BDF8) : (isAbyss ? Colors.white : const Color(0xFF475569)),
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
@@ -546,15 +492,7 @@ class _SitesTabState extends State<SitesTab> {
                   final isSelected = site.id == widget.selectedSite?.id;
 
                   return Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: isSelected
-                            ? const Color(0xFF0284C7)
-                            : const Color(0xFFE2E8F0),
-                        width: isSelected ? 1.8 : 1.0,
-                      ),
+                    decoration: BoxDecoration(color: isAbyss ? const Color(0x28FFFFFF) : Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: isSelected ? const Color(0xFF38BDF8) : (isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0)), width: isSelected ? 1.8 : 1.0),
                       boxShadow: [
                         BoxShadow(
                           color: isSelected
@@ -586,9 +524,7 @@ class _SitesTabState extends State<SitesTab> {
                                   ),
                                   child: Icon(
                                     Icons.water_drop_rounded,
-                                    color: isSelected
-                                        ? const Color(0xFF0284C7)
-                                        : const Color(0xFF475569),
+                                    color: isSelected ? const Color(0xFF38BDF8) : (isAbyss ? Colors.white : const Color(0xFF475569)),
                                     size: 22,
                                   ),
                                 ),
@@ -653,11 +589,7 @@ class _SitesTabState extends State<SitesTab> {
                                         : site.timezone,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Color(0xFF64748B),
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                    style: TextStyle(fontSize: 12, color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B), fontWeight: FontWeight.w500),
                                   ),
                                 ),
                               ],
@@ -672,9 +604,7 @@ class _SitesTabState extends State<SitesTab> {
                                       : 'Mở bảng quan trắc',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: isSelected
-                                        ? const Color(0xFF0284C7)
-                                        : const Color(0xFF475569),
+                                    color: isSelected ? const Color(0xFF38BDF8) : (isAbyss ? Colors.white : const Color(0xFF475569)),
                                     fontWeight: FontWeight.w800,
                                   ),
                                 ),
@@ -701,7 +631,7 @@ class _SitesTabState extends State<SitesTab> {
     );
   }
 
-  Widget _filterChip(String label, String value) {
+  Widget _filterChip(String label, String value, [bool isAbyss = true]) {
     final active = _filter == value;
     return InkWell(
       onTap: () => setState(() => _filter = value),
@@ -709,15 +639,24 @@ class _SitesTabState extends State<SitesTab> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: active ? const Color(0xFF0F62FE) : const Color(0xFFF1F5F9),
+          color: active
+              ? const Color(0xFF0284C7)
+              : (isAbyss ? const Color(0x20FFFFFF) : const Color(0xFFF1F5F9)),
           borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: active
+                ? const Color(0xFF38BDF8)
+                : (isAbyss ? const Color(0x2838BDF8) : Colors.transparent),
+          ),
         ),
         child: Text(
           label,
           style: TextStyle(
             fontSize: 11.5,
             fontWeight: active ? FontWeight.w800 : FontWeight.w600,
-            color: active ? Colors.white : const Color(0xFF475569),
+            color: active
+                ? Colors.white
+                : (isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF475569)),
           ),
         ),
       ),

@@ -4,6 +4,7 @@ import '../../utils/csv_exporter.dart';
 import '../../utils/formatters.dart';
 import '../../widgets/common_views.dart';
 import '../../widgets/history_chart.dart';
+import '../../widgets/underwater_ambient_canvas.dart';
 
 class HistoryTab extends StatelessWidget {
   const HistoryTab({
@@ -17,6 +18,7 @@ class HistoryTab extends StatelessWidget {
     required this.onSelectSite,
     required this.onSelectMetric,
     required this.onSelectRange,
+    this.lightingMode = OceanLightingMode.abyssal,
   });
 
   final List<MonitoringSite> sites;
@@ -28,6 +30,7 @@ class HistoryTab extends StatelessWidget {
   final ValueChanged<MonitoringSite> onSelectSite;
   final ValueChanged<String> onSelectMetric;
   final ValueChanged<Duration> onSelectRange;
+  final OceanLightingMode lightingMode;
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +49,7 @@ class HistoryTab extends StatelessWidget {
     }
 
     final isMobile = MediaQuery.of(context).size.width < 650;
+    final isAbyss = lightingMode == OceanLightingMode.abyssal;
     final rows = [...history]
       ..sort((a, b) => b.measuredAt.compareTo(a.measuredAt));
 
@@ -57,10 +61,10 @@ class HistoryTab extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'PONDORA · WATER QUALITY TELEMETRY',
                 style: TextStyle(
-                  color: Color(0xFF0284C7),
+                  color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.2,
@@ -71,15 +75,15 @@ class HistoryTab extends StatelessWidget {
                 'Lịch sử dữ liệu quan trắc',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w900,
-                      color: const Color(0xFF0F172A),
+                      color: isAbyss ? Colors.white : const Color(0xFF0F172A),
                       letterSpacing: -0.5,
                     ),
               ),
               const SizedBox(height: 3),
               Text(
                 'Truy xuất chuỗi thời gian và đối chiếu ${rows.length} mẫu đo nước đã ghi nhận.',
-                style: const TextStyle(
-                  color: Color(0xFF64748B),
+                style: TextStyle(
+                  color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
                   fontSize: 13,
                 ),
               ),
@@ -120,10 +124,10 @@ class HistoryTab extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'PONDORA · WATER QUALITY TELEMETRY',
                     style: TextStyle(
-                      color: Color(0xFF0284C7),
+                      color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1.2,
@@ -134,15 +138,15 @@ class HistoryTab extends StatelessWidget {
                     'Lịch sử dữ liệu quan trắc',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w900,
-                          color: const Color(0xFF0F172A),
+                          color: isAbyss ? Colors.white : const Color(0xFF0F172A),
                           letterSpacing: -0.5,
                         ),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     'Truy xuất chuỗi thời gian và đối chiếu ${rows.length} mẫu đo nước đã ghi nhận.',
-                    style: const TextStyle(
-                      color: Color(0xFF64748B),
+                    style: TextStyle(
+                      color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
                       fontSize: 13,
                     ),
                   ),
@@ -182,6 +186,7 @@ class HistoryTab extends StatelessWidget {
           selected: selectedSite!,
           onChanged: onSelectSite,
           onAdd: onCreateSite,
+          isAbyss: isAbyss,
         ),
 
         const SizedBox(height: 16),
@@ -190,20 +195,25 @@ class HistoryTab extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFFEFF6FF), // Soft azure 50
-                Color(0xFFF8FAFC),
-                Color(0xFFFAF5FF), // Purple 50
-              ],
-            ),
+            color: isAbyss ? const Color(0x28FFFFFF) : null,
+            gradient: isAbyss
+                ? null
+                : const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFFEFF6FF), // Soft azure 50
+                      Color(0xFFF8FAFC),
+                      Color(0xFFFAF5FF), // Purple 50
+                    ],
+                  ),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFC7D2FE)),
+            border: Border.all(
+              color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFC7D2FE),
+            ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF6366F1).withValues(alpha: 0.04),
+                color: (isAbyss ? Colors.black : const Color(0xFF6366F1)).withValues(alpha: isAbyss ? 0.25 : 0.04),
                 blurRadius: 10,
                 offset: const Offset(0, 3),
               ),
@@ -215,12 +225,12 @@ class HistoryTab extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF6366F1).withValues(alpha: 0.12),
+                  color: isAbyss ? const Color(0x3338BDF8) : const Color(0xFF6366F1).withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.psychology_rounded,
-                  color: Color(0xFF6366F1),
+                  color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF6366F1),
                   size: 20,
                 ),
               ),
@@ -228,22 +238,22 @@ class HistoryTab extends StatelessWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
                       'AI TIME-SERIES FORECASTING · DỰ BÁO CHUỖI THỜI GIAN',
                       style: TextStyle(
                         fontSize: 10.5,
                         fontWeight: FontWeight.w800,
-                        color: Color(0xFF4F46E5),
+                        color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF4F46E5),
                         letterSpacing: 0.8,
                       ),
                     ),
-                    SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     Text(
                       'Động cơ AI phân tích xu hướng biến thiên Oxy hòa tan (DO) và pH theo chu kỳ sinh học ngày/đêm, tự động cảnh báo sớm rủi ro sụt giảm chất lượng nước 6–24 giờ.',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Color(0xFF334155),
+                        color: isAbyss ? const Color(0xFFE2E8F0) : const Color(0xFF334155),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -263,6 +273,7 @@ class HistoryTab extends StatelessWidget {
           range: historyRange,
           onRangeChanged: onSelectRange,
           onMetricChanged: onSelectMetric,
+          isAbyss: isAbyss,
         ),
 
         const SizedBox(height: 20),
@@ -280,32 +291,38 @@ class HistoryTab extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Bảng nhật ký mẫu quan trắc',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w900,
-                    color: Color(0xFF0F172A),
+                    color: isAbyss ? Colors.white : const Color(0xFF0F172A),
                     letterSpacing: -0.3,
                   ),
                 ),
                 const SizedBox(height: 3),
-                const Text(
+                Text(
                   'Các mẫu đo mới nhất được sắp xếp ở đầu danh sách.',
-                  style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
+                  ),
                 ),
               ],
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: const Color(0xFFEAF2FF),
+                color: isAbyss ? const Color(0x3338BDF8) : const Color(0xFFEAF2FF),
                 borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isAbyss ? const Color(0x4D38BDF8) : Colors.transparent,
+                ),
               ),
               child: Text(
                 '${rows.length} mẫu đo',
-                style: const TextStyle(
-                  color: Color(0xFF0F62FE),
+                style: TextStyle(
+                  color: isAbyss ? Colors.white : const Color(0xFF0F62FE),
                   fontWeight: FontWeight.w800,
                   fontSize: 11.5,
                 ),
@@ -321,30 +338,32 @@ class HistoryTab extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(48),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              border: Border.all(
+                color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0),
+              ),
             ),
-            child: const Center(
+            child: Center(
               child: Column(
                 children: [
                   Icon(Icons.query_stats_rounded,
-                      size: 40, color: Color(0xFF94A3B8)),
-                  SizedBox(height: 12),
+                      size: 40, color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF94A3B8)),
+                  const SizedBox(height: 12),
                   Text(
                     'Không có phép đo trong khoảng thời gian đã chọn',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF334155),
+                      color: isAbyss ? Colors.white : const Color(0xFF334155),
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     'Dữ liệu sẽ xuất hiện khi thiết bị gửi gói tin quan trắc qua MQTT/HTTP.',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Color(0xFF94A3B8),
+                      color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF94A3B8),
                     ),
                   ),
                 ],
@@ -354,12 +373,14 @@ class HistoryTab extends StatelessWidget {
         else
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              border: Border.all(
+                color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0),
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF0F172A).withValues(alpha: 0.02),
+                  color: (isAbyss ? Colors.black : const Color(0xFF0F172A)).withValues(alpha: isAbyss ? 0.25 : 0.02),
                   blurRadius: 16,
                   offset: const Offset(0, 4),
                 ),
@@ -381,7 +402,7 @@ class HistoryTab extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 24, vertical: 14),
                           child: Row(
-                            children: const [
+                            children: [
                               Expanded(
                                 flex: 3,
                                 child: Text(
@@ -389,7 +410,7 @@ class HistoryTab extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w800,
-                                    color: Color(0xFF64748B),
+                                    color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF64748B),
                                     letterSpacing: 0.8,
                                   ),
                                 ),
@@ -401,7 +422,7 @@ class HistoryTab extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w800,
-                                    color: Color(0xFF64748B),
+                                    color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF64748B),
                                     letterSpacing: 0.8,
                                   ),
                                 ),
@@ -413,7 +434,7 @@ class HistoryTab extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w800,
-                                    color: Color(0xFF64748B),
+                                    color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF64748B),
                                     letterSpacing: 0.8,
                                   ),
                                 ),
@@ -425,7 +446,7 @@ class HistoryTab extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w800,
-                                    color: Color(0xFF64748B),
+                                    color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF64748B),
                                     letterSpacing: 0.8,
                                   ),
                                 ),
@@ -437,7 +458,7 @@ class HistoryTab extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w800,
-                                    color: Color(0xFF64748B),
+                                    color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF64748B),
                                     letterSpacing: 0.8,
                                   ),
                                 ),
@@ -450,7 +471,7 @@ class HistoryTab extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w800,
-                                    color: Color(0xFF64748B),
+                                    color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF64748B),
                                     letterSpacing: 0.8,
                                   ),
                                 ),
@@ -458,7 +479,7 @@ class HistoryTab extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                        Divider(height: 1, color: isAbyss ? const Color(0x20FFFFFF) : const Color(0xFFF1F5F9)),
 
                         // Table Rows (take 50)
                         ...rows.take(50).toList().asMap().entries.map((entry) {
@@ -493,14 +514,14 @@ class HistoryTab extends StatelessWidget {
                                             width: 32,
                                             height: 32,
                                             decoration: BoxDecoration(
-                                              color: const Color(0xFFF1F5F9),
+                                              color: isAbyss ? const Color(0x3338BDF8) : const Color(0xFFF1F5F9),
                                               borderRadius:
                                                   BorderRadius.circular(10),
                                             ),
-                                            child: const Icon(
+                                            child: Icon(
                                               Icons.schedule_rounded,
                                               size: 16,
-                                              color: Color(0xFF64748B),
+                                              color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF64748B),
                                             ),
                                           ),
                                           const SizedBox(width: 10),
@@ -510,17 +531,17 @@ class HistoryTab extends StatelessWidget {
                                             children: [
                                               Text(
                                                 timeLabel(local),
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontSize: 13,
                                                   fontWeight: FontWeight.w800,
-                                                  color: Color(0xFF0F172A),
+                                                  color: isAbyss ? Colors.white : const Color(0xFF0F172A),
                                                 ),
                                               ),
                                               Text(
                                                 dateLabel(local),
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontSize: 11,
-                                                  color: Color(0xFF94A3B8),
+                                                  color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF94A3B8),
                                                 ),
                                               ),
                                             ],
@@ -534,10 +555,10 @@ class HistoryTab extends StatelessWidget {
                                       flex: 2,
                                       child: Text(
                                         phVal != null ? formatNumber(phVal) : '—',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w800,
-                                          color: Color(0xFF0F172A),
+                                          color: isAbyss ? Colors.white : const Color(0xFF0F172A),
                                         ),
                                       ),
                                     ),
@@ -547,10 +568,10 @@ class HistoryTab extends StatelessWidget {
                                       flex: 2,
                                       child: Text(
                                         doVal != null ? formatNumber(doVal) : '—',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w800,
-                                          color: Color(0xFF0F172A),
+                                          color: isAbyss ? Colors.white : const Color(0xFF0F172A),
                                         ),
                                       ),
                                     ),
@@ -562,10 +583,10 @@ class HistoryTab extends StatelessWidget {
                                         turbVal != null
                                             ? formatNumber(turbVal)
                                             : '—',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w800,
-                                          color: Color(0xFF0F172A),
+                                          color: isAbyss ? Colors.white : const Color(0xFF0F172A),
                                         ),
                                       ),
                                     ),
@@ -577,10 +598,10 @@ class HistoryTab extends StatelessWidget {
                                         tempVal != null
                                             ? formatNumber(tempVal)
                                             : '—',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w800,
-                                          color: Color(0xFF0F172A),
+                                          color: isAbyss ? Colors.white : const Color(0xFF0F172A),
                                         ),
                                       ),
                                     ),
@@ -597,10 +618,13 @@ class HistoryTab extends StatelessWidget {
                                           ),
                                           decoration: BoxDecoration(
                                             color: invalid
-                                                ? const Color(0xFFF1F5F9)
-                                                : level.withValues(alpha: 0.12),
+                                                ? (isAbyss ? const Color(0x3364748B) : const Color(0xFFF1F5F9))
+                                                : level.withValues(alpha: isAbyss ? 0.22 : 0.12),
                                             borderRadius:
                                                 BorderRadius.circular(20),
+                                            border: Border.all(
+                                              color: invalid ? Colors.transparent : level.withValues(alpha: 0.4),
+                                            ),
                                           ),
                                           child: Text(
                                             invalid
@@ -608,8 +632,8 @@ class HistoryTab extends StatelessWidget {
                                                 : '● ${levelTitle(m.assessmentLevel)}',
                                             style: TextStyle(
                                               color: invalid
-                                                  ? const Color(0xFF64748B)
-                                                  : level,
+                                                  ? (isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B))
+                                                  : (isAbyss ? Colors.white : level),
                                               fontWeight: FontWeight.w700,
                                               fontSize: 11,
                                             ),
@@ -621,7 +645,7 @@ class HistoryTab extends StatelessWidget {
                                 ),
                               ),
                               if (!isLast)
-                                const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                                Divider(height: 1, color: isAbyss ? const Color(0x18FFFFFF) : const Color(0xFFF1F5F9)),
                             ],
                           );
                         }),
@@ -639,7 +663,10 @@ class HistoryTab extends StatelessWidget {
             child: Text(
               'Đang hiển thị 50 trên ${rows.length} mẫu quan trắc gần nhất.',
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+              style: TextStyle(
+                color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF94A3B8),
+                fontSize: 12,
+              ),
             ),
           ),
 
@@ -673,15 +700,19 @@ class HistoryTab extends StatelessWidget {
                     ? 'mg/L'
                     : '';
 
+    final isAbyss = lightingMode == OceanLightingMode.abyssal;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(
+          color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0),
+        ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0F172A).withValues(alpha: 0.02),
+            color: (isAbyss ? Colors.black : const Color(0xFF0F172A)).withValues(alpha: isAbyss ? 0.25 : 0.02),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -692,14 +723,14 @@ class HistoryTab extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.analytics_outlined, size: 16, color: Color(0xFF0284C7)),
+              Icon(Icons.analytics_outlined, size: 16, color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7)),
               const SizedBox(width: 8),
               Text(
                 'THỐNG KÊ BIẾN THIÊN CHUỖI THỜI GIAN (${metricLabel(metric).toUpperCase()})',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF0284C7),
+                  color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
                   letterSpacing: 0.8,
                 ),
               ),
@@ -713,30 +744,34 @@ class HistoryTab extends StatelessWidget {
                   'Cao nhất (Max)',
                   '${formatNumber(maxV)}${unit.isEmpty ? "" : " $unit"}',
                   const Color(0xFFEF4444),
+                  isAbyss,
                 ),
               ),
-              Container(width: 1, height: 28, color: const Color(0xFFE2E8F0)),
+              Container(width: 1, height: 28, color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0)),
               Expanded(
                 child: _statItem(
                   'Thấp nhất (Min)',
                   '${formatNumber(minV)}${unit.isEmpty ? "" : " $unit"}',
                   const Color(0xFF10B981),
+                  isAbyss,
                 ),
               ),
-              Container(width: 1, height: 28, color: const Color(0xFFE2E8F0)),
+              Container(width: 1, height: 28, color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0)),
               Expanded(
                 child: _statItem(
                   'Trung bình (Avg)',
                   '${formatNumber(avgV)}${unit.isEmpty ? "" : " $unit"}',
-                  const Color(0xFF0284C7),
+                  isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                  isAbyss,
                 ),
               ),
-              Container(width: 1, height: 28, color: const Color(0xFFE2E8F0)),
+              Container(width: 1, height: 28, color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0)),
               Expanded(
                 child: _statItem(
                   'Dao động (Δ)',
                   '±${formatNumber(deltaV)}${unit.isEmpty ? "" : " $unit"}',
                   const Color(0xFFF59E0B),
+                  isAbyss,
                 ),
               ),
             ],
@@ -746,7 +781,7 @@ class HistoryTab extends StatelessWidget {
     );
   }
 
-  Widget _statItem(String label, String value, Color color) {
+  Widget _statItem(String label, String value, Color color, bool isAbyss) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -762,9 +797,9 @@ class HistoryTab extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
-            color: Color(0xFF64748B),
+            color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
             fontWeight: FontWeight.w600,
           ),
         ),

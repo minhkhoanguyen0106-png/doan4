@@ -5,6 +5,7 @@ import '../../services/alarm_sound_service.dart';
 import '../../utils/formatters.dart';
 import '../../widgets/common_views.dart';
 import '../../widgets/stat_cards.dart';
+import '../../widgets/underwater_ambient_canvas.dart';
 
 class AlertsTab extends StatefulWidget {
   const AlertsTab({
@@ -16,6 +17,7 @@ class AlertsTab extends StatefulWidget {
     required this.onSelectSite,
     required this.onCreateSite,
     required this.onResolveAlert,
+    this.lightingMode = OceanLightingMode.abyssal,
   });
 
   final List<MonitoringSite> sites;
@@ -25,6 +27,7 @@ class AlertsTab extends StatefulWidget {
   final ValueChanged<MonitoringSite> onSelectSite;
   final VoidCallback onCreateSite;
   final ValueChanged<WaterAlert> onResolveAlert;
+  final OceanLightingMode lightingMode;
 
   @override
   State<AlertsTab> createState() => _AlertsTabState();
@@ -36,6 +39,7 @@ class _AlertsTabState extends State<AlertsTab> {
 
   @override
   Widget build(BuildContext context) {
+    final isAbyss = widget.lightingMode == OceanLightingMode.abyssal;
     if (widget.sites.isEmpty) {
       return EmptyState(
         icon: Icons.warning_amber_rounded,
@@ -81,10 +85,7 @@ class _AlertsTabState extends State<AlertsTab> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'PONDORA · EARLY WARNING SYSTEM',
-                    style: TextStyle(
-                      color: Color(0xFF0284C7),
+                  Text('PONDORA · EARLY WARNING SYSTEM', style: TextStyle(color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1.2,
@@ -95,15 +96,11 @@ class _AlertsTabState extends State<AlertsTab> {
                     'Trung tâm cảnh báo tự động',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w900,
-                          color: const Color(0xFF0F172A),
-                          letterSpacing: -0.5,
+                          color: isAbyss ? Colors.white : const Color(0xFF0F172A), letterSpacing: -0.5,
                         ),
                   ),
                   const SizedBox(height: 3),
-                  const Text(
-                    'Phát hiện tự động chỉ số vượt ngưỡng hoặc thiết bị mất kết nối thời gian thực.',
-                    style: TextStyle(
-                      color: Color(0xFF64748B),
+                  Text('Phát hiện tự động chỉ số vượt ngưỡng hoặc thiết bị mất kết nối thời gian thực.', style: TextStyle(color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
                       fontSize: 13,
                     ),
                   ),
@@ -165,6 +162,7 @@ class _AlertsTabState extends State<AlertsTab> {
             selected: widget.selectedSite!,
             onChanged: widget.onSelectSite,
             onAdd: widget.onCreateSite,
+            isAbyss: isAbyss,
           ),
 
           const SizedBox(height: 16),
@@ -211,7 +209,7 @@ class _AlertsTabState extends State<AlertsTab> {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
                         'AI EARLY WARNING · HỆ THỐNG CẢNH BÁO SỚM & CHẨN ĐOÁN RỦI RO',
                         style: TextStyle(
@@ -252,6 +250,7 @@ class _AlertsTabState extends State<AlertsTab> {
                         value: '${activeAlerts.length}',
                         icon: Icons.notifications_active_rounded,
                         color: const Color(0xFFEF4444),
+                        isAbyss: isAbyss,
                       ),
                     ),
                     const SizedBox(width: 14),
@@ -261,6 +260,7 @@ class _AlertsTabState extends State<AlertsTab> {
                         value: '$criticalCount',
                         icon: Icons.error_outline_rounded,
                         color: const Color(0xFFDC2626),
+                        isAbyss: isAbyss,
                       ),
                     ),
                     const SizedBox(width: 14),
@@ -270,6 +270,7 @@ class _AlertsTabState extends State<AlertsTab> {
                         value: '$highCount',
                         icon: Icons.warning_amber_rounded,
                         color: const Color(0xFFF59E0B),
+                        isAbyss: isAbyss,
                       ),
                     ),
                     const SizedBox(width: 14),
@@ -279,6 +280,7 @@ class _AlertsTabState extends State<AlertsTab> {
                         value: '$resolvedCount',
                         icon: Icons.check_circle_outline_rounded,
                         color: const Color(0xFF10B981),
+                        isAbyss: isAbyss,
                       ),
                     ),
                   ],
@@ -295,6 +297,7 @@ class _AlertsTabState extends State<AlertsTab> {
                       value: '${activeAlerts.length}',
                       icon: Icons.notifications_active_rounded,
                       color: const Color(0xFFEF4444),
+                      isAbyss: isAbyss,
                     ),
                   ),
                   SizedBox(
@@ -304,6 +307,7 @@ class _AlertsTabState extends State<AlertsTab> {
                       value: '$criticalCount',
                       icon: Icons.error_outline_rounded,
                       color: const Color(0xFFDC2626),
+                      isAbyss: isAbyss,
                     ),
                   ),
                   SizedBox(
@@ -313,6 +317,7 @@ class _AlertsTabState extends State<AlertsTab> {
                       value: '$highCount',
                       icon: Icons.warning_amber_rounded,
                       color: const Color(0xFFF59E0B),
+                      isAbyss: isAbyss,
                     ),
                   ),
                   SizedBox(
@@ -322,6 +327,7 @@ class _AlertsTabState extends State<AlertsTab> {
                       value: '$resolvedCount',
                       icon: Icons.check_circle_outline_rounded,
                       color: const Color(0xFF10B981),
+                      isAbyss: isAbyss,
                     ),
                   ),
                 ],
@@ -334,10 +340,7 @@ class _AlertsTabState extends State<AlertsTab> {
           // Search & Filter Toolbar
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+            decoration: BoxDecoration(color: isAbyss ? const Color(0x28FFFFFF) : Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0)),
               boxShadow: [
                 BoxShadow(
                   color: const Color(0xFF0F172A).withValues(alpha: 0.02),
@@ -357,11 +360,7 @@ class _AlertsTabState extends State<AlertsTab> {
                           Expanded(
                             child: TextField(
                               onChanged: (v) => setState(() => _query = v),
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: Color(0xFF0F172A),
-                                fontWeight: FontWeight.w600,
-                              ),
+                              style: TextStyle(fontSize: 13, color: isAbyss ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w600),
                               decoration: const InputDecoration(
                                 hintText: 'Tìm kiếm sự kiện hoặc nội dung...',
                                 hintStyle: TextStyle(
@@ -401,11 +400,7 @@ class _AlertsTabState extends State<AlertsTab> {
                       Expanded(
                         child: TextField(
                           onChanged: (v) => setState(() => _query = v),
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Color(0xFF0F172A),
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: TextStyle(fontSize: 13, color: isAbyss ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w600),
                           decoration: const InputDecoration(
                             hintText: 'Tìm kiếm theo sự kiện hoặc nội dung cảnh báo...',
                             hintStyle: TextStyle(
@@ -476,11 +471,7 @@ class _AlertsTabState extends State<AlertsTab> {
             )
           else
             Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
-                boxShadow: [
+              decoration: BoxDecoration(color: isAbyss ? const Color(0x28FFFFFF) : Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0)), boxShadow: [
                   BoxShadow(
                     color: const Color(0xFF0F172A).withValues(alpha: 0.02),
                     blurRadius: 16,
@@ -498,7 +489,7 @@ class _AlertsTabState extends State<AlertsTab> {
                         vertical: 14,
                       ),
                       child: Row(
-                        children: const [
+                        children: [
                           Expanded(
                             flex: 5,
                             child: Text(
@@ -506,8 +497,7 @@ class _AlertsTabState extends State<AlertsTab> {
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
-                                color: Color(0xFF64748B),
-                                letterSpacing: 0.8,
+                                color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF64748B), letterSpacing: 0.8,
                               ),
                             ),
                           ),
@@ -518,8 +508,7 @@ class _AlertsTabState extends State<AlertsTab> {
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
-                                color: Color(0xFF64748B),
-                                letterSpacing: 0.8,
+                                color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF64748B), letterSpacing: 0.8,
                               ),
                             ),
                           ),
@@ -527,11 +516,7 @@ class _AlertsTabState extends State<AlertsTab> {
                             flex: 2,
                             child: Text(
                               'TRẠNG THÁI',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                color: Color(0xFF64748B),
-                              ),
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF64748B)),
                             ),
                           ),
                           Expanded(
@@ -542,8 +527,7 @@ class _AlertsTabState extends State<AlertsTab> {
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
-                                color: Color(0xFF64748B),
-                                letterSpacing: 0.8,
+                                color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF64748B), letterSpacing: 0.8,
                               ),
                             ),
                           ),
@@ -551,7 +535,7 @@ class _AlertsTabState extends State<AlertsTab> {
                       ),
                     ),
                   if (!isMobile)
-                    const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                    Divider(height: 1, color: isAbyss ? const Color(0x20FFFFFF) : const Color(0xFFF1F5F9)),
 
                   // Alert Items (Responsive: Mobile card vs Desktop row)
                   ...filtered.asMap().entries.map((entry) {
@@ -639,20 +623,12 @@ class _AlertsTabState extends State<AlertsTab> {
                                       const SizedBox(height: 8),
                                       Text(
                                         alert.title,
-                                        style: const TextStyle(
-                                          fontSize: 13.5,
-                                          fontWeight: FontWeight.w800,
-                                          color: Color(0xFF0F172A),
-                                        ),
+                                        style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: isAbyss ? Colors.white : const Color(0xFF0F172A)),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
                                         alert.message,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: Color(0xFF64748B),
-                                          height: 1.35,
-                                        ),
+                                        style: TextStyle(fontSize: 12, color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B), height: 1.35),
                                       ),
                                       if (alert.isActive) ...[
                                         const SizedBox(height: 10),
@@ -668,21 +644,13 @@ class _AlertsTabState extends State<AlertsTab> {
                                               ),
                                               minimumSize: Size.zero,
                                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                              side: const BorderSide(
-                                                color: Color(0xFFCBD5E1),
-                                              ),
+                                              side: BorderSide(color: isAbyss ? const Color(0x6638BDF8) : const Color(0xFFCBD5E1)), backgroundColor: isAbyss ? const Color(0x1838BDF8) : Colors.transparent,
                                               shape: RoundedRectangleBorder(
                                                 borderRadius:
                                                     BorderRadius.circular(8),
                                               ),
                                             ),
-                                            child: const Text(
-                                              'Đã xử lý',
-                                              style: TextStyle(
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w700,
-                                                color: Color(0xFF0F172A),
-                                              ),
+                                            child: Text('Đã xử lý', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: isAbyss ? Colors.white : const Color(0xFF0F172A)),
                                             ),
                                           ),
                                         ),
@@ -779,10 +747,7 @@ class _AlertsTabState extends State<AlertsTab> {
                                                     maxLines: 2,
                                                     overflow:
                                                         TextOverflow.ellipsis,
-                                                    style: const TextStyle(
-                                                      fontSize: 12,
-                                                      color: Color(0xFF64748B),
-                                                    ),
+                                                    style: TextStyle(fontSize: 12, color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B)),
                                                   ),
                                                 ],
                                               ),
@@ -801,20 +766,13 @@ class _AlertsTabState extends State<AlertsTab> {
                                             Text(
                                               dateLabel(
                                                   alert.triggeredAt.toLocal()),
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w700,
-                                                color: Color(0xFF0F172A),
-                                              ),
+                                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: isAbyss ? Colors.white : const Color(0xFF0F172A)),
                                             ),
                                             const SizedBox(height: 2),
                                             Text(
                                               timeLabel(
                                                   alert.triggeredAt.toLocal()),
-                                              style: const TextStyle(
-                                                fontSize: 11,
-                                                color: Color(0xFF64748B),
-                                              ),
+                                              style: TextStyle(fontSize: 11, color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B)),
                                             ),
                                           ],
                                         ),
@@ -868,18 +826,14 @@ class _AlertsTabState extends State<AlertsTab> {
                                                       horizontal: 12,
                                                       vertical: 8,
                                                     ),
-                                                    side: const BorderSide(
-                                                      color: Color(0xFFCBD5E1),
-                                                    ),
+                                                    side: BorderSide(color: isAbyss ? const Color(0x6638BDF8) : const Color(0xFFCBD5E1)), backgroundColor: isAbyss ? const Color(0x1838BDF8) : Colors.transparent,
                                                     shape:
                                                         RoundedRectangleBorder(
                                                       borderRadius:
                                                           BorderRadius.circular(8),
                                                     ),
                                                   ),
-                                                  child: const Text(
-                                                    'Đã xử lý',
-                                                    style: TextStyle(
+                                                  child: Text('Đã xử lý', style: TextStyle(
                                                       fontSize: 11,
                                                       fontWeight:
                                                           FontWeight.w700,
@@ -902,7 +856,7 @@ class _AlertsTabState extends State<AlertsTab> {
                                 ),
                         ),
                         if (!isLast)
-                          const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                          Divider(height: 1, color: isAbyss ? const Color(0x20FFFFFF) : const Color(0xFFF1F5F9)),
                       ],
                     );
                   }),
@@ -914,7 +868,7 @@ class _AlertsTabState extends State<AlertsTab> {
     );
   }
 
-  Widget _filterChip(String label, String value) {
+  Widget _filterChip(String label, String value, [bool isAbyss = true]) {
     final active = _filter == value;
     return InkWell(
       onTap: () => setState(() => _filter = value),
@@ -922,15 +876,24 @@ class _AlertsTabState extends State<AlertsTab> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: active ? const Color(0xFF0F62FE) : const Color(0xFFF1F5F9),
+          color: active
+              ? const Color(0xFF0284C7)
+              : (isAbyss ? const Color(0x20FFFFFF) : const Color(0xFFF1F5F9)),
           borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: active
+                ? const Color(0xFF38BDF8)
+                : (isAbyss ? const Color(0x2838BDF8) : Colors.transparent),
+          ),
         ),
         child: Text(
           label,
           style: TextStyle(
             fontSize: 11.5,
             fontWeight: active ? FontWeight.w800 : FontWeight.w600,
-            color: active ? Colors.white : const Color(0xFF475569),
+            color: active
+                ? Colors.white
+                : (isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF475569)),
           ),
         ),
       ),

@@ -10,12 +10,14 @@ class HistoryChart extends StatelessWidget {
     required this.range,
     required this.onRangeChanged,
     required this.onMetricChanged,
+    this.isAbyss = true,
   });
   final List<WaterMeasurement> measurements;
   final String metric;
   final Duration range;
   final ValueChanged<Duration> onRangeChanged;
   final ValueChanged<String> onMetricChanged;
+  final bool isAbyss;
 
   static const _metrics = <String, ({
     String label,
@@ -98,12 +100,14 @@ class HistoryChart extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(
+          color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0),
+        ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0F172A).withValues(alpha: 0.02),
+            color: (isAbyss ? const Color(0xFF00E5FF) : const Color(0xFF0284C7)).withValues(alpha: isAbyss ? 0.06 : 0.04),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -121,10 +125,10 @@ class HistoryChart extends StatelessWidget {
                   children: [
                     Text(
                       'Xu hướng ${rangeLabel(range)}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w900,
                         fontSize: 16,
-                        color: Color(0xFF0F172A),
+                        color: isAbyss ? Colors.white : const Color(0xFF0F172A),
                         letterSpacing: -0.3,
                       ),
                     ),
@@ -133,8 +137,8 @@ class HistoryChart extends StatelessWidget {
                       latest == null
                           ? 'Chưa có mẫu hợp lệ'
                           : '${formatNumber(latest)} ${config.unit} hiện tại · ${points.length} mẫu đo',
-                      style: const TextStyle(
-                        color: Color(0xFF64748B),
+                      style: TextStyle(
+                        color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -145,12 +149,14 @@ class HistoryChart extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFCBD5E1)),
+                  border: Border.all(
+                    color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFCBD5E1),
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+                      color: (isAbyss ? const Color(0xFF00E5FF) : const Color(0xFF0284C7)).withValues(alpha: isAbyss ? 0.06 : 0.04),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -162,10 +168,10 @@ class HistoryChart extends StatelessWidget {
                     isDense: true,
                     borderRadius: BorderRadius.circular(16),
                     elevation: 8,
-                    dropdownColor: Colors.white,
-                    icon: const Padding(
-                      padding: EdgeInsets.only(left: 6),
-                      child: Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF0284C7), size: 18),
+                    dropdownColor: isAbyss ? const Color(0xFF08182D) : Colors.white,
+                    icon: Padding(
+                      padding: const EdgeInsets.only(left: 6),
+                      child: Icon(Icons.keyboard_arrow_down_rounded, color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7), size: 18),
                     ),
                     selectedItemBuilder: (context) {
                       return _metrics.entries.map((e) {
@@ -184,20 +190,20 @@ class HistoryChart extends StatelessWidget {
                             const SizedBox(width: 8),
                             Text(
                               meta.label,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w800,
-                                color: Color(0xFF0F172A),
+                                color: isAbyss ? Colors.white : const Color(0xFF0F172A),
                               ),
                             ),
                             if (meta.unit.isNotEmpty) ...[
                               const SizedBox(width: 4),
                               Text(
                                 '(${meta.unit})',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color: Color(0xFF64748B),
+                                  color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
                                 ),
                               ),
                             ],
@@ -236,7 +242,7 @@ class HistoryChart extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                                      color: isSelected ? meta.color : const Color(0xFF1E293B),
+                                      color: isSelected ? meta.color : (isAbyss ? Colors.white : const Color(0xFF1E293B)),
                                     ),
                                   ),
                                   if (meta.unit.isNotEmpty)
@@ -312,25 +318,25 @@ class HistoryChart extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9),
+                    color: isAbyss ? const Color(0x3338BDF8) : const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    border: Border.all(color: isAbyss ? const Color(0x4D38BDF8) : const Color(0xFFE2E8F0)),
                   ),
                   child: Text(
                     'Đáy: ${minVal.toStringAsFixed(2)}${config.unit.isNotEmpty ? ' ${config.unit}' : ''}',
-                    style: const TextStyle(fontSize: 11, color: Color(0xFF475569), fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 11, color: isAbyss ? Colors.white : const Color(0xFF475569), fontWeight: FontWeight.bold),
                   ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9),
+                    color: isAbyss ? const Color(0x3338BDF8) : const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    border: Border.all(color: isAbyss ? const Color(0x4D38BDF8) : const Color(0xFFE2E8F0)),
                   ),
                   child: Text(
                     'Đỉnh: ${maxVal.toStringAsFixed(2)}${config.unit.isNotEmpty ? ' ${config.unit}' : ''}',
-                    style: const TextStyle(fontSize: 11, color: Color(0xFF475569), fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 11, color: isAbyss ? Colors.white : const Color(0xFF475569), fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -341,11 +347,11 @@ class HistoryChart extends StatelessWidget {
             height: 180,
             width: double.infinity,
             child: points.length < 2
-                ? const Center(
+                ? Center(
                     child: Text(
                       'Cần ít nhất 2 mẫu để vẽ biểu đồ.',
                       style: TextStyle(
-                        color: Color(0xFF8390A4),
+                        color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF8390A4),
                         fontSize: 12,
                       ),
                     ),
@@ -362,6 +368,7 @@ class HistoryChart extends StatelessWidget {
                           .toList(),
                       unit: config.unit,
                       primaryColor: config.color,
+                      isAbyss: isAbyss,
                     ),
                   ),
           ),
@@ -374,8 +381,8 @@ class HistoryChart extends StatelessWidget {
                   points.isEmpty
                       ? '—'
                       : measurementTimeLabel(points.first.measuredAt, range),
-                  style: const TextStyle(
-                    color: Color(0xFF64748B),
+                  style: TextStyle(
+                    color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                   ),
@@ -384,8 +391,8 @@ class HistoryChart extends StatelessWidget {
                   points.isEmpty
                       ? '—'
                       : measurementTimeLabel(points.last.measuredAt, range),
-                  style: const TextStyle(
-                    color: Color(0xFF64748B),
+                  style: TextStyle(
+                    color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                   ),
@@ -406,15 +413,18 @@ class HistoryChart extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
         decoration: BoxDecoration(
-          color: active ? const Color(0xFF0F62FE) : const Color(0xFFF1F5F9),
+          color: active ? const Color(0xFF0F62FE) : (isAbyss ? const Color(0x2238BDF8) : const Color(0xFFF1F5F9)),
           borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: active ? const Color(0xFF0F62FE) : (isAbyss ? const Color(0x4D38BDF8) : const Color(0xFFE2E8F0)),
+          ),
         ),
         child: Text(
           label,
           style: TextStyle(
             fontSize: 11.5,
             fontWeight: active ? FontWeight.w800 : FontWeight.w600,
-            color: active ? Colors.white : const Color(0xFF475569),
+            color: active ? Colors.white : (isAbyss ? Colors.white : const Color(0xFF475569)),
           ),
         ),
       ),
@@ -427,11 +437,13 @@ class HistoryChartPainter extends CustomPainter {
     this.samples, {
     this.unit = '',
     this.primaryColor = const Color(0xFF1769D2),
+    this.isAbyss = true,
   });
 
   final List<(DateTime, double)> samples;
   final String unit;
   final Color primaryColor;
+  final bool isAbyss;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -475,7 +487,7 @@ class HistoryChartPainter extends CustomPainter {
     }
 
     final gridPaint = Paint()
-      ..color = const Color(0xFFE2E8F0)
+      ..color = isAbyss ? const Color(0x2538BDF8) : const Color(0xFFE2E8F0)
       ..strokeWidth = 1;
 
     // Draw 4 horizontal grid lines with distinct, non-duplicate Y-axis numbers
@@ -486,8 +498,8 @@ class HistoryChartPainter extends CustomPainter {
       final val = rawVals[i];
       final textSpan = TextSpan(
         text: val.toStringAsFixed(decimals),
-        style: const TextStyle(
-          color: Color(0xFF64748B),
+        style: TextStyle(
+          color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
           fontSize: 10,
           fontWeight: FontWeight.w700,
         ),

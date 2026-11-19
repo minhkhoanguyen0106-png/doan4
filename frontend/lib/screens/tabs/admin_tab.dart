@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/water_models.dart';
 import '../../widgets/common_views.dart';
 import '../../widgets/stat_cards.dart';
+import '../../widgets/underwater_ambient_canvas.dart';
 
 class AdminTab extends StatefulWidget {
   const AdminTab({
@@ -13,6 +14,7 @@ class AdminTab extends StatefulWidget {
     required this.onToggleUserStatus,
     required this.onToggleUserRole,
     this.onSimulate,
+    this.lightingMode = OceanLightingMode.abyssal,
   });
 
   final AccountUser account;
@@ -22,6 +24,7 @@ class AdminTab extends StatefulWidget {
   final ValueChanged<AccountUser> onToggleUserStatus;
   final ValueChanged<AccountUser> onToggleUserRole;
   final VoidCallback? onSimulate;
+  final OceanLightingMode lightingMode;
 
   @override
   State<AdminTab> createState() => _AdminTabState();
@@ -43,6 +46,7 @@ class _AdminTabState extends State<AdminTab> {
 
   @override
   Widget build(BuildContext context) {
+    final isAbyss = widget.lightingMode == OceanLightingMode.abyssal;
     final active = widget.users.where((user) => user.isActive).length;
     final admins = widget.users.where((user) => user.isAdmin).length;
     final locked = widget.users.length - active;
@@ -93,17 +97,13 @@ class _AdminTabState extends State<AdminTab> {
                     'Trung tâm quản trị người dùng',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w900,
-                          color: const Color(0xFF0F172A),
-                          letterSpacing: -0.5,
+                          color: isAbyss ? Colors.white : const Color(0xFF0F172A), letterSpacing: -0.5,
                         ),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     'Theo dõi và phân bổ quyền truy cập cho ${widget.users.length} tài khoản trong hệ thống.',
-                    style: const TextStyle(
-                      color: Color(0xFF64748B),
-                      fontSize: 13,
-                    ),
+                    style: TextStyle(color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B), fontSize: 13),
                   ),
                 ],
               ),
@@ -136,6 +136,7 @@ class _AdminTabState extends State<AdminTab> {
                         value: '${widget.users.length}',
                         icon: Icons.groups_2_rounded,
                         color: const Color(0xFF0F62FE),
+                        isAbyss: isAbyss,
                       ),
                     ),
                     const SizedBox(width: 14),
@@ -145,12 +146,12 @@ class _AdminTabState extends State<AdminTab> {
                         value: '$active',
                         icon: Icons.verified_user_rounded,
                         color: const Color(0xFF10B981),
+                        isAbyss: isAbyss,
                       ),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
-                      child: AdminStat(
-                        label: 'Quản trị viên',
+                      child: AdminStat(isAbyss: isAbyss, label: 'Quản trị viên',
                         value: '$admins',
                         icon: Icons.shield_rounded,
                         color: const Color(0xFF8B5CF6),
@@ -163,6 +164,7 @@ class _AdminTabState extends State<AdminTab> {
                         value: '$locked',
                         icon: Icons.lock_person_rounded,
                         color: const Color(0xFFF59E0B),
+                        isAbyss: isAbyss,
                       ),
                     ),
                   ],
@@ -181,15 +183,16 @@ class _AdminTabState extends State<AdminTab> {
                       value: '${widget.users.length}',
                       icon: Icons.groups_2_rounded,
                       color: const Color(0xFF0F62FE),
+                      isAbyss: isAbyss,
                     ),
                     AdminStat(
                       label: 'Đang hoạt động',
                       value: '$active',
                       icon: Icons.verified_user_rounded,
                       color: const Color(0xFF10B981),
+                      isAbyss: isAbyss,
                     ),
-                    AdminStat(
-                      label: 'Quản trị viên',
+                    AdminStat(isAbyss: isAbyss, label: 'Quản trị viên',
                       value: '$admins',
                       icon: Icons.shield_rounded,
                       color: const Color(0xFF8B5CF6),
@@ -199,6 +202,7 @@ class _AdminTabState extends State<AdminTab> {
                       value: '$locked',
                       icon: Icons.lock_person_rounded,
                       color: const Color(0xFFF59E0B),
+                      isAbyss: isAbyss,
                     ),
                   ],
                 );
@@ -493,7 +497,7 @@ class _AdminTabState extends State<AdminTab> {
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: filtered.length,
-                        separatorBuilder: (context, index) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                        separatorBuilder: (context, index) => Divider(height: 1, color: isAbyss ? const Color(0x20FFFFFF) : const Color(0xFFF1F5F9)),
                         itemBuilder: (context, index) {
                           final user = filtered[index];
                           final isSelf = user.email == widget.account.email;

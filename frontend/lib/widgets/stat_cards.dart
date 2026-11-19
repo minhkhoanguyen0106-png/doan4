@@ -13,6 +13,7 @@ class AssessmentCard extends StatelessWidget {
     this.species,
     this.onViewActionPlan,
     this.onSimulate,
+    this.isAbyss = false,
   });
 
   final String level;
@@ -23,13 +24,14 @@ class AssessmentCard extends StatelessWidget {
   final AquacultureSpecies? species;
   final VoidCallback? onViewActionPlan;
   final VoidCallback? onSimulate;
+  final bool isAbyss;
 
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 600;
     final statusColor = levelColor(level);
     final isPending = level == 'INSUFFICIENT_DATA' || level.isEmpty || sampleCount == 0;
-    final accentColor = isPending ? const Color(0xFF0F62FE) : statusColor;
+    final accentColor = isPending ? (isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0F62FE)) : statusColor;
     final displayTitle = isPending
         ? 'Hệ thống AI sẵn sàng giám sát & phân tích'
         : levelTitle(level);
@@ -43,20 +45,26 @@ class AssessmentCard extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Colors.white,
-            const Color(0xFFF8FAFC),
-            accentColor.withValues(alpha: 0.06),
-          ],
+          colors: isAbyss
+              ? [
+                  const Color(0x2CFFFFFF),
+                  const Color(0x1EFFFFFF),
+                  accentColor.withValues(alpha: 0.10),
+                ]
+              : [
+                  Colors.white,
+                  const Color(0xFFF8FAFC),
+                  accentColor.withValues(alpha: 0.06),
+                ],
         ),
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: accentColor.withValues(alpha: 0.28),
-          width: 1.5,
+          color: isAbyss ? const Color(0x3838BDF8) : accentColor.withValues(alpha: 0.28),
+          width: 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: accentColor.withValues(alpha: 0.09),
+            color: (isAbyss ? const Color(0xFF00E5FF) : accentColor).withValues(alpha: isAbyss ? 0.04 : 0.09),
             blurRadius: 22,
             offset: const Offset(0, 6),
           ),
@@ -193,8 +201,8 @@ class AssessmentCard extends StatelessWidget {
                         children: [
                           Text(
                             displayTitle,
-                            style: const TextStyle(
-                              color: Color(0xFF0F172A),
+                            style: TextStyle(
+                              color: isAbyss ? Colors.white : const Color(0xFF0F172A),
                               fontSize: 20,
                               fontWeight: FontWeight.w900,
                               letterSpacing: -0.4,
@@ -203,8 +211,8 @@ class AssessmentCard extends StatelessWidget {
                           const SizedBox(height: 3),
                           Text(
                             displayDesc,
-                            style: const TextStyle(
-                              color: Color(0xFF64748B),
+                            style: TextStyle(
+                              color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
                               fontSize: 12.5,
                               height: 1.35,
                               fontWeight: FontWeight.w500,
@@ -237,9 +245,11 @@ class AssessmentCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFC),
+                    color: isAbyss ? const Color(0x18FFFFFF) : const Color(0xFFF8FAFC),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    border: Border.all(
+                      color: isAbyss ? const Color(0x2838BDF8) : const Color(0xFFE2E8F0),
+                    ),
                   ),
                   child: isMobile
                       ? Column(
@@ -435,9 +445,11 @@ class AssessmentCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFC),
+                    color: isAbyss ? const Color(0x18FFFFFF) : const Color(0xFFF8FAFC),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    border: Border.all(
+                      color: isAbyss ? const Color(0x2838BDF8) : const Color(0xFFE2E8F0),
+                    ),
                   ),
                   child: Row(
                     children: [
@@ -519,12 +531,14 @@ class HeroStat extends StatelessWidget {
     required this.value,
     required this.label,
     this.accent = const Color(0xFF0284C7),
+    this.isAbyss = true,
   });
 
   final IconData icon;
   final String value;
   final String label;
   final Color accent;
+  final bool isAbyss;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -541,8 +555,8 @@ class HeroStat extends StatelessWidget {
       const SizedBox(width: 6),
       Text(
         value,
-        style: const TextStyle(
-          color: Color(0xFF0F172A),
+        style: TextStyle(
+          color: isAbyss ? Colors.white : const Color(0xFF0F172A),
           fontWeight: FontWeight.w900,
           fontSize: 14.5,
         ),
@@ -553,8 +567,8 @@ class HeroStat extends StatelessWidget {
           label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: Color(0xFF64748B),
+          style: TextStyle(
+            color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
             fontSize: 11,
             fontWeight: FontWeight.w500,
           ),
@@ -571,23 +585,28 @@ class AdminStat extends StatelessWidget {
     required this.value,
     required this.icon,
     required this.color,
+    this.isAbyss = true,
   });
 
   final String label;
   final String value;
   final IconData icon;
   final Color color;
+  final bool isAbyss;
 
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
       borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
+      border: Border.all(
+        color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFBAE6FD),
+        width: 1.2,
+      ),
       boxShadow: [
         BoxShadow(
-          color: const Color(0xFF0F172A).withValues(alpha: 0.03),
+          color: (isAbyss ? const Color(0xFF00E5FF) : const Color(0xFF0284C7)).withValues(alpha: isAbyss ? 0.08 : 0.08),
           blurRadius: 16,
           offset: const Offset(0, 4),
         ),
@@ -612,18 +631,18 @@ class AdminStat extends StatelessWidget {
             children: [
               Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: 24,
-                  color: Color(0xFF0F172A),
+                  color: isAbyss ? Colors.white : const Color(0xFF0F172A),
                   letterSpacing: -0.5,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 label,
-                style: const TextStyle(
-                  color: Color(0xFF64748B),
+                style: TextStyle(
+                  color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
                   fontSize: 12.5,
                   fontWeight: FontWeight.w600,
                 ),
@@ -652,6 +671,7 @@ class MetricCard extends StatelessWidget {
     this.safeMin,
     this.safeMax,
     this.safeLabel,
+    this.isAbyss = false,
   });
 
   final String label;
@@ -665,16 +685,18 @@ class MetricCard extends StatelessWidget {
   final double? safeMin;
   final double? safeMax;
   final String? safeLabel;
+  final bool isAbyss;
 
   @override
   Widget build(BuildContext context) {
     return Card(
       clipBehavior: Clip.antiAlias,
       elevation: 0,
+      color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(
-          color: selected ? accent : const Color(0xFFE2E8F0),
+          color: selected ? accent : (isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0)),
           width: selected ? 2 : 1,
         ),
       ),
@@ -686,8 +708,8 @@ class MetricCard extends StatelessWidget {
             gradient: selected
                 ? LinearGradient(
                     colors: [
-                      accent.withValues(alpha: 0.05),
-                      Colors.white,
+                      accent.withValues(alpha: isAbyss ? 0.15 : 0.05),
+                      isAbyss ? accent.withValues(alpha: 0.04) : Colors.white,
                     ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -715,9 +737,9 @@ class MetricCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       label,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
-                        color: Color(0xFF475569),
+                        color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
                         fontWeight: FontWeight.w700,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -743,10 +765,10 @@ class MetricCard extends StatelessWidget {
                 children: [
                   Text(
                     value == null ? '—' : formatNumber(value!),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.w900,
-                      color: Color(0xFF0F172A),
+                      color: isAbyss ? Colors.white : const Color(0xFF0F172A),
                       letterSpacing: -0.5,
                     ),
                   ),
@@ -754,10 +776,10 @@ class MetricCard extends StatelessWidget {
                     const SizedBox(width: 5),
                     Text(
                       unit,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF64748B),
+                        color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                       ),
                     ),
                   ],
@@ -793,14 +815,17 @@ class MetricCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9),
+                    color: isAbyss ? const Color(0x18FFFFFF) : const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isAbyss ? const Color(0x2838BDF8) : Colors.transparent,
+                    ),
                   ),
                   child: Text(
                     'TB ${formatNumber(stat!.average!)} · Min ${formatNumber(stat!.min!)} - Max ${formatNumber(stat!.max!)}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 10,
-                      color: Color(0xFF475569),
+                      color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
                       fontWeight: FontWeight.w600,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -914,27 +939,31 @@ class ReadingPill extends StatelessWidget {
     required this.label,
     required this.value,
     required this.unit,
+    this.isAbyss = true,
   });
 
   final String label;
   final num? value;
   final String unit;
+  final bool isAbyss;
 
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
     decoration: BoxDecoration(
-      color: const Color(0xFFF1F5F9),
+      color: isAbyss ? const Color(0x28FFFFFF) : const Color(0xFFF1F5F9),
       borderRadius: BorderRadius.circular(9),
-      border: Border.all(color: const Color(0xFFE2E8F0)),
+      border: Border.all(
+        color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0),
+      ),
     ),
     child: Text.rich(
       TextSpan(
         children: [
           TextSpan(
             text: '$label: ',
-            style: const TextStyle(
-              color: Color(0xFF64748B),
+            style: TextStyle(
+              color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
               fontSize: 11,
               fontWeight: FontWeight.w500,
             ),
@@ -943,8 +972,8 @@ class ReadingPill extends StatelessWidget {
             text: value == null
                 ? '—'
                 : '${formatNumber(value!)}${unit.isEmpty ? '' : ' $unit'}',
-            style: const TextStyle(
-              color: Color(0xFF0F172A),
+            style: TextStyle(
+              color: isAbyss ? Colors.white : const Color(0xFF0F172A),
               fontSize: 11,
               fontWeight: FontWeight.w800,
             ),

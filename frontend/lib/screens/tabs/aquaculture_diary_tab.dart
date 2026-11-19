@@ -9,6 +9,7 @@ import '../../models/diary_models.dart';
 import '../../models/water_models.dart';
 import '../../utils/csv_exporter.dart';
 import '../../utils/formatters.dart';
+import '../../widgets/underwater_ambient_canvas.dart';
 
 class AquacultureDiaryTab extends StatefulWidget {
   const AquacultureDiaryTab({
@@ -17,12 +18,14 @@ class AquacultureDiaryTab extends StatefulWidget {
     required this.sites,
     required this.selectedSite,
     required this.onSelectSite,
+    this.lightingMode = OceanLightingMode.abyssal,
   });
 
   final ApiClient api;
   final List<MonitoringSite> sites;
   final MonitoringSite? selectedSite;
   final ValueChanged<MonitoringSite> onSelectSite;
+  final OceanLightingMode lightingMode;
 
   @override
   State<AquacultureDiaryTab> createState() => _AquacultureDiaryTabState();
@@ -373,6 +376,7 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
       return const Center(child: Text('Vui lòng tạo điểm quan trắc / ao nuôi trước.'));
     }
 
+    final bool isAbyss = widget.lightingMode == OceanLightingMode.abyssal;
     final site = widget.selectedSite ?? widget.sites.first;
     final profile = _profile;
     final analytics = _analytics;
@@ -388,10 +392,10 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'PONDORA · AQUACULTURE DIARY',
+              Text(
+                'PONDORA · SỔ NHẬT KÝ AO NUÔI',
                 style: TextStyle(
-                  color: Color(0xFF0284C7),
+                  color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
                   fontSize: 10,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.1,
@@ -399,10 +403,10 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
               ),
               const SizedBox(height: 2),
               Text(
-                'Số hóa Ao nuôi & Nhật ký',
+                'Số hóa ao nuôi & nhật ký',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w900,
-                      color: const Color(0xFF0F172A),
+                      color: isAbyss ? Colors.white : const Color(0xFF0F172A),
                     ),
               ),
               const SizedBox(height: 10),
@@ -411,12 +415,14 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                 runSpacing: 8,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  _buildSiteDropdown(site),
+                  _buildSiteDropdown(site, isAbyss),
                   OutlinedButton.icon(
                     onPressed: _openEditProfile,
                     icon: const Icon(Icons.tune_rounded, size: 15),
                     label: const Text('Cấu hình'),
                     style: OutlinedButton.styleFrom(
+                      foregroundColor: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                      side: BorderSide(color: isAbyss ? const Color(0x6638BDF8) : const Color(0xFFCBD5E1)),
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       textStyle: const TextStyle(fontSize: 12),
                     ),
@@ -443,10 +449,10 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'PONDORA · AQUACULTURE DIARY & SHRIMP MANAGEMENT',
+                  Text(
+                    'PONDORA · SỔ NHẬT KÝ & QUẢN LÝ AO NUÔI',
                     style: TextStyle(
-                      color: Color(0xFF0284C7),
+                      color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1.2,
@@ -454,17 +460,17 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Số hóa Ao nuôi & Nhật ký chăm sóc',
+                    'Số hóa ao nuôi & nhật ký chăm sóc',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w900,
-                          color: const Color(0xFF0F172A),
+                          color: isAbyss ? Colors.white : const Color(0xFF0F172A),
                           letterSpacing: -0.5,
                         ),
                   ),
                   const SizedBox(height: 3),
-                  const Text(
+                  Text(
                     'Quản lý thức ăn, theo dõi đường cong tăng trưởng tôm, xử lý thuốc và xifong đáy ao.',
-                    style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                    style: TextStyle(color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B), fontSize: 13),
                   ),
                 ],
               ),
@@ -472,11 +478,15 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _buildSiteDropdown(site),
+                  _buildSiteDropdown(site, isAbyss),
                   OutlinedButton.icon(
                     onPressed: _openEditProfile,
                     icon: const Icon(Icons.tune_rounded, size: 16),
                     label: const Text('Cấu hình ao'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                      side: BorderSide(color: isAbyss ? const Color(0x6638BDF8) : const Color(0xFFCBD5E1)),
+                    ),
                   ),
                   FilledButton.icon(
                     onPressed: _exportCsv,
@@ -515,38 +525,41 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
           )
         else ...[
           // SECTION 1: Digital Pond Profile Card
-          _buildPondProfileCard(profile, analytics),
+          _buildPondProfileCard(profile, analytics, isAbyss),
 
           const SizedBox(height: 14),
 
           // SECTION 2: Key Operational Metrics Strip (KPIs)
-          _buildKpiMetricsStrip(analytics, isMobile),
+          _buildKpiMetricsStrip(analytics, isMobile, isAbyss),
 
           const SizedBox(height: 16),
 
           // SECTION 3: Visual Analytics & Growth Curves
-          _buildAnalyticsCharts(analytics, isMobile),
+          _buildAnalyticsCharts(analytics, isMobile, isAbyss),
 
           const SizedBox(height: 20),
 
           // SECTION 4: Interactive Activity Diary (Tabs)
-          _buildDiaryActivitiesPanel(),
+          _buildDiaryActivitiesPanel(isAbyss),
         ],
       ],
     );
   }
 
-  Widget _buildSiteDropdown(MonitoringSite site) {
+  Widget _buildSiteDropdown(MonitoringSite site, bool isAbyss) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFCBD5E1)),
+        border: Border.all(
+          color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFCBD5E1),
+          width: 1.0,
+        ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0F172A).withValues(alpha: 0.04),
-            blurRadius: 8,
+            color: (isAbyss ? Colors.black : const Color(0xFF0F172A)).withValues(alpha: isAbyss ? 0.25 : 0.04),
+            blurRadius: 12,
             offset: const Offset(0, 2),
           ),
         ],
@@ -559,10 +572,10 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
           ),
           borderRadius: BorderRadius.circular(16),
           elevation: 8,
-          dropdownColor: Colors.white,
-          icon: const Padding(
-            padding: EdgeInsets.only(left: 6),
-            child: Icon(Icons.unfold_more_rounded, color: Color(0xFF0284C7), size: 18),
+          dropdownColor: isAbyss ? const Color(0xFF08152B) : Colors.white,
+          icon: Padding(
+            padding: const EdgeInsets.only(left: 6),
+            child: Icon(Icons.unfold_more_rounded, color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7), size: 18),
           ),
           selectedItemBuilder: (context) {
             return widget.sites.map((s) {
@@ -572,18 +585,18 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                   Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE0F2FE),
+                      color: isAbyss ? const Color(0x2238BDF8) : const Color(0xFFE0F2FE),
                       borderRadius: BorderRadius.circular(6),
                     ),
-                    child: const Icon(Icons.water_rounded, size: 14, color: Color(0xFF0284C7)),
+                    child: Icon(Icons.water_rounded, size: 14, color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7)),
                   ),
                   const SizedBox(width: 8),
                   Text(
                     s.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFF0F172A),
+                      color: isAbyss ? Colors.white : const Color(0xFF0F172A),
                     ),
                   ),
                 ],
@@ -604,17 +617,17 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                       height: 28,
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? const Color(0xFF0284C7).withValues(alpha: 0.12)
-                            : const Color(0xFFF1F5F9),
+                            ? (isAbyss ? const Color(0x3338BDF8) : const Color(0xFF0284C7).withValues(alpha: 0.12))
+                            : (isAbyss ? const Color(0x1AFFFFFF) : const Color(0xFFF1F5F9)),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: isSelected ? const Color(0xFF0284C7) : const Color(0xFFE2E8F0),
+                          color: isSelected ? const Color(0xFF38BDF8) : (isAbyss ? const Color(0x2238BDF8) : const Color(0xFFE2E8F0)),
                         ),
                       ),
                       child: Icon(
                         Icons.water_rounded,
                         size: 15,
-                        color: isSelected ? const Color(0xFF0284C7) : const Color(0xFF64748B),
+                        color: isSelected ? (isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7)) : (isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -627,19 +640,19 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                            color: isSelected ? const Color(0xFF0284C7) : const Color(0xFF0F172A),
+                            color: isSelected ? (isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7)) : (isAbyss ? Colors.white : const Color(0xFF0F172A)),
                           ),
                         ),
                         if (s.location != null && s.location!.isNotEmpty)
                           Text(
                             s.location!,
-                            style: const TextStyle(fontSize: 10.5, color: Color(0xFF94A3B8)),
+                            style: TextStyle(fontSize: 10.5, color: isAbyss ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
                           ),
                       ],
                     ),
                     const SizedBox(width: 16),
                     if (isSelected)
-                      const Icon(Icons.check_circle_rounded, size: 16, color: Color(0xFF0284C7)),
+                      Icon(Icons.check_circle_rounded, size: 16, color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7)),
                   ],
                 ),
               ),
@@ -653,109 +666,253 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
     );
   }
 
-  Widget _buildPondProfileCard(ShrimpProfile? p, DiaryAnalytics? a) {
+  Widget _buildPondProfileCard(ShrimpProfile? p, DiaryAnalytics? a, bool isAbyss) {
     if (p == null) return const SizedBox.shrink();
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: const [
+        border: Border.all(
+          color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0),
+          width: 1.0,
+        ),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x060F172A),
-            blurRadius: 16,
-            offset: Offset(0, 4),
+            color: (isAbyss ? Colors.black : const Color(0xFF0F172A)).withValues(alpha: isAbyss ? 0.35 : 0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF0F62FE), Color(0xFF0284C7)],
-              ),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(19)),
-            ),
+          // Integrated Header (Minimalist & Sleek)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 14),
             child: Row(
               children: [
-                const Icon(Icons.water_drop_rounded, color: Colors.white, size: 20),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'HỒ SƠ SỐ HÓA AO NUÔI: ${p.siteName.toUpperCase()}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.8,
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF00D2FF), Color(0xFF0284C7)],
                     ),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF00D2FF).withValues(alpha: isAbyss ? 0.35 : 0.2),
+                        blurRadius: 8,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(Icons.water_drop_rounded, color: Colors.white, size: 18),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'HỒ SƠ SỐ HÓA AO NUÔI: ${p.siteName.toUpperCase()}',
+                        style: TextStyle(
+                          color: isAbyss ? Colors.white : const Color(0xFF0F172A),
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.6,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Quy chuẩn kích thước, mật độ và giống tôm thả nuôi',
+                        style: TextStyle(color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B), fontSize: 11.5),
+                      ),
+                    ],
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
+                    color: isAbyss ? const Color(0x2238BDF8) : const Color(0xFFE0F2FE),
                     borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isAbyss ? const Color(0x4438BDF8) : const Color(0xFFBAE6FD),
+                    ),
                   ),
-                  child: Text(
-                    p.farmingStage == 'UOM_GIONG'
-                        ? 'Ươm giống'
-                        : p.farmingStage == 'GIAI_DOAN_1'
-                            ? 'Giai đoạn 1 (20-45d)'
-                            : p.farmingStage == 'GIAI_DOAN_2'
-                                ? 'Giai đoạn 2 (45-70d)'
-                                : 'Về đích (>70d)',
-                    style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        p.farmingStage == 'UOM_GIONG'
+                            ? 'Ươm giống'
+                            : p.farmingStage == 'GIAI_DOAN_1'
+                                ? 'Giai đoạn 1 (20-45d)'
+                                : p.farmingStage == 'GIAI_DOAN_2'
+                                    ? 'Giai đoạn 2 (45-70d)'
+                                    : 'Về đích (>70d)',
+                        style: TextStyle(
+                          color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
+          Divider(
+            height: 1,
+            color: isAbyss ? const Color(0x1F38BDF8) : const Color(0xFFF1F5F9),
+          ),
           Padding(
             padding: const EdgeInsets.all(20),
-            child: Wrap(
-              spacing: 24,
-              runSpacing: 16,
-              alignment: WrapAlignment.spaceBetween,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth > 700;
+                final items = [
+                  _specItem(
+                    'NGÀY TUỔI TÔM (DOC)',
+                    p.currentDoc != null ? '${p.currentDoc} ngày' : 'Chưa thả giống',
+                    Icons.calendar_today_rounded,
+                    isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                    isAbyss,
+                  ),
+                  _specItem(
+                    'DIỆN TÍCH / THỂ TÍCH',
+                    '${formatNumber(p.areaM2)} m² · ${formatNumber(p.waterVolumeM3)} m³',
+                    Icons.crop_square_rounded,
+                    isAbyss ? const Color(0xFF34D399) : const Color(0xFF10B981),
+                    isAbyss,
+                  ),
+                  _specItem(
+                    'MẬT ĐỘ THẢ GIỐNG',
+                    '${formatNumber(p.stockingDensityPerM2 ?? 100)} con/m²',
+                    Icons.grain_rounded,
+                    isAbyss ? const Color(0xFFA78BFA) : const Color(0xFF8B5CF6),
+                    isAbyss,
+                  ),
+                  _specItem(
+                    'SỐ LƯỢNG GIỐNG THẢ',
+                    '${p.stockedCount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},')} con',
+                    Icons.groups_rounded,
+                    isAbyss ? const Color(0xFFFBBF24) : const Color(0xFFF59E0B),
+                    isAbyss,
+                  ),
+                  _specItem(
+                    'GIỐNG TÔM NUÔI',
+                    _cleanSpecies(p.shrimpSpecies),
+                    Icons.bubble_chart_rounded,
+                    isAbyss ? const Color(0xFF22D3EE) : const Color(0xFF06B6D4),
+                    isAbyss,
+                  ),
+                  _specItem(
+                    'MỤC TIÊU THU HOẠCH',
+                    '${formatNumber(p.targetHarvestWeightG ?? 25)} g/con',
+                    Icons.flag_rounded,
+                    isAbyss ? const Color(0xFFF472B6) : const Color(0xFFEC4899),
+                    isAbyss,
+                  ),
+                ];
+
+                if (isWide) {
+                  return Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(child: items[0]),
+                          const SizedBox(width: 16),
+                          Expanded(child: items[1]),
+                          const SizedBox(width: 16),
+                          Expanded(child: items[2]),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(child: items[3]),
+                          const SizedBox(width: 16),
+                          Expanded(child: items[4]),
+                          const SizedBox(width: 16),
+                          Expanded(child: items[5]),
+                        ],
+                      ),
+                    ],
+                  );
+                } else {
+                  return Wrap(
+                    spacing: 16,
+                    runSpacing: 14,
+                    children: items.map((it) => SizedBox(width: (constraints.maxWidth - 20) / 2, child: it)).toList(),
+                  );
+                }
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _specItem(String label, String value, IconData icon, Color color, bool isAbyss) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: isAbyss ? const Color(0x18FFFFFF) : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: isAbyss ? const Color(0x3038BDF8) : const Color(0xFFE2E8F0),
+          width: 0.9,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(7),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: isAbyss ? 0.18 : 0.10),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: color, size: 17),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                _specItem(
-                  'NGÀY TUỔI TÔM (DOC)',
-                  p.currentDoc != null ? '${p.currentDoc} ngày' : 'Chưa thả giống',
-                  Icons.calendar_today_rounded,
-                  const Color(0xFF0284C7),
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
+                    letterSpacing: 0.4,
+                  ),
                 ),
-                _specItem(
-                  'DIỆN TÍCH / THỂ TÍCH',
-                  '${formatNumber(p.areaM2)} m² · ${formatNumber(p.waterVolumeM3)} m³',
-                  Icons.crop_square_rounded,
-                  const Color(0xFF10B981),
-                ),
-                _specItem(
-                  'MẬT ĐỘ THẢ GIỐNG',
-                  '${formatNumber(p.stockingDensityPerM2 ?? 100)} con/m²',
-                  Icons.grain_rounded,
-                  const Color(0xFF8B5CF6),
-                ),
-                _specItem(
-                  'SỐ LƯỢNG GIỐNG THẢ',
-                  '${p.stockedCount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},')} con',
-                  Icons.groups_rounded,
-                  const Color(0xFFF59E0B),
-                ),
-                _specItem(
-                  'GIỐNG TÔM NUÔI',
-                  _cleanSpecies(p.shrimpSpecies),
-                  Icons.bubble_chart_rounded,
-                  const Color(0xFF06B6D4),
-                ),
-                _specItem(
-                  'MỤC TIÊU THU HOẠCH',
-                  '${formatNumber(p.targetHarvestWeightG ?? 25)} g/con',
-                  Icons.flag_rounded,
-                  const Color(0xFFEC4899),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    color: isAbyss ? Colors.white : const Color(0xFF0F172A),
+                  ),
                 ),
               ],
             ),
@@ -765,38 +922,7 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
     );
   }
 
-  Widget _specItem(String label, String value, IconData icon, Color color) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(icon, color: color, size: 18),
-        ),
-        const SizedBox(width: 10),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Color(0xFF64748B)),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              value,
-              style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: Color(0xFF0F172A)),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildKpiMetricsStrip(DiaryAnalytics? a, bool isMobile) {
+  Widget _buildKpiMetricsStrip(DiaryAnalytics? a, bool isMobile, bool isAbyss) {
     if (a == null) return const SizedBox.shrink();
 
     final card1 = _kpiCard(
@@ -804,24 +930,27 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
       value: '${formatNumber(a.totalFeedKg)} kg',
       sub: 'Lũy kế cả vụ',
       icon: Icons.restaurant_rounded,
-      color: const Color(0xFFD97706),
+      color: isAbyss ? const Color(0xFFFBBF24) : const Color(0xFFD97706),
       bg: const Color(0xFFFEF3C7),
+      isAbyss: isAbyss,
     );
     final card2 = _kpiCard(
       title: 'SINH KHỐI',
       value: a.estimatedBiomassKg != null ? '${formatNumber(a.estimatedBiomassKg!)} kg' : '---',
       sub: 'Sống ~${a.survivalRatePercent ?? 85}%',
       icon: Icons.pets_rounded,
-      color: const Color(0xFF059669),
+      color: isAbyss ? const Color(0xFF34D399) : const Color(0xFF059669),
       bg: const Color(0xFFD1FAE5),
+      isAbyss: isAbyss,
     );
     final card3 = _kpiCard(
       title: 'HỆ SỐ FCR',
       value: a.fcr != null ? a.fcr!.toStringAsFixed(2) : '---',
       sub: a.fcr != null && a.fcr! < 1.3 ? 'Tối ưu' : 'Bình thường',
       icon: Icons.trending_up_rounded,
-      color: const Color(0xFF2563EB),
+      color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF2563EB),
       bg: const Color(0xFFDBEAFE),
+      isAbyss: isAbyss,
     );
     final card4 = _kpiCard(
       title: 'SIZE TÔM',
@@ -832,8 +961,9 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
           ? '~${a.currentSizeCountPerKg} con/kg'
           : 'Chưa có số đo',
       icon: Icons.scale_rounded,
-      color: const Color(0xFF7C3AED),
+      color: isAbyss ? const Color(0xFFC084FC) : const Color(0xFF7C3AED),
       bg: const Color(0xFFEDE9FE),
+      isAbyss: isAbyss,
     );
 
     if (isMobile) {
@@ -878,29 +1008,36 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
     required IconData icon,
     required Color color,
     required Color bg,
+    required bool isAbyss,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: const [
+        border: Border.all(
+          color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0),
+          width: 1.0,
+        ),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x040F172A),
-            blurRadius: 8,
-            offset: Offset(0, 2),
+            color: (isAbyss ? Colors.black : const Color(0xFF0F172A)).withValues(alpha: isAbyss ? 0.30 : 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(7),
-            decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(10)),
-            child: Icon(icon, color: color, size: 19),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: isAbyss ? 0.16 : 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: color, size: 20),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -910,20 +1047,33 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Color(0xFF64748B)),
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
+                    letterSpacing: 0.5,
+                  ),
                 ),
-                const SizedBox(height: 1),
+                const SizedBox(height: 2),
                 Text(
                   value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: color),
+                  style: TextStyle(
+                    fontSize: 16.5,
+                    fontWeight: FontWeight.w900,
+                    color: color,
+                    letterSpacing: -0.3,
+                  ),
                 ),
                 Text(
                   sub,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8)),
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    color: isAbyss ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                  ),
                 ),
               ],
             ),
@@ -933,30 +1083,40 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
     );
   }
 
-  Widget _buildAnalyticsCharts(DiaryAnalytics? a, bool isMobile) {
+  Widget _buildAnalyticsCharts(DiaryAnalytics? a, bool isMobile, bool isAbyss) {
     if (a == null) return const SizedBox.shrink();
 
     final feedChart = Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(
+          color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0),
+          width: 1.0,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: (isAbyss ? Colors.black : const Color(0xFF0F172A)).withValues(alpha: isAbyss ? 0.30 : 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.bar_chart_rounded, color: Color(0xFFD97706), size: 18),
-              SizedBox(width: 8),
+              const Icon(Icons.bar_chart_rounded, color: Color(0xFFD97706), size: 18),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   'LƯỢNG THỨC ĂN TIÊU THỤ (KG/NGÀY)',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFFD97706),
+                    color: isAbyss ? const Color(0xFFFBBF24) : const Color(0xFFD97706),
                     letterSpacing: 0.6,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -966,9 +1126,14 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
           ),
           const SizedBox(height: 14),
           if (a.dailyFeedTrend.isEmpty)
-            const SizedBox(
+            SizedBox(
               height: 130,
-              child: Center(child: Text('Chưa có số liệu cho ăn gần đây.')),
+              child: Center(
+                child: Text(
+                  'Chưa có số liệu cho ăn gần đây.',
+                  style: TextStyle(color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                ),
+              ),
             )
           else
             SizedBox(
@@ -984,7 +1149,11 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                     children: [
                       Text(
                         '${p.amountKg.toStringAsFixed(0)}k',
-                        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: isAbyss ? Colors.white : const Color(0xFF0F172A),
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Container(
@@ -1002,7 +1171,11 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                       const SizedBox(height: 5),
                       Text(
                         p.dateLabel,
-                        style: const TextStyle(fontSize: 9.5, color: Color(0xFF64748B), fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   );
@@ -1014,26 +1187,36 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
     );
 
     final growthChart = Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(
+          color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0),
+          width: 1.0,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: (isAbyss ? Colors.black : const Color(0xFF0F172A)).withValues(alpha: isAbyss ? 0.30 : 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.show_chart_rounded, color: Color(0xFF059669), size: 18),
-              SizedBox(width: 8),
+              const Icon(Icons.show_chart_rounded, color: Color(0xFF059669), size: 18),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   'ĐƯỜNG CONG TĂNG TRƯỞNG (G/CON THEO DOC)',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFF059669),
+                    color: isAbyss ? const Color(0xFF34D399) : const Color(0xFF059669),
                     letterSpacing: 0.6,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -1043,9 +1226,14 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
           ),
           const SizedBox(height: 14),
           if (a.growthCurve.isEmpty)
-            const SizedBox(
+            SizedBox(
               height: 130,
-              child: Center(child: Text('Chưa có mẫu cân đo trọng lượng.')),
+              child: Center(
+                child: Text(
+                  'Chưa có mẫu cân đo trọng lượng.',
+                  style: TextStyle(color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                ),
+              ),
             )
           else
             SizedBox(
@@ -1061,7 +1249,11 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                     children: [
                       Text(
                         '${c.actualWeightG.toStringAsFixed(1)}g',
-                        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF059669)),
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: isAbyss ? const Color(0xFF34D399) : const Color(0xFF059669),
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Container(
@@ -1079,7 +1271,11 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                       const SizedBox(height: 5),
                       Text(
                         'D${c.doc}',
-                        style: const TextStyle(fontSize: 9.5, color: Color(0xFF64748B), fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   );
@@ -1110,12 +1306,22 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
     );
   }
 
-  Widget _buildDiaryActivitiesPanel() {
+  Widget _buildDiaryActivitiesPanel(bool isAbyss) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(
+          color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0),
+          width: 1.0,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: (isAbyss ? Colors.black : const Color(0xFF0F172A)).withValues(alpha: isAbyss ? 0.35 : 0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -1123,10 +1329,13 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
             controller: _tabCtrl,
             isScrollable: true,
             tabAlignment: TabAlignment.start,
-            labelColor: const Color(0xFF0F62FE),
-            unselectedLabelColor: const Color(0xFF64748B),
-            labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-            indicatorColor: const Color(0xFF0F62FE),
+            labelColor: isAbyss ? Colors.white : const Color(0xFF0F62FE),
+            unselectedLabelColor: isAbyss ? Colors.white : const Color(0xFF64748B),
+            labelStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
+            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: Colors.white),
+            indicatorColor: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0F62FE),
+            indicatorWeight: 3.0,
+            dividerColor: isAbyss ? const Color(0x2238BDF8) : const Color(0xFFE2E8F0),
             tabs: [
               Tab(text: 'Cữ cho ăn (${_feedings.length})', icon: const Icon(Icons.restaurant_rounded, size: 16)),
               Tab(text: 'Cân đo & Khám tôm (${_healthLogs.length})', icon: const Icon(Icons.monitor_heart_rounded, size: 16)),
@@ -1134,16 +1343,16 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
               Tab(text: 'Thay nước & Xifong (${_waterOps.length})', icon: const Icon(Icons.waves_rounded, size: 16)),
             ],
           ),
-          const Divider(height: 1, color: Color(0xFFE2E8F0)),
+          Divider(height: 1, color: isAbyss ? const Color(0x2238BDF8) : const Color(0xFFE2E8F0)),
           SizedBox(
             height: 420,
             child: TabBarView(
               controller: _tabCtrl,
               children: [
-                _buildFeedingTab(),
-                _buildHealthTab(),
-                _buildTreatmentTab(),
-                _buildWaterOpTab(),
+                _buildFeedingTab(isAbyss),
+                _buildHealthTab(isAbyss),
+                _buildTreatmentTab(isAbyss),
+                _buildWaterOpTab(isAbyss),
               ],
             ),
           ),
@@ -1152,17 +1361,21 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
     );
   }
 
-  Widget _buildFeedingTab() {
+  Widget _buildFeedingTab(bool isAbyss) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Nhật ký cữ ăn & kiểm tra nhá',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: isAbyss ? Colors.white : const Color(0xFF0F172A),
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -1182,7 +1395,12 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
           const SizedBox(height: 12),
           Expanded(
             child: _feedings.isEmpty
-                ? const Center(child: Text('Chưa có cữ ăn nào được ghi nhận.'))
+                ? Center(
+                    child: Text(
+                      'Chưa có cữ ăn nào được ghi nhận.',
+                      style: TextStyle(color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                    ),
+                  )
                 : ListView.separated(
                     itemCount: _feedings.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 10),
@@ -1191,9 +1409,11 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                       return Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: isAbyss ? const Color(0x1CFFFFFF) : Colors.white,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          border: Border.all(
+                            color: isAbyss ? const Color(0x2838BDF8) : const Color(0xFFE2E8F0),
+                          ),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1202,7 +1422,7 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                               children: [
                                 CircleAvatar(
                                   radius: 16,
-                                  backgroundColor: const Color(0xFFFEF3C7),
+                                  backgroundColor: isAbyss ? const Color(0x33D97706) : const Color(0xFFFEF3C7),
                                   child: const Icon(Icons.restaurant, color: Color(0xFFD97706), size: 16),
                                 ),
                                 const SizedBox(width: 10),
@@ -1214,14 +1434,18 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                                     children: [
                                       Text(
                                         _formatMeal(f.feedMeal),
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13.5,
+                                          color: isAbyss ? Colors.white : const Color(0xFF0F172A),
+                                        ),
                                       ),
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                                         decoration: BoxDecoration(
                                           color: (f.feedTrayStatus == 'HẾT' || f.feedTrayStatus.contains('H'))
-                                              ? const Color(0xFFDCFCE7)
-                                              : const Color(0xFFFEF3C7),
+                                              ? (isAbyss ? const Color(0x3310B981) : const Color(0xFFDCFCE7))
+                                              : (isAbyss ? const Color(0x33F59E0B) : const Color(0xFFFEF3C7)),
                                           borderRadius: BorderRadius.circular(6),
                                         ),
                                         child: Text(
@@ -1230,8 +1454,8 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                                             fontSize: 10.5,
                                             fontWeight: FontWeight.bold,
                                             color: (f.feedTrayStatus == 'HẾT' || f.feedTrayStatus.contains('H'))
-                                                ? const Color(0xFF16A34A)
-                                                : const Color(0xFFD97706),
+                                                ? (isAbyss ? const Color(0xFF34D399) : const Color(0xFF16A34A))
+                                                : (isAbyss ? const Color(0xFFFBBF24) : const Color(0xFFD97706)),
                                           ),
                                         ),
                                       ),
@@ -1262,12 +1486,15 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                               width: double.infinity,
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF8FAFC),
+                                color: isAbyss ? const Color(0x20000000) : const Color(0xFFF8FAFC),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
                                 '${f.feedBrand ?? 'Thức ăn chuẩn'} · ${f.notes ?? 'Không có ghi chú'} · ${dateLabel(f.fedAt.toLocal())} ${timeLabel(f.fedAt.toLocal())}',
-                                style: const TextStyle(fontSize: 11.5, color: Color(0xFF475569)),
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+                                ),
                               ),
                             ),
                           ],
@@ -1281,17 +1508,21 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
     );
   }
 
-  Widget _buildHealthTab() {
+  Widget _buildHealthTab(bool isAbyss) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Cân mẫu & sức khỏe tôm',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: isAbyss ? Colors.white : const Color(0xFF0F172A),
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -1311,7 +1542,12 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
           const SizedBox(height: 12),
           Expanded(
             child: _healthLogs.isEmpty
-                ? const Center(child: Text('Chưa có số liệu cân mẫu nào.'))
+                ? Center(
+                    child: Text(
+                      'Chưa có số liệu cân mẫu nào.',
+                      style: TextStyle(color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                    ),
+                  )
                 : ListView.separated(
                     itemCount: _healthLogs.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 10),
@@ -1320,9 +1556,11 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                       return Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: isAbyss ? const Color(0x1CFFFFFF) : Colors.white,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          border: Border.all(
+                            color: isAbyss ? const Color(0x2838BDF8) : const Color(0xFFE2E8F0),
+                          ),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1332,7 +1570,7 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                               children: [
                                 CircleAvatar(
                                   radius: 16,
-                                  backgroundColor: const Color(0xFFDCFCE7),
+                                  backgroundColor: isAbyss ? const Color(0x33059669) : const Color(0xFFDCFCE7),
                                   child: const Icon(Icons.monitor_heart, color: Color(0xFF16A34A), size: 16),
                                 ),
                                 const SizedBox(width: 10),
@@ -1344,17 +1582,25 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                                     children: [
                                       Text(
                                         'DOC: ${h.ageDays ?? 0} ngày',
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13.5,
+                                          color: isAbyss ? Colors.white : const Color(0xFF0F172A),
+                                        ),
                                       ),
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFFE0F2FE),
+                                          color: isAbyss ? const Color(0x330284C7) : const Color(0xFFE0F2FE),
                                           borderRadius: BorderRadius.circular(6),
                                         ),
                                         child: Text(
                                           _formatHealth(h.healthStatus),
-                                          style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Color(0xFF0284C7)),
+                                          style: TextStyle(
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.bold,
+                                            color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -1369,7 +1615,10 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                                     ),
                                     Text(
                                       '~${h.sizeCountPerKg ?? 0} con/kg',
-                                      style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -1393,12 +1642,16 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                               width: double.infinity,
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF8FAFC),
+                                color: isAbyss ? const Color(0x20000000) : const Color(0xFFF8FAFC),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
                                 'Ruột: ${h.gutCondition ?? 'Bình thường'} | Gan: ${h.hepatopancreas ?? 'Bình thường'} | Vỏ: ${h.shellCondition ?? 'Sáng bóng'}\nNgày đo: ${dateLabel(h.loggedAt.toLocal())}',
-                                style: const TextStyle(fontSize: 12, color: Color(0xFF334155), height: 1.4),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                                  height: 1.4,
+                                ),
                               ),
                             ),
                           ],
@@ -1412,17 +1665,21 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
     );
   }
 
-  Widget _buildTreatmentTab() {
+  Widget _buildTreatmentTab(bool isAbyss) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Men vi sinh & xử lý nước',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: isAbyss ? Colors.white : const Color(0xFF0F172A),
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -1442,7 +1699,12 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
           const SizedBox(height: 12),
           Expanded(
             child: _treatments.isEmpty
-                ? const Center(child: Text('Chưa có lần xử lý thuốc/vi sinh nào.'))
+                ? Center(
+                    child: Text(
+                      'Chưa có lần xử lý thuốc/vi sinh nào.',
+                      style: TextStyle(color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                    ),
+                  )
                 : ListView.separated(
                     itemCount: _treatments.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 10),
@@ -1451,9 +1713,11 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                       return Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: isAbyss ? const Color(0x1CFFFFFF) : Colors.white,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          border: Border.all(
+                            color: isAbyss ? const Color(0x2838BDF8) : const Color(0xFFE2E8F0),
+                          ),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1463,7 +1727,7 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                               children: [
                                 CircleAvatar(
                                   radius: 16,
-                                  backgroundColor: const Color(0xFFF3E8FF),
+                                  backgroundColor: isAbyss ? const Color(0x339333EA) : const Color(0xFFF3E8FF),
                                   child: const Icon(Icons.science, color: Color(0xFF9333EA), size: 16),
                                 ),
                                 const SizedBox(width: 10),
@@ -1475,18 +1739,28 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                                     children: [
                                       Text(
                                         t.productName,
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13.5,
+                                          color: isAbyss ? Colors.white : const Color(0xFF0F172A),
+                                        ),
                                       ),
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFFF3E8FF),
+                                          color: isAbyss ? const Color(0x339333EA) : const Color(0xFFF3E8FF),
                                           borderRadius: BorderRadius.circular(6),
-                                          border: Border.all(color: const Color(0xFFE9D5FF)),
+                                          border: Border.all(
+                                            color: isAbyss ? const Color(0x669333EA) : const Color(0xFFE9D5FF),
+                                          ),
                                         ),
                                         child: Text(
                                           _formatTreatment(t.treatmentType),
-                                          style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Color(0xFF7E22CE)),
+                                          style: TextStyle(
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.bold,
+                                            color: isAbyss ? const Color(0xFFC084FC) : const Color(0xFF7E22CE),
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -1516,12 +1790,16 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                               width: double.infinity,
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF8FAFC),
+                                color: isAbyss ? const Color(0x20000000) : const Color(0xFFF8FAFC),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
                                 'Mục đích: ${t.purpose ?? 'Xử lý định kỳ'}${t.notes != null && t.notes!.isNotEmpty ? ' · ${t.notes}' : ''}\nNgày xử lý: ${dateLabel(t.treatedAt.toLocal())}',
-                                style: const TextStyle(fontSize: 12, color: Color(0xFF334155), height: 1.4),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                                  height: 1.4,
+                                ),
                               ),
                             ),
                           ],
@@ -1535,17 +1813,21 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
     );
   }
 
-  Widget _buildWaterOpTab() {
+  Widget _buildWaterOpTab(bool isAbyss) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Xifong & thay nước ao',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: isAbyss ? Colors.white : const Color(0xFF0F172A),
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -1565,7 +1847,12 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
           const SizedBox(height: 12),
           Expanded(
             child: _waterOps.isEmpty
-                ? const Center(child: Text('Chưa có hoạt động thay nước/xifong nào.'))
+                ? Center(
+                    child: Text(
+                      'Chưa có hoạt động thay nước/xifong nào.',
+                      style: TextStyle(color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                    ),
+                  )
                 : ListView.separated(
                     itemCount: _waterOps.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 10),
@@ -1574,9 +1861,11 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                       return Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: isAbyss ? const Color(0x1CFFFFFF) : Colors.white,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          border: Border.all(
+                            color: isAbyss ? const Color(0x2838BDF8) : const Color(0xFFE2E8F0),
+                          ),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1586,14 +1875,18 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                               children: [
                                 CircleAvatar(
                                   radius: 16,
-                                  backgroundColor: const Color(0xFFCFFAFE),
+                                  backgroundColor: isAbyss ? const Color(0x330891B2) : const Color(0xFFCFFAFE),
                                   child: const Icon(Icons.waves, color: Color(0xFF0891B2), size: 16),
                                 ),
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
                                     _formatWaterOp(w.operationType, w.volumeM3),
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13.5,
+                                      color: isAbyss ? Colors.white : const Color(0xFF0F172A),
+                                    ),
                                   ),
                                 ),
                                 IconButton(
@@ -1615,12 +1908,16 @@ class _AquacultureDiaryTabState extends State<AquacultureDiaryTab> with SingleTi
                               width: double.infinity,
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF8FAFC),
+                                color: isAbyss ? const Color(0x20000000) : const Color(0xFFF8FAFC),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
                                 'Nguồn: ${w.waterSource ?? 'Ao lắng'}${w.notes != null && w.notes!.isNotEmpty ? ' · ${w.notes}' : ''}\nNgày thực hiện: ${dateLabel(w.operatedAt.toLocal())}',
-                                style: const TextStyle(fontSize: 12, color: Color(0xFF334155), height: 1.4),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                                  height: 1.4,
+                                ),
                               ),
                             ),
                           ],

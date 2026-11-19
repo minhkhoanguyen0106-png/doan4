@@ -8,8 +8,7 @@
  *   PO  -> Cau phan ap -> GPIO35 (D35)
  *   V+  -> Nguon 5V rieng
  *   GND -> GND chung
- *   DO  -> Khong noi
- *   TO  -> Khong noi
+ *  
  *
  * THINGSPEAK:
  *   FIELD 1 = Gia tri pH
@@ -31,7 +30,7 @@
 // 1. CAU HINH WIFI
 // =========================================================
 
-const char* WIFI_SSID = "QLAM 1404";
+const char* WIFI_SSID = "OnePlus Ace 2 Pro f193";
 const char* WIFI_PASSWORD = "thaochode";
 
 // =========================================================
@@ -56,6 +55,26 @@ const int ADC_SAMPLES = 20;
 const float VOLTAGE_DIVIDER_RATIO = 2.0;
 
 // =========================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // 4. THONG SO HIEU CHUAN pH
 // =========================================================
 

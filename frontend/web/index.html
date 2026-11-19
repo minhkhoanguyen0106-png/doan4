@@ -34,6 +34,11 @@
   <title>Pondora - Giám Sát & Nhật Ký Ao Tôm</title>
   <link rel="manifest" href="manifest.json">
 
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono for High-Tech Editorial Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
   <!-- PONDORA Early Warning System Web Audio Synthesizer -->
   <script>
     let _pondoraCtx = null;
@@ -118,16 +123,85 @@
       }
     };
   </script>
+  <!-- Loading styles -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #060912;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    #pondora-loading-spinner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 50% 30%, #0c1833 0%, #060912 70%);
+      z-index: 99999;
+      color: #ffffff;
+      transition: opacity 0.4s ease-out;
+    }
+    .pondora-spinner-ring {
+      width: 54px;
+      height: 54px;
+      border: 3.5px solid rgba(14, 165, 233, 0.18);
+      border-top-color: #00d2ff;
+      border-radius: 50%;
+      animation: pondoraSpin 0.9s cubic-bezier(0.55, 0.15, 0.45, 0.85) infinite;
+      box-shadow: 0 0 25px rgba(0, 210, 255, 0.35);
+    }
+    @keyframes pondoraSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .pondora-title {
+      margin-top: 22px;
+      font-weight: 800;
+      font-size: 19px;
+      letter-spacing: 2px;
+      color: #f8fafc;
+      text-transform: uppercase;
+    }
+    .pondora-subtitle {
+      margin-top: 6px;
+      font-size: 12px;
+      letter-spacing: 0.8px;
+      color: #38bdf8;
+      font-weight: 600;
+    }
+  </style>
 </head>
 <body>
-  <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
+  <div id="pondora-loading-spinner">
+    <div class="pondora-spinner-ring"></div>
+    <div class="pondora-title">PONDORA</div>
+    <div class="pondora-subtitle">Đang tải hệ thống giám sát...</div>
+  </div>
 
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
-  -->
-  <script src="flutter_bootstrap.js" async></script>
+  <script>
+    // 1. Force unregister stale service workers that may cache old assets
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    }
+
+    // 2. Hide loading screen when Flutter first renders
+    window.addEventListener('flutter-first-frame', function() {
+      const loader = document.getElementById('pondora-loading-spinner');
+      if (loader) {
+        loader.style.opacity = '0';
+        setTimeout(() => loader.remove(), 400);
+      }
+    });
+  </script>
+  <script src="flutter_bootstrap.js?v=20261119_1752" async></script>
 </body>
 </html>

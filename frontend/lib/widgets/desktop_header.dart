@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'underwater_ambient_canvas.dart';
 
 class DesktopHeader extends StatelessWidget {
   const DesktopHeader({
@@ -13,6 +14,9 @@ class DesktopHeader extends StatelessWidget {
     this.activeAlertCount = 0,
     this.onAlertClick,
     this.onSimulate,
+    this.isSimulating = false,
+    this.lightingMode = OceanLightingMode.abyssal,
+    this.onToggleLighting,
   });
 
   final String title;
@@ -25,44 +29,57 @@ class DesktopHeader extends StatelessWidget {
   final int activeAlertCount;
   final VoidCallback? onAlertClick;
   final VoidCallback? onSimulate;
+  final bool isSimulating;
+  final OceanLightingMode lightingMode;
+  final VoidCallback? onToggleLighting;
 
   @override
-  Widget build(BuildContext context) => Container(
-    height: 80,
-    padding: const EdgeInsets.symmetric(horizontal: 28),
-    decoration: const BoxDecoration(
-      color: Colors.white,
-      border: Border(bottom: BorderSide(color: Color(0xFFE8EEF6), width: 1)),
-    ),
-    child: Row(
-      children: [
-        // Title & breadcrumb
-        Expanded(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFF0F172A),
-                  letterSpacing: -0.4,
-                ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                subtitle,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF64748B),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
+  Widget build(BuildContext context) {
+    final isAbyss = lightingMode == OceanLightingMode.abyssal;
+
+    return Container(
+      height: 80,
+      padding: const EdgeInsets.symmetric(horizontal: 28),
+      decoration: BoxDecoration(
+        color: isAbyss
+            ? const Color(0xE6051124) // Deep ocean glassmorphism
+            : Colors.white.withValues(alpha: 0.94),
+        border: Border(
+          bottom: BorderSide(
+            color: isAbyss ? const Color(0x3338BDF8) : const Color(0xFFE8EEF6),
+            width: 1,
           ),
         ),
+      ),
+      child: Row(
+        children: [
+          // Title & breadcrumb
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: isAbyss ? Colors.white : const Color(0xFF0F172A),
+                    letterSpacing: -0.4,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
 
         // Active Alert Warning Pill
         if (activeAlertCount > 0) ...[
@@ -72,12 +89,15 @@ class DesktopHeader extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFFFEF2F2),
+                color: isAbyss ? const Color(0x33EF4444) : const Color(0xFFFEF2F2),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFFECACA), width: 1),
+                border: Border.all(
+                  color: isAbyss ? const Color(0xFFEF4444) : const Color(0xFFFECACA),
+                  width: 1,
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFEF4444).withValues(alpha: 0.1),
+                    color: const Color(0xFFEF4444).withValues(alpha: isAbyss ? 0.25 : 0.1),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -95,10 +115,10 @@ class DesktopHeader extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '$activeAlertCount Cảnh báo phát hiện',
-                    style: const TextStyle(
+                    '$activeAlertCount Cảnh báo nước',
+                    style: TextStyle(
                       fontSize: 12,
-                      color: Color(0xFFB91C1C),
+                      color: isAbyss ? const Color(0xFFFCA5A5) : const Color(0xFFB91C1C),
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -113,9 +133,12 @@ class DesktopHeader extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFFF8FAFD),
+            color: isAbyss ? const Color(0x2638BDF8) : const Color(0xFFF8FAFD),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+            border: Border.all(
+              color: isAbyss ? const Color(0x4D38BDF8) : const Color(0xFFE2E8F0),
+              width: 1,
+            ),
           ),
           child: Row(
             children: [
@@ -139,11 +162,11 @@ class DesktopHeader extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                '$onlineDeviceCount/$deviceCount Thiết bị trực tuyến',
-                style: const TextStyle(
+                '$onlineDeviceCount/$deviceCount Máy đo đang bật',
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF334155),
+                  color: isAbyss ? const Color(0xFFE2E8F0) : const Color(0xFF334155),
                 ),
               ),
             ],
@@ -153,18 +176,51 @@ class DesktopHeader extends StatelessWidget {
         const SizedBox(width: 12),
 
         if (onSimulate != null) ...[
-          OutlinedButton.icon(
+          FilledButton.icon(
             onPressed: onSimulate,
-            icon: const Icon(Icons.science_outlined, size: 16),
-            label: const Text('Mô phỏng AI & Cảm biến'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF4F46E5),
-              side: const BorderSide(color: Color(0xFFC7D2FE)),
-              backgroundColor: const Color(0xFFEEF2FF),
+            icon: Icon(
+              isSimulating ? Icons.science_rounded : Icons.science_outlined,
+              size: 16,
+            ),
+            label: Text(isSimulating ? 'Đang thử số liệu' : 'Thử số liệu'),
+            style: FilledButton.styleFrom(
+              backgroundColor: isSimulating ? const Color(0xFFF59E0B) : const Color(0xFFEEF2FF),
+              foregroundColor: isSimulating ? Colors.white : const Color(0xFF4F46E5),
+              elevation: 0,
               visualDensity: VisualDensity.compact,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
+                side: BorderSide(
+                  color: isSimulating ? const Color(0xFFD97706) : const Color(0xFFC7D2FE),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
+
+        // Underwater Ocean Lighting Toggle (Abyssal Bioluminescent vs Sunlit Lagoon)
+        if (onToggleLighting != null) ...[
+          IconButton.filledTonal(
+            onPressed: onToggleLighting,
+            tooltip: isAbyss
+                ? 'Đang bật: Đại dương huyền ảo (Bấm để chuyển sang Nắng mai)'
+                : 'Đang bật: Nước trong nắng mai (Bấm để chuyển sang Đại dương huyền ảo)',
+            icon: Icon(
+              isAbyss ? Icons.nights_stay_rounded : Icons.wb_sunny_rounded,
+              size: 19,
+              color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFFF59E0B),
+            ),
+            style: IconButton.styleFrom(
+              backgroundColor: isAbyss
+                  ? const Color(0xFF0C2449)
+                  : const Color(0xFFFEF3C7),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: isAbyss ? const Color(0x6638BDF8) : const Color(0xFFFDE68A),
+                ),
               ),
             ),
           ),
@@ -176,10 +232,13 @@ class DesktopHeader extends StatelessWidget {
           onPressed: onRefresh,
           tooltip: 'Làm mới dữ liệu',
           style: IconButton.styleFrom(
-            backgroundColor: const Color(0xFFF1F5F9),
-            foregroundColor: const Color(0xFF0F62FE),
+            backgroundColor: isAbyss ? const Color(0xFF0C2449) : const Color(0xFFF1F5F9),
+            foregroundColor: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0F62FE),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
+              side: BorderSide(
+                color: isAbyss ? const Color(0x6638BDF8) : Colors.transparent,
+              ),
             ),
           ),
           icon: loading
@@ -201,4 +260,5 @@ class DesktopHeader extends StatelessWidget {
       ],
     ),
   );
+  }
 }

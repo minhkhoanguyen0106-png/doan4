@@ -18,8 +18,10 @@ import '../tabs/alerts_tab.dart';
 import '../tabs/aquaculture_diary_tab.dart';
 import '../tabs/devices_tab.dart';
 import '../tabs/history_tab.dart';
+import '../tabs/landing_tab.dart';
 import '../tabs/overview_tab.dart';
 import '../tabs/sites_tab.dart';
+import '../../widgets/underwater_ambient_canvas.dart';
 
 class WaterHomeScreen extends StatefulWidget {
   const WaterHomeScreen({
@@ -38,7 +40,9 @@ class WaterHomeScreen extends StatefulWidget {
 }
 
 class _WaterHomeScreenState extends State<WaterHomeScreen> {
-  int _tab = 0;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  OceanLightingMode _lightingMode = OceanLightingMode.abyssal;
+  int _tab = 7;
   bool _loading = true;
   String? _error;
   List<MonitoringSite> _sites = [];
@@ -419,6 +423,7 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final title = switch (_tab) {
+      7 => 'Trang chủ',
       1 => 'Điểm quan trắc',
       2 => 'Thiết bị',
       3 => 'Lịch sử phép đo',
@@ -433,7 +438,8 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
       builder: (context, constraints) {
         final desktop = constraints.maxWidth >= 1000;
         return Scaffold(
-          appBar: desktop
+          key: _scaffoldKey,
+          appBar: desktop || _tab == 7
               ? null
               : AppBar(
                   titleSpacing: 8,
@@ -468,108 +474,117 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
                     const SizedBox(width: 8),
                   ],
                 ),
-          drawer: desktop
-              ? null
-              : Drawer(
-                  width: 280,
-                  backgroundColor: const Color(0xFF060912),
-                  child: SafeArea(
-                    child: WaterSidebar(
-                      selectedIndex: _tab,
-                      onSelect: (idx) {
-                        Navigator.of(context).pop();
-                        _selectTab(idx);
-                      },
-                      isAdmin: widget.account.isAdmin,
-                      account: widget.account,
-                      onCreateSite: () {
-                        Navigator.of(context).pop();
-                        _createSite();
-                      },
-                      onLogout: () {
-                        Navigator.of(context).pop();
-                        widget.onLogout();
-                      },
-                      activeAlertCount: activeAlertCount,
-                    ),
-                  ),
-                ),
-          body: desktop
-              ? Row(
-                  children: [
-                    WaterSidebar(
-                      selectedIndex: _tab,
-                      onSelect: _selectTab,
-                      isAdmin: widget.account.isAdmin,
-                      account: widget.account,
-                      onCreateSite: _createSite,
-                      onLogout: widget.onLogout,
-                      activeAlertCount: activeAlertCount,
-                    ),
-                    Expanded(
-                      child: Stack(
-                        children: [
-                          const Positioned.fill(
-                            child: _DashboardBackgroundAccents(),
-                          ),
-                          Column(
-                            children: [
-                              DesktopHeader(
-                                title: title,
-                                subtitle: _tab == 0
-                                    ? 'Theo dõi các chỉ số và hoạt động của cảm biến.'
-                                    : _tab == 6
-                                    ? 'Số hóa thông tin ao nuôi, nhật ký chăm sóc, tôm và thức ăn.'
-                                    : _tab == 5
-                                    ? 'Quản lý quyền truy cập và trạng thái tài khoản.'
-                                    : _tab == 1
-                                    ? 'Quản lý các vị trí đang thu thập dữ liệu nước.'
-                                    : _tab == 2
-                                    ? 'Theo dõi kết nối và dữ liệu từ các thiết bị.'
-                                    : _tab == 4
-                                    ? 'Cảnh báo chất lượng nước và tình trạng thiết bị.'
-                                    : 'Tra cứu và đối chiếu các mẫu nước đã ghi nhận.',
-                                loading: _loading,
-                                onRefresh: _load,
-                                accountMenu: _accountMenu(),
-                                onlineDeviceCount: _devices
-                                    .where((device) => device.online)
-                                    .length,
-                                deviceCount: _devices.length,
-                                activeAlertCount: activeAlertCount,
-                                onAlertClick: () => _selectTab(4),
-                                onSimulate: _openSimulationDialog,
-                              ),
-                              Expanded(child: _pageContent()),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+          drawer: Drawer(
+            width: 280,
+            backgroundColor: const Color(0xFF060912),
+            child: SafeArea(
+              child: WaterSidebar(
+                selectedIndex: _tab,
+                onSelect: (idx) {
+                  Navigator.of(context).pop();
+                  _selectTab(idx);
+                },
+                isAdmin: widget.account.isAdmin,
+                account: widget.account,
+                onCreateSite: () {
+                  Navigator.of(context).pop();
+                  _createSite();
+                },
+                onLogout: () {
+                  Navigator.of(context).pop();
+                  widget.onLogout();
+                },
+                activeAlertCount: activeAlertCount,
+              ),
+            ),
+          ),
+          body: _tab == 7
+              ? LandingTab(
+                  latest: _latest,
+                  lightingMode: _lightingMode,
+                  onToggleLighting: () => setState(() => _lightingMode = _lightingMode == OceanLightingMode.abyssal ? OceanLightingMode.sunlit : OceanLightingMode.abyssal),
+                  onOpenMenu: () => _scaffoldKey.currentState?.openDrawer(),
+                  onNavigateToOverview: () => _selectTab(0),
+                  onNavigateToDiary: () => _selectTab(6),
+                  onNavigateToSites: () => _selectTab(1),
+                  onViewActionPlan: _showActionPlan,
+                  onSimulate: _openSimulationDialog,
                 )
-              : Stack(
-                  children: [
-                    const Positioned.fill(
-                      child: _DashboardBackgroundAccents(),
-                    ),
-                    _pageContent(),
-                  ],
+              : UnderwaterAmbientBackground(
+                  lightingMode: _lightingMode,
+                  onToggleLighting: () => setState(() => _lightingMode = _lightingMode == OceanLightingMode.abyssal ? OceanLightingMode.sunlit : OceanLightingMode.abyssal),
+                  child: desktop
+                      ? Row(
+                          children: [
+                            WaterSidebar(
+                              selectedIndex: _tab,
+                              onSelect: _selectTab,
+                              isAdmin: widget.account.isAdmin,
+                              account: widget.account,
+                              onCreateSite: _createSite,
+                              isAbyss: _lightingMode == OceanLightingMode.abyssal,
+                              onLogout: widget.onLogout,
+                              activeAlertCount: activeAlertCount,
+                            ),
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  DesktopHeader(
+                                    title: title,
+                                    subtitle: _tab == 0
+                                        ? 'Theo dõi các chỉ số và hoạt động của cảm biến.'
+                                        : _tab == 6
+                                        ? 'Số hóa thông tin ao nuôi, nhật ký chăm sóc, tôm và thức ăn.'
+                                        : _tab == 5
+                                        ? 'Quản lý quyền truy cập và trạng thái tài khoản.'
+                                        : _tab == 1
+                                        ? 'Quản lý các vị trí đang thu thập dữ liệu nước.'
+                                        : _tab == 2
+                                        ? 'Theo dõi kết nối và dữ liệu từ các thiết bị.'
+                                        : _tab == 4
+                                        ? 'Cảnh báo chất lượng nước và tình trạng thiết bị.'
+                                        : 'Tra cứu và đối chiếu các mẫu nước đã ghi nhận.',
+                                    loading: _loading,
+                                    onRefresh: _load,
+                                    accountMenu: _accountMenu(),
+                                    onlineDeviceCount: _devices
+                                        .where((device) => device.online)
+                                        .length,
+                                    deviceCount: _devices.length,
+                                    activeAlertCount: activeAlertCount,
+                                    onAlertClick: () => _selectTab(4),
+                                    onSimulate: _openSimulationDialog,
+                                    lightingMode: _lightingMode,
+                                    onToggleLighting: () => setState(() => _lightingMode = _lightingMode == OceanLightingMode.abyssal ? OceanLightingMode.sunlit : OceanLightingMode.abyssal),
+                                  ),
+                                  Expanded(child: _pageContent()),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
+                      : Column(
+                          children: [
+                            Expanded(child: _pageContent()),
+                          ],
+                        ),
                 ),
-          floatingActionButton: !desktop && _tab == 1
+          floatingActionButton: desktop || _tab == 7
+              ? null
+              : _tab == 1
               ? FloatingActionButton.extended(
                   onPressed: _createSite,
                   icon: const Icon(Icons.add_location_alt_outlined),
                   label: const Text('Thêm điểm'),
                 )
-              : !desktop && _tab == 2 && _selected != null
+              : _tab == 2 && _selected != null
               ? FloatingActionButton.extended(
                   onPressed: _createDevice,
                   icon: const Icon(Icons.add),
                   label: const Text('Thêm thiết bị'),
                 )
               : null,
-          bottomNavigationBar: desktop
+          bottomNavigationBar: desktop || _tab == 7
               ? null
               : NavigationBarTheme(
                   data: NavigationBarThemeData(
@@ -802,11 +817,24 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
       ? const Center(child: CircularProgressIndicator())
       : _error != null
       ? ErrorPanel(message: _error!, onRetry: _load)
+      : _tab == 7
+      ? LandingTab(
+          latest: _latest,
+          lightingMode: _lightingMode,
+          onToggleLighting: () => setState(() => _lightingMode = _lightingMode == OceanLightingMode.abyssal ? OceanLightingMode.sunlit : OceanLightingMode.abyssal),
+          onOpenMenu: () => _scaffoldKey.currentState?.openDrawer(),
+          onNavigateToOverview: () => _selectTab(0),
+          onNavigateToDiary: () => _selectTab(6),
+          onNavigateToSites: () => _selectTab(1),
+          onViewActionPlan: _showActionPlan,
+          onSimulate: _openSimulationDialog,
+        )
       : Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1320),
             child: _tab == 5
                 ? AdminTab(
+                    lightingMode: _lightingMode,
                     account: widget.account,
                     users: _adminUsers,
                     loading: _adminLoading,
@@ -817,6 +845,7 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
                   )
                 : _tab == 6
                 ? AquacultureDiaryTab(
+                    lightingMode: _lightingMode,
                     api: widget.api,
                     sites: _sites,
                     selectedSite: _selected,
@@ -824,6 +853,7 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
                   )
                 : _tab == 1
                 ? SitesTab(
+                    lightingMode: _lightingMode,
                     sites: _sites,
                     selectedSite: _selected,
                     onCreateSite: _createSite,
@@ -834,6 +864,7 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
                   )
                 : _tab == 2
                 ? DevicesTab(
+                    lightingMode: _lightingMode,
                     sites: _sites,
                     selectedSite: _selected,
                     devices: _devices,
@@ -843,6 +874,7 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
                   )
                 : _tab == 3
                 ? HistoryTab(
+                    lightingMode: _lightingMode,
                     sites: _sites,
                     selectedSite: _selected,
                     history: _history,
@@ -858,6 +890,7 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
                   )
                 : _tab == 4
                 ? AlertsTab(
+                    lightingMode: _lightingMode,
                     sites: _sites,
                     selectedSite: _selected,
                     alerts: _alerts,
@@ -867,6 +900,7 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
                     onResolveAlert: _resolveAlert,
                   )
                 : OverviewTab(
+                    lightingMode: _lightingMode,
                     sites: _sites,
                     selectedSite: _selected,
                     devices: _devices,
@@ -1098,142 +1132,5 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
       }
     });
   }
-}
-
-class _DashboardBackgroundAccents extends StatelessWidget {
-  const _DashboardBackgroundAccents();
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Stack(
-        children: [
-          // Base Canvas Gradient with subtle tech tone
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFFF1F6FD), // Soft blue-tinted clean canvas
-                    Color(0xFFF8FAFC), // Slate clean canvas
-                    Color(0xFFEDF5FF), // Subtle aqua tint at bottom right
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // Geometric water ripples & tech dot matrix
-          Positioned.fill(
-            child: CustomPaint(
-              painter: _TechWaterAccentPainter(),
-            ),
-          ),
-
-          // Top-right prominent cyan/aqua ambient aura
-          Positioned(
-            top: -120,
-            right: -80,
-            child: Container(
-              width: 620,
-              height: 620,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    const Color(0xFF00D2FF).withValues(alpha: 0.18),
-                    const Color(0xFF0284C7).withValues(alpha: 0.08),
-                    Colors.transparent,
-                  ],
-                  stops: const [0.0, 0.45, 1.0],
-                ),
-              ),
-            ),
-          ),
-
-          // Center-left electric sapphire aura
-          Positioned(
-            top: 200,
-            left: -100,
-            child: Container(
-              width: 520,
-              height: 520,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    const Color(0xFF0F62FE).withValues(alpha: 0.11),
-                    const Color(0xFF38BDF8).withValues(alpha: 0.04),
-                    Colors.transparent,
-                  ],
-                  stops: const [0.0, 0.55, 1.0],
-                ),
-              ),
-            ),
-          ),
-
-          // Bottom-right soft emerald/aqua aura
-          Positioned(
-            bottom: -60,
-            right: -60,
-            child: Container(
-              width: 480,
-              height: 480,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    const Color(0xFF10B981).withValues(alpha: 0.09),
-                    Colors.transparent,
-                  ],
-                  stops: const [0.0, 1.0],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TechWaterAccentPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    // 1. Water Ripple Concentric Rings in top-right
-    final rippleCenter = Offset(size.width - 60, 120);
-    final ripplePaint = Paint()
-      ..color = const Color(0xFF0284C7).withValues(alpha: 0.13)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-
-    canvas.drawCircle(rippleCenter, 120, ripplePaint);
-    canvas.drawCircle(rippleCenter, 240, ripplePaint);
-    canvas.drawCircle(rippleCenter, 380, ripplePaint);
-    canvas.drawCircle(rippleCenter, 540, ripplePaint);
-
-    // 2. High-Tech Dot Matrix Grid in upper canvas
-    final dotPaint = Paint();
-    const step = 26.0;
-    final maxX = size.width;
-    final maxY = size.height.clamp(0.0, 520.0);
-
-    for (double x = 30; x < maxX; x += step) {
-      for (double y = 15; y < maxY; y += step) {
-        final opacityFactor = (1.0 - (y / maxY)).clamp(0.0, 1.0);
-        if (opacityFactor > 0.08) {
-          dotPaint.color = const Color(0xFF0284C7).withValues(
-            alpha: 0.10 * opacityFactor,
-          );
-          canvas.drawCircle(Offset(x, y), 1.1, dotPaint);
-        }
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 

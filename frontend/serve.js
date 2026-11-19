@@ -53,14 +53,33 @@ function handleRequest(req, res) {
 
   // 2. Phục vụ tài nguyên tĩnh Web
   let safePath = path.normalize(decodeURIComponent(req.url.split('?')[0])).replace(/^(\.\.[\/\\])+/, '');
+  if (safePath.startsWith(path.sep)) safePath = safePath.substring(1);
+
+  // If browser asks for flutter_service_worker.js, return a valid no-op script so it doesn't crash
+  if (safePath === 'flutter_service_worker.js') {
+    res.writeHead(200, {
+      'Content-Type': 'application/javascript; charset=utf-8',
+      'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0'
+    });
+    res.end('// PONDORA noop service worker\nself.addEventListener("install", () => self.skipWaiting());\nself.addEventListener("activate", () => self.clients.claim());\n');
+    return;
+  }
+
   let filePath = path.join(WEB_DIR, safePath);
 
   if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
     filePath = path.join(filePath, 'index.html');
   }
 
-  // Fallback to index.html for SPA client-side routing
+  // Fallback to index.html ONLY for SPA clean routes (no extension)
   if (!fs.existsSync(filePath)) {
+    const requestedExt = path.extname(safePath);
+    if (requestedExt && requestedExt !== '.html') {
+      console.warn(`[404 NOT FOUND] ${req.url}`);
+      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+      res.end('404 Not Found: ' + req.url);
+      return;
+    }
     filePath = path.join(WEB_DIR, 'index.html');
   }
 
@@ -77,7 +96,7 @@ function handleRequest(req, res) {
     res.writeHead(200, {
       'Content-Type': contentType,
       'Access-Control-Allow-Origin': '*',
-      'Cache-Control': 'no-cache'
+      'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0'
     });
     res.end(content);
   });

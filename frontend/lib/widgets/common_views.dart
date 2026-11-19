@@ -123,22 +123,27 @@ class SitePicker extends StatelessWidget {
     required this.selected,
     required this.onChanged,
     required this.onAdd,
+    this.isAbyss = true,
   });
   final List<MonitoringSite> sites;
   final MonitoringSite selected;
   final ValueChanged<MonitoringSite> onChanged;
   final VoidCallback onAdd;
+  final bool isAbyss;
 
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
       borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
+      border: Border.all(
+        color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFBAE6FD),
+        width: 1.2,
+      ),
       boxShadow: [
         BoxShadow(
-          color: const Color(0xFF0F172A).withValues(alpha: 0.03),
+          color: (isAbyss ? const Color(0xFF00E5FF) : const Color(0xFF0284C7)).withValues(alpha: isAbyss ? 0.08 : 0.08),
           blurRadius: 14,
           offset: const Offset(0, 3),
         ),
@@ -150,10 +155,14 @@ class SitePicker extends StatelessWidget {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: const Color(0xFFEFF6FF),
+            color: isAbyss ? const Color(0x2238BDF8) : const Color(0xFFEFF6FF),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: const Icon(Icons.location_on_rounded, color: Color(0xFF0284C7), size: 19),
+          child: Icon(
+            Icons.location_on_rounded,
+            color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+            size: 19,
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -163,10 +172,14 @@ class SitePicker extends StatelessWidget {
               value: selected.id,
               borderRadius: BorderRadius.circular(16),
               elevation: 8,
-              dropdownColor: Colors.white,
-              icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF0284C7), size: 20),
-              style: const TextStyle(
-                color: Color(0xFF0F172A),
+              dropdownColor: isAbyss ? const Color(0xFF08182D) : Colors.white,
+              icon: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                size: 20,
+              ),
+              style: TextStyle(
+                color: isAbyss ? Colors.white : const Color(0xFF0F172A),
                 fontWeight: FontWeight.w800,
                 fontSize: 14,
               ),
@@ -176,8 +189,8 @@ class SitePicker extends StatelessWidget {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       s.name,
-                      style: const TextStyle(
-                        color: Color(0xFF0F172A),
+                      style: TextStyle(
+                        color: isAbyss ? Colors.white : const Color(0xFF0F172A),
                         fontWeight: FontWeight.w800,
                         fontSize: 14,
                       ),
@@ -201,17 +214,17 @@ class SitePicker extends StatelessWidget {
                                 height: 30,
                                 decoration: BoxDecoration(
                                   color: isSelected
-                                      ? const Color(0xFF0284C7).withValues(alpha: 0.12)
-                                      : const Color(0xFFF1F5F9),
+                                      ? (isAbyss ? const Color(0x3338BDF8) : const Color(0xFF0284C7).withValues(alpha: 0.12))
+                                      : (isAbyss ? const Color(0x15FFFFFF) : const Color(0xFFF1F5F9)),
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
-                                    color: isSelected ? const Color(0xFF0284C7) : const Color(0xFFE2E8F0),
+                                    color: isSelected ? const Color(0xFF38BDF8) : (isAbyss ? const Color(0x2838BDF8) : const Color(0xFFE2E8F0)),
                                   ),
                                 ),
                                 child: Icon(
                                   Icons.water_rounded,
                                   size: 16,
-                                  color: isSelected ? const Color(0xFF0284C7) : const Color(0xFF64748B),
+                                  color: isSelected ? const Color(0xFF38BDF8) : (isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -223,7 +236,7 @@ class SitePicker extends StatelessWidget {
                                     Text(
                                       s.name,
                                       style: TextStyle(
-                                        color: isSelected ? const Color(0xFF0284C7) : const Color(0xFF0F172A),
+                                        color: isSelected ? const Color(0xFF38BDF8) : (isAbyss ? Colors.white : const Color(0xFF0F172A)),
                                         fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                                         fontSize: 13.5,
                                       ),
@@ -232,14 +245,17 @@ class SitePicker extends StatelessWidget {
                                     if (s.location != null && s.location!.isNotEmpty)
                                       Text(
                                         s.location!,
-                                        style: const TextStyle(fontSize: 10.5, color: Color(0xFF94A3B8)),
+                                        style: TextStyle(
+                                          fontSize: 10.5,
+                                          color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF94A3B8),
+                                        ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                   ],
                                 ),
                               ),
                               if (isSelected)
-                                const Icon(Icons.check_circle_rounded, size: 16, color: Color(0xFF0284C7)),
+                                const Icon(Icons.check_circle_rounded, size: 16, color: Color(0xFF38BDF8)),
                             ],
                           ),
                         ),
@@ -260,8 +276,9 @@ class SitePicker extends StatelessWidget {
           icon: const Icon(Icons.add_rounded, size: 16),
           label: const Text('Thêm điểm'),
           style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFF0284C7),
-            side: const BorderSide(color: Color(0xFFBAE6FD)),
+            foregroundColor: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+            side: BorderSide(color: isAbyss ? const Color(0x6638BDF8) : const Color(0xFFBAE6FD)),
+            backgroundColor: isAbyss ? const Color(0x1838BDF8) : Colors.transparent,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

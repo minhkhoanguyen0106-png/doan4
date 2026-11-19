@@ -1,0 +1,1790 @@
+import 'dart:math' as math;
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../models/water_models.dart';
+import '../../widgets/underwater_ambient_canvas.dart';
+import '../../widgets/tutorial_video_player.dart';
+
+/// ============================================================================
+/// CẤU HÌNH ĐƯỜNG DẪN VIDEO HƯỚNG DẪN HỆ THỐNG PONDORA (SYSTEM TUTORIAL VIDEO)
+/// ============================================================================
+/// Dán URL video hướng dẫn vào hằng số kTutorialVideoUrl bên dưới.
+/// Hỗ trợ: đường dẫn file .mp4, .webm, CDN, stream hoặc video trực tiếp.
+/// Nếu để trống (""), hệ thống sẽ hiển thị ảnh Poster nghệ thuật cùng chế độ
+/// mô phỏng 4 giai đoạn hệ thống chuẩn mực, tuyệt đối không phát video mẫu sai lệch.
+const String kTutorialVideoUrl = kDefaultTutorialVideoUrl; // <-- DÁN LINK VIDEO TẠI ĐÂY
+const String kTutorialVideoPoster = kDefaultTutorialVideoPoster;
+
+class LandingTab extends StatefulWidget {
+  const LandingTab({
+    super.key,
+    required this.onNavigateToOverview,
+    required this.onNavigateToDiary,
+    required this.onNavigateToSites,
+    required this.onViewActionPlan,
+    required this.onSimulate,
+    this.latest,
+    this.lightingMode = OceanLightingMode.abyssal,
+    this.onToggleLighting,
+    this.onOpenMenu,
+    this.videoUrl = kTutorialVideoUrl,
+    this.videoPoster = kTutorialVideoPoster,
+  });
+
+  final VoidCallback onNavigateToOverview;
+  final VoidCallback onNavigateToDiary;
+  final VoidCallback onNavigateToSites;
+  final VoidCallback onViewActionPlan;
+  final VoidCallback onSimulate;
+  final WaterMeasurement? latest;
+  final OceanLightingMode lightingMode;
+  final VoidCallback? onToggleLighting;
+  final VoidCallback? onOpenMenu;
+  final String videoUrl;
+  final String videoPoster;
+
+  @override
+  State<LandingTab> createState() => _LandingTabState();
+}
+
+class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateMixin {
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey<TutorialVideoPlayerState> _videoPlayerKey = GlobalKey<TutorialVideoPlayerState>();
+  double _scrollOffset = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (mounted) {
+      final offset = _scrollController.offset;
+      setState(() {
+        _scrollOffset = offset;
+      });
+      // Tự động tạm dừng phát video khi người dùng cuộn rời xa khu vực video (tránh phát ngầm)
+      if (offset < 40 || offset > 1650) {
+        _videoPlayerKey.currentState?.pauseVideo();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isDesktop = width >= 980;
+    final isTablet = width >= 680 && width < 980;
+    final isAbyss = widget.lightingMode == OceanLightingMode.abyssal;
+
+    return UnderwaterAmbientBackground(
+      scrollOffset: _scrollOffset,
+      lightingMode: widget.lightingMode,
+      onToggleLighting: widget.onToggleLighting,
+      child: Stack(
+        children: [
+          // Ambient Oceanic Glows
+          Positioned(
+            top: -120,
+            left: width * 0.15,
+            child: Container(
+              width: 520,
+              height: 520,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xFF00D2FF).withValues(alpha: isAbyss ? 0.14 : 0.06),
+                    const Color(0xFF0284C7).withValues(alpha: 0.03),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 400,
+            right: -100,
+            child: Container(
+              width: 480,
+              height: 480,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xFF7C3AED).withValues(alpha: isAbyss ? 0.12 : 0.04),
+                    const Color(0xFF38BDF8).withValues(alpha: 0.03),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Main Scrollable Body
+          Scrollbar(
+            controller: _scrollController,
+            thumbVisibility: true,
+            interactive: true,
+            thickness: 7,
+            radius: const Radius.circular(8),
+            child: ListView(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              padding: EdgeInsets.symmetric(
+                horizontal: isDesktop ? 64 : (isTablet ? 32 : 18),
+                vertical: 14,
+              ),
+              children: [
+                // 1. Floating Pill Navbar
+                _buildFloatingNav(context, isDesktop, isAbyss),
+
+                SizedBox(height: isDesktop ? 20 : 14),
+
+                // 2. Editorial Hero Headline & Action Group
+                _buildHeroHeader(context, isDesktop, isAbyss),
+
+                SizedBox(height: isDesktop ? 14 : 10),
+
+                // 3. 3D Perspective Flip Video Showcase (Khám phá cách sử dụng hệ thống)
+                _build3DVideoShowcase(context, isDesktop, isAbyss),
+
+                SizedBox(height: isDesktop ? 64 : 44),
+
+                // 4. Live Precision Telemetry Strip (Instrument bar)
+                _buildPrecisionTelemetryStrip(context, isDesktop, isAbyss),
+
+                SizedBox(height: isDesktop ? 80 : 56),
+
+                // 5. Asymmetric Editorial Problem Section ("Biến động vô hình")
+                _buildEditorialProblemSection(context, isDesktop, isAbyss),
+
+                SizedBox(height: isDesktop ? 84 : 60),
+
+                // 6. Bento-Grid Architecture ("4 Trụ Cột Nền Tảng")
+                _buildBentoTechnologySection(context, isDesktop, isAbyss),
+
+                SizedBox(height: isDesktop ? 84 : 60),
+
+                // 7. Minimalist Operational Metrics (Reliability)
+                _buildEditorialMetricsSection(context, isDesktop, isAbyss),
+
+                SizedBox(height: isDesktop ? 80 : 56),
+
+                // 8. 3-Step Turnkey Deployment
+                _buildEditorialWorkflowSection(context, isDesktop, isAbyss),
+
+                SizedBox(height: isDesktop ? 80 : 56),
+
+                // 9. Premium Editorial Call To Action Banner
+                _buildEditorialCtaBanner(context, isDesktop, isAbyss),
+
+                const SizedBox(height: 72),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ===========================================================================
+  // 1. FLOATING PILL NAVBAR
+  // ===========================================================================
+  Widget _buildFloatingNav(BuildContext context, bool isDesktop, bool isAbyss) {
+    return Center(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 1080),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          color: isAbyss
+              ? const Color(0xCC061226)
+              : Colors.white.withValues(alpha: 0.90),
+          borderRadius: BorderRadius.circular(32),
+          border: Border.all(
+            color: isAbyss ? const Color(0x3338BDF8) : const Color(0xFFBAE6FD),
+            width: 1.1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: (isAbyss ? Colors.black : const Color(0xFF0F172A)).withValues(alpha: 0.15),
+              blurRadius: 24,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Drawer menu toggle (available on full-screen landing view)
+            if (widget.onOpenMenu != null) ...[
+              IconButton(
+                onPressed: widget.onOpenMenu,
+                tooltip: 'Menu hệ thống & Quản trị',
+                icon: Icon(
+                  Icons.menu_rounded,
+                  color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0F62FE),
+                  size: 20,
+                ),
+                style: IconButton.styleFrom(
+                  backgroundColor: isAbyss ? const Color(0x2238BDF8) : const Color(0xFFE0F2FE),
+                  padding: const EdgeInsets.all(7),
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
+
+            // Brand Mark & Monogram
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF00D2FF), Color(0xFF0F62FE)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(9),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF00D2FF).withValues(alpha: 0.35),
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.water_drop_rounded, color: Colors.white, size: 18),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              'PONDORA',
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w900,
+                fontSize: 15.5,
+                color: Colors.white,
+                letterSpacing: 1.6,
+              ),
+            ),
+            const Spacer(),
+
+            if (isDesktop) ...[
+              _navLinkItem('XEM NƯỚC AO', widget.onNavigateToOverview, isAbyss),
+              _navLinkItem('GỢI Ý XỬ LÝ', widget.onViewActionPlan, isAbyss),
+              _navLinkItem('THỬ SỐ LIỆU', widget.onSimulate, isAbyss),
+              _navLinkItem('SỔ NHẬT KÝ', widget.onNavigateToDiary, isAbyss),
+              const SizedBox(width: 12),
+            ],
+
+            // Ocean Lighting Mode Toggle Button
+            if (widget.onToggleLighting != null) ...[
+              IconButton(
+                onPressed: widget.onToggleLighting,
+                tooltip: isAbyss
+                    ? 'Chế độ hiện tại: Đại dương huyền ảo (Bấm để chuyển sang Nắng mai)'
+                    : 'Chế độ hiện tại: Nước trong nắng mai (Bấm để chuyển sang Đại dương)',
+                icon: Icon(
+                  isAbyss ? Icons.nights_stay_rounded : Icons.wb_sunny_rounded,
+                  color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFFF59E0B),
+                  size: 19,
+                ),
+                style: IconButton.styleFrom(
+                  backgroundColor: isAbyss ? const Color(0xFF0B1E3B) : const Color(0xFFFEF3C7),
+                  padding: const EdgeInsets.all(8),
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
+
+            // Primary Enter Dashboard Button
+            FilledButton.icon(
+              onPressed: widget.onNavigateToOverview,
+              icon: const Icon(Icons.speed_rounded, size: 15),
+              label: Text(
+                'VÀO XEM AO',
+                style: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 12,
+                  letterSpacing: 0.8,
+                ),
+              ),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF0284C7),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                elevation: 3,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _navLinkItem(String label, VoidCallback onTap, bool isAbyss) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        hoverColor: (isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7)).withValues(alpha: 0.15),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Text(
+            label.toUpperCase(),
+            style: GoogleFonts.plusJakartaSans(
+              color: Colors.white,
+              fontWeight: FontWeight.w900,
+              fontSize: 13.0,
+              letterSpacing: 1.0,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ===========================================================================
+  // 2. EDITORIAL HERO BANNER
+  // ===========================================================================
+  Widget _buildHeroHeader(BuildContext context, bool isDesktop, bool isAbyss) {
+    return Column(
+      children: [
+        // Category Eyebrow Badge
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+          decoration: BoxDecoration(
+            color: (isAbyss ? const Color(0xFF00D2FF) : Colors.white).withValues(alpha: isAbyss ? 0.15 : 0.22),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: (isAbyss ? const Color(0xFF00D2FF) : Colors.white).withValues(alpha: isAbyss ? 0.35 : 0.60),
+              width: 1.1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isAbyss ? 0.20 : 0.10),
+                blurRadius: 8,
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 7,
+                height: 7,
+                decoration: BoxDecoration(
+                  color: isAbyss ? const Color(0xFF00D2FF) : Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: (isAbyss ? const Color(0xFF00D2FF) : Colors.white).withValues(alpha: 0.8),
+                      blurRadius: 6,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'THEO DÕI NƯỚC AO TÔM TỰ ĐỘNG',
+                style: GoogleFonts.jetBrainsMono(
+                  color: isAbyss ? const Color(0xFF38BDF8) : Colors.white,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.1,
+                  shadows: const [
+                    Shadow(color: Color(0x33000000), blurRadius: 4, offset: Offset(0, 1)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+
+        // Expressive Main Headline with Controlled Hierarchy
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 820),
+          child: RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: isDesktop ? 33 : 23,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.6,
+                height: 1.22,
+                color: Colors.white,
+                shadows: const [
+                  Shadow(color: Color(0x3D000000), blurRadius: 10, offset: Offset(0, 2)),
+                ],
+              ),
+              children: [
+                const TextSpan(text: 'Theo dõi chất lượng nước &\n'),
+                TextSpan(
+                  text: 'chăm sóc ao tôm dễ dàng',
+                  style: TextStyle(
+                    color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFFE0F2FE),
+                    shadows: const [
+                      Shadow(color: Color(0x33000000), blurRadius: 10, offset: Offset(0, 2)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+
+        // Editorial Narrative Lead
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 640),
+          child: Text(
+            'Hệ thống tự động đo pH, oxy, nhiệt độ và tính khí độc liên tục ngày đêm. Cảnh báo ngay khi nước có dấu hiệu bất thường và gợi ý cách xử lý kịp thời.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: isDesktop ? 13.5 : 12,
+              fontWeight: FontWeight.w600,
+              color: isAbyss ? const Color(0xFFCBD5E1) : Colors.white.withValues(alpha: 0.95),
+              height: 1.5,
+              shadows: const [
+                Shadow(color: Color(0x28000000), blurRadius: 6, offset: Offset(0, 1)),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+
+        // Action Buttons with Distinct Typographic & Visual Weights
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 10,
+          runSpacing: 8,
+          children: [
+            FilledButton.icon(
+              onPressed: widget.onNavigateToOverview,
+              icon: const Icon(Icons.arrow_forward_rounded, size: 15),
+              label: Text(
+                'XEM NƯỚC AO',
+                style: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 12,
+                  letterSpacing: 0.6,
+                ),
+              ),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF0284C7),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 3,
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: widget.onViewActionPlan,
+              icon: const Icon(Icons.psychology_rounded, size: 16),
+              label: Text(
+                'GỢI Ý XỬ LÝ NƯỚC',
+                style: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 12,
+                  letterSpacing: 0.6,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: isAbyss ? const Color(0x28FFFFFF) : Colors.white.withValues(alpha: 0.20),
+                side: BorderSide(
+                  color: isAbyss ? const Color(0x6638BDF8) : Colors.white.withValues(alpha: 0.75),
+                  width: 1.2,
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: widget.onSimulate,
+              icon: const Icon(Icons.science_outlined, size: 16),
+              label: Text(
+                'THỬ NGHIỆM SỐ LIỆU',
+                style: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 12,
+                  letterSpacing: 0.6,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: isAbyss ? const Color(0x28FFFFFF) : Colors.white.withValues(alpha: 0.20),
+                side: BorderSide(
+                  color: isAbyss ? const Color(0x666366F1) : Colors.white.withValues(alpha: 0.75),
+                  width: 1.2,
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // ===========================================================================
+  // 3. 3D FLIP VIDEO SHOWCASE — LẬT MÀN HÌNH 3D PHÁT VIDEO HƯỚNG DẪN HỆ THỐNG
+  // ===========================================================================
+  Widget _build3DVideoShowcase(BuildContext context, bool isDesktop, bool isAbyss) {
+    // Scroll progress: Activates as the user scrolls towards the middle of this showcase section
+    // Starts engaging smoothly right from the start, settling upright cleanly.
+    final double rawProgress = (_scrollOffset / 320.0).clamp(0.0, 1.0);
+
+    // Dynamic Ease-Out curve with a gentle natural spring bounce cushion
+    final double t = rawProgress;
+    final double easeOut = 1.0 - math.pow(1.0 - t, 3.2);
+    final double spring = math.sin(t * math.pi) * 0.025 * (1.0 - t);
+    final double progress = (easeOut + spring).clamp(0.0, 1.0);
+
+    // Pronounced 3D Backward Lean (-0.40 rad ≈ -23°) rising smoothly to 0.0 rad (flat upright facing user)
+    final double tiltAngle = -(1.0 - progress) * 0.40;
+    final double scaleFactor = 0.92 + (0.08 * progress);
+    final double translateY = -(1.0 - progress) * 16.0;
+
+    return Column(
+      children: [
+        // Section Category Eyebrow Badge
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+          decoration: BoxDecoration(
+            color: (isAbyss ? const Color(0xFF00D2FF) : Colors.white).withValues(alpha: isAbyss ? 0.15 : 0.22),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: (isAbyss ? const Color(0xFF00D2FF) : Colors.white).withValues(alpha: isAbyss ? 0.35 : 0.60),
+              width: 1.1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isAbyss ? 0.20 : 0.10),
+                blurRadius: 8,
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: isAbyss ? const Color(0xFF00D2FF) : Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: (isAbyss ? const Color(0xFF00D2FF) : Colors.white).withValues(alpha: 0.8),
+                      blurRadius: 6,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'HƯỚNG DẪN DỄ HIỂU',
+                style: GoogleFonts.jetBrainsMono(
+                  color: isAbyss ? const Color(0xFF38BDF8) : Colors.white,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.1,
+                  shadows: const [
+                    Shadow(color: Color(0x33000000), blurRadius: 4, offset: Offset(0, 1)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 6),
+
+        // Prominent Required Headline: "Khám phá cách sử dụng hệ thống"
+        Text(
+          'Khám phá cách sử dụng hệ thống',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: isDesktop ? 22 : 18,
+            fontWeight: FontWeight.w900,
+            color: Colors.white,
+            letterSpacing: -0.5,
+            shadows: const [
+              Shadow(color: Color(0x33000000), blurRadius: 8, offset: Offset(0, 2)),
+            ],
+          ),
+        ),
+        const SizedBox(height: 4),
+
+        // Required Subtitle: "Tìm hiểu các chức năng và cách thao tác thông qua video hướng dẫn trực quan"
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 640),
+          child: Text(
+            'Tìm hiểu các chức năng và cách thao tác thông qua video hướng dẫn trực quan',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: isDesktop ? 12 : 11,
+              fontWeight: FontWeight.w600,
+              color: isAbyss ? const Color(0xFFCBD5E1) : Colors.white.withValues(alpha: 0.95),
+              shadows: const [
+                Shadow(color: Color(0x28000000), blurRadius: 6, offset: Offset(0, 1)),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(height: isDesktop ? 10 : 8),
+
+        // 3D Perspective Flip Transform with Physical Bezel & Thickness
+        Center(
+          child: Container(
+            constraints: BoxConstraints(maxWidth: isDesktop ? 980 : 720),
+            // Outer 3D ambient shadow & water floor caustics
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                // Deep physical contact shadow that responds to tilt angle
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isAbyss ? 0.70 : 0.35),
+                  blurRadius: 40 + (24 * (1.0 - progress)),
+                  offset: Offset(0, 26 + (18 * (1.0 - progress))),
+                  spreadRadius: 2,
+                ),
+                // Bioluminescent ocean floor underglow
+                BoxShadow(
+                  color: const Color(0xFF00D2FF).withValues(
+                    alpha: isAbyss ? (0.16 + 0.12 * progress) : 0.08,
+                  ),
+                  blurRadius: 55,
+                  offset: const Offset(0, 16),
+                  spreadRadius: -4,
+                ),
+              ],
+            ),
+            child: Transform(
+              alignment: const Alignment(0.0, 0.90), // Bottom pivot point for natural easel flip
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, 0.0014) // Deep 3D perspective foreshortening
+                ..rotateX(tiltAngle)
+                ..multiply(Matrix4.diagonal3Values(scaleFactor, scaleFactor, 1.0))
+                ..multiply(Matrix4.translationValues(0.0, translateY, 0.0)),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // Simulated 3D Bezel Chassis Edge (Physical depth & thickness)
+                  Positioned(
+                    left: 4,
+                    right: 4,
+                    bottom: -8 * (1.0 - progress),
+                    height: 16,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isAbyss ? const Color(0xFF050E1E) : const Color(0xFFCBD5E1),
+                        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(22)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.5),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Main High-Tech Display Frame
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(22),
+                      border: Border.all(
+                        color: isAbyss
+                            ? const Color(0xFF38BDF8).withValues(alpha: 0.45 + (0.35 * progress))
+                            : const Color(0xFFBAE6FD),
+                        width: 1.5,
+                      ),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: TutorialVideoPlayer(
+                      key: _videoPlayerKey,
+                      videoUrl: widget.videoUrl,
+                      videoPoster: widget.videoPoster,
+                      isDesktop: isDesktop,
+                      isAbyss: isAbyss,
+                      isFlippedOpen: progress >= 0.70,
+                      onNavigateToOverview: widget.onNavigateToOverview,
+                    ),
+                  ),
+
+                  // Top Specular Horizon Light (Crisp glass rim reflection)
+                  Positioned(
+                    top: 0,
+                    left: 20,
+                    right: 20,
+                    height: 1.2,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.transparent,
+                            const Color(0xFF00D2FF).withValues(alpha: 0.85),
+                            Colors.white.withValues(alpha: 0.95),
+                            const Color(0xFF00D2FF).withValues(alpha: 0.85),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ===========================================================================
+  // 4. PRECISION TELEMETRY STRIP (HIGH-TECH INSTRUMENT BAR)
+  // ===========================================================================
+  Widget _buildPrecisionTelemetryStrip(BuildContext context, bool isDesktop, bool isAbyss) {
+    final ph = widget.latest?.readings['ph']?.toDouble() ?? 7.85;
+    final doVal = widget.latest?.readings['dissolvedOxygenMgL']?.toDouble() ?? 6.2;
+    final temp = widget.latest?.readings['temperatureC']?.toDouble() ?? 28.5;
+    final nh3Pct = widget.latest?.nh3Percentage ?? 3.8;
+
+    final phOk = ph >= 7.5 && ph <= 8.5;
+    final doOk = doVal >= 4.5;
+    final nh3Ok = nh3Pct <= 4.5;
+    final tempOk = temp >= 25.0 && temp <= 32.0;
+
+    return Center(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 1040),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        decoration: BoxDecoration(
+          color: isAbyss ? const Color(0xCC07152B) : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isAbyss ? const Color(0x3338BDF8) : const Color(0xFFBAE6FD),
+            width: 1.1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: (isAbyss ? Colors.black : const Color(0xFF0F172A)).withValues(alpha: 0.08),
+              blurRadius: 20,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isNarrow = constraints.maxWidth < 720;
+            if (isNarrow) {
+              return Wrap(
+                spacing: 16,
+                runSpacing: 14,
+                alignment: WrapAlignment.spaceAround,
+                children: [
+                  _telemetryInstrument('ĐỘ pH NƯỚC', ph.toStringAsFixed(2), phOk ? 'Nước tốt (7.5–8.5)' : 'Cần kiểm tra lại', phOk ? const Color(0xFF10B981) : const Color(0xFFF59E0B), isAbyss),
+                  _telemetryInstrument('OXY HÒA TAN', '$doVal mg/L', doOk ? 'Tôm thở khỏe' : 'Thiếu oxy - Bật quạt', doOk ? const Color(0xFF00D2FF) : const Color(0xFFEF4444), isAbyss),
+                  _telemetryInstrument('KHÍ ĐỘC NH₃', '${nh3Pct.toStringAsFixed(1)} %', nh3Ok ? 'Nước an toàn' : 'Khí độc cao - Nguy hiểm', nh3Ok ? const Color(0xFF10B981) : const Color(0xFFEF4444), isAbyss),
+                  _telemetryInstrument('NHIỆT ĐỘ NƯỚC', '$temp °C', tempOk ? 'Nhiệt độ ấm tốt' : 'Nước bị lạnh/nóng', tempOk ? const Color(0xFF10B981) : const Color(0xFF38BDF8), isAbyss),
+                ],
+              );
+            }
+            return Row(
+              children: [
+                Expanded(child: _telemetryInstrument('ĐỘ pH NƯỚC', ph.toStringAsFixed(2), phOk ? 'Nước tốt (7.5–8.5)' : 'Cần kiểm tra lại', phOk ? const Color(0xFF10B981) : const Color(0xFFF59E0B), isAbyss)),
+                _verticalSeparator(isAbyss),
+                Expanded(child: _telemetryInstrument('OXY HÒA TAN', '$doVal mg/L', doOk ? 'Tôm thở khỏe' : 'Thiếu oxy - Bật quạt', doOk ? const Color(0xFF00D2FF) : const Color(0xFFEF4444), isAbyss)),
+                _verticalSeparator(isAbyss),
+                Expanded(child: _telemetryInstrument('KHÍ ĐỘC NH₃', '${nh3Pct.toStringAsFixed(1)} %', nh3Ok ? 'Nước an toàn' : 'Khí độc cao - Nguy hiểm', nh3Ok ? const Color(0xFF10B981) : const Color(0xFFEF4444), isAbyss)),
+                _verticalSeparator(isAbyss),
+                Expanded(child: _telemetryInstrument('NHIỆT ĐỘ NƯỚC', '$temp °C', tempOk ? 'Nhiệt độ ấm tốt' : 'Nước bị lạnh/nóng', tempOk ? const Color(0xFF10B981) : const Color(0xFF38BDF8), isAbyss)),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _verticalSeparator(bool isAbyss) => Container(
+    height: 38,
+    width: 1,
+    color: isAbyss ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+    margin: const EdgeInsets.symmetric(horizontal: 12),
+  );
+
+  Widget _telemetryInstrument(String label, String value, String status, Color statusColor, bool isAbyss) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.jetBrainsMono(
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+            letterSpacing: 0.8,
+          ),
+        ),
+        const SizedBox(height: 3),
+        Text(
+          value,
+          style: GoogleFonts.jetBrainsMono(
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+            letterSpacing: -0.5,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Row(
+          children: [
+            Container(width: 5, height: 5, decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle)),
+            const SizedBox(width: 5),
+            Flexible(
+              child: Text(
+                status,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w500,
+                  color: statusColor,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // ===========================================================================
+  // 5. ASYMMETRIC EDITORIAL PROBLEM SECTION (SPLIT LAYOUT)
+  // ===========================================================================
+  Widget _buildEditorialProblemSection(BuildContext context, bool isDesktop, bool isAbyss) {
+    return Center(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 1080),
+        child: isDesktop
+            ? Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Left Editorial Lead Column
+                  Expanded(
+                    flex: 4,
+                    child: _buildProblemEditorialLead(isAbyss),
+                  ),
+                  const SizedBox(width: 48),
+                  // Right Narrative Danger Zones Column
+                  Expanded(
+                    flex: 6,
+                    child: _buildProblemDangerList(isAbyss),
+                  ),
+                ],
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildProblemEditorialLead(isAbyss),
+                  const SizedBox(height: 32),
+                  _buildProblemDangerList(isAbyss),
+                ],
+              ),
+      ),
+    );
+  }
+
+  Widget _buildProblemEditorialLead(bool isAbyss) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Category Badge
+        Text(
+          'RỦI RO THƯỜNG GẶP',
+          style: GoogleFonts.jetBrainsMono(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFFEF4444),
+            letterSpacing: 1.2,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'Nước ao đổi màu, trở trời -\nnguy hiểm không kịp trở tay.',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 28,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.6,
+            height: 1.25,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 14),
+        Text(
+          'Chỉ một cơn mưa rào hay nửa đêm cạn oxy, môi trường nước có thể thay đổi rất nhanh làm tôm yếu hoặc chết nếu không phát hiện sớm.',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 13.5,
+            fontWeight: FontWeight.w500,
+            color: isAbyss ? const Color(0xFFCBD5E1) : Colors.white.withValues(alpha: 0.95),
+            height: 1.6,
+            shadows: const [
+              Shadow(color: Color(0x28000000), blurRadius: 6, offset: Offset(0, 1)),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        // Editorial Stat Callout
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+          decoration: BoxDecoration(
+            color: isAbyss ? const Color(0xFF131D33) : const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isAbyss ? const Color(0x33EF4444) : const Color(0xFFFECACA),
+            ),
+          ),
+          child: Row(
+            children: [
+              Text(
+                '40%',
+                style: GoogleFonts.jetBrainsMono(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w900,
+                  color: const Color(0xFFEF4444),
+                  letterSpacing: -1.0,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
+                  'thiệt hại vụ tôm thường do phát hiện muộn khi nước bị tụt pH sau mưa hoặc thiếu oxy rạng sáng.',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w500,
+                    color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                    height: 1.45,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProblemDangerList(bool isAbyss) {
+    final risks = [
+      {
+        'phase': 'KHI TRỜI MƯA RÀO',
+        'title': 'Nước mưa xả phèn làm tụt pH',
+        'desc': 'Mưa cuốn phèn bờ ao làm nước chua nhanh, tôm dễ bị mềm vỏ, lột dính và yếu sức.',
+        'accent': const Color(0xFFF59E0B),
+      },
+      {
+        'phase': 'NỬA ĐÊM & RẠNG SÁNG',
+        'title': 'Thiếu oxy lúc 3h - 5h sáng',
+        'desc': 'Tảo và bùn đáy cạn oxy làm tôm nổi đầu tấp mé nếu không kịp thời bật quạt nước.',
+        'accent': const Color(0xFFEF4444),
+      },
+      {
+        'phase': 'TRƯA NẮNG GẮT',
+        'title': 'Tảo phát triển mạnh, sinh khí độc',
+        'desc': 'Nắng gắt làm pH tăng vọt sinh khí độc NH₃ gây bỏng mang tôm và khó thở.',
+        'accent': const Color(0xFFEC4899),
+      },
+    ];
+
+    return Column(
+      children: risks.map((r) {
+        final color = r['accent'] as Color;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 14),
+          child: Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: isAbyss ? const Color(0xCC07152B) : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: color.withValues(alpha: isAbyss ? 0.30 : 0.20),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.04),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 4,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        r['phase'] as String,
+                        style: GoogleFonts.jetBrainsMono(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: color,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        r['title'] as String,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        r['desc'] as String,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12.5,
+                          color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                          height: 1.45,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  // ===========================================================================
+  // 6. BENTO-GRID ARCHITECTURE — 4 TRỤ CỘT CÔNG NGHỆ NỀN TẢNG
+  // ===========================================================================
+  Widget _buildBentoTechnologySection(BuildContext context, bool isDesktop, bool isAbyss) {
+    return Center(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 1080),
+        child: Column(
+          children: [
+            // Section Header
+            _editorialSectionHeader(
+              badge: 'TÍNH NĂNG CHÍNH',
+              title: 'Bốn trợ thủ đắc lực cho người nuôi tôm',
+              subtitle: 'Giúp người nuôi yên tâm quản lý ao tôm, giảm chi phí và phòng ngừa rủi ro từ sớm.',
+              isAbyss: isAbyss,
+            ),
+            const SizedBox(height: 36),
+
+            // Bento Grid: 4 Khung bằng nhau hoàn hảo (Equal width & height in 2x2 grid)
+            if (isDesktop) ...[
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: _buildBentoSoftSensorCard(isAbyss),
+                    ),
+                    const SizedBox(width: 18),
+                    Expanded(
+                      child: _buildBentoEsp32Card(isAbyss),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: _buildBentoAiPrescriptionCard(isAbyss),
+                    ),
+                    const SizedBox(width: 18),
+                    Expanded(
+                      child: _buildBentoDiaryCard(isAbyss),
+                    ),
+                  ],
+                ),
+              ),
+            ] else ...[
+              _buildBentoSoftSensorCard(isAbyss),
+              const SizedBox(height: 14),
+              _buildBentoEsp32Card(isAbyss),
+              const SizedBox(height: 14),
+              _buildBentoAiPrescriptionCard(isAbyss),
+              const SizedBox(height: 14),
+              _buildBentoDiaryCard(isAbyss),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBentoSoftSensorCard(bool isAbyss) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: isAbyss ? const Color(0x4038BDF8) : const Color(0xFFBAE6FD),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: (isAbyss ? const Color(0xFF00D2FF) : const Color(0xFF0284C7))
+                .withValues(alpha: isAbyss ? 0.08 : 0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF00D2FF).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'TÍNH TỰ ĐỘNG',
+                  style: GoogleFonts.jetBrainsMono(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF00D2FF),
+                  ),
+                ),
+              ),
+              const Spacer(),
+              const Icon(Icons.bolt_rounded, color: Color(0xFF00D2FF), size: 24),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            'Tự tính khí độc NH₃ – Không cần mua đầu đo đắt tiền',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+              letterSpacing: -0.4,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Máy đo khí độc thường có giá rất cao và nhanh hỏng màng đo. PONDORA tự động tính nồng độ khí độc chính xác từ độ pH và nhiệt độ nước, giúp bà con tiết kiệm chi phí.',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              fontWeight: FontWeight.w400,
+              color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+              height: 1.55,
+            ),
+          ),
+          const Spacer(),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: isAbyss ? const Color(0x18FFFFFF) : const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              children: [
+                Text(
+                  'Công thức chuẩn hóa học',
+                  style: GoogleFonts.jetBrainsMono(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF38BDF8),
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  'Chi phí đầu dò: 0đ',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF10B981),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBentoEsp32Card(bool isAbyss) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: isAbyss ? const Color(0x4038BDF8) : const Color(0xFFBAE6FD),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: (isAbyss ? const Color(0xFF00D2FF) : const Color(0xFF0284C7))
+                .withValues(alpha: isAbyss ? 0.08 : 0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF38BDF8).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'MÁY ĐO TỰ ĐỘNG',
+                  style: GoogleFonts.jetBrainsMono(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF38BDF8),
+                  ),
+                ),
+              ),
+              const Spacer(),
+              const Icon(Icons.sensors_rounded, color: Color(0xFF38BDF8), size: 22),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            'Máy đo cắm tại ao – Tự gửi số liệu 24/24',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+              letterSpacing: -0.3,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Đo đạc tự động 3 giây một lần, lọc nhiễu chính xác và tự gửi số liệu về điện thoại qua Wi-Fi mà không cần lội ao múc nước đo tay.',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              fontWeight: FontWeight.w400,
+              color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+              height: 1.55,
+            ),
+          ),
+          const Spacer(),
+          const SizedBox(height: 16),
+          _techFeaturePill('Báo động ngay khi mất điện hoặc mất mạng', isAbyss),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBentoAiPrescriptionCard(bool isAbyss) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: isAbyss ? const Color(0x4010B981) : const Color(0xFFBAE6FD),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF10B981).withValues(alpha: isAbyss ? 0.08 : 0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'GỢI Ý KỸ THUẬT',
+                  style: GoogleFonts.jetBrainsMono(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF10B981),
+                  ),
+                ),
+              ),
+              const Spacer(),
+              const Icon(Icons.psychology_rounded, color: Color(0xFF10B981), size: 22),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            'Gợi ý lượng vôi, oxy viên và vi sinh cần đánh',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+              letterSpacing: -0.3,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Khi nước có dấu hiệu xấu, hệ thống tính sẵn lượng vôi nông nghiệp hoặc vi sinh cần đánh cho đúng thể tích ao của bạn.',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              fontWeight: FontWeight.w400,
+              color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+              height: 1.55,
+            ),
+          ),
+          const Spacer(),
+          const SizedBox(height: 16),
+          _techFeaturePill('Tính sẵn số ký thuốc cần đánh cho ao', isAbyss),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBentoDiaryCard(bool isAbyss) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: isAbyss ? const Color(0x40F59E0B) : const Color(0xFFBAE6FD),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFF59E0B).withValues(alpha: isAbyss ? 0.08 : 0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'SỔ GHI CHÉP DỄ DÙNG',
+                  style: GoogleFonts.jetBrainsMono(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFFF59E0B),
+                  ),
+                ),
+              ),
+              const Spacer(),
+              const Icon(Icons.menu_book_rounded, color: Color(0xFFF59E0B), size: 22),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            'Sổ nhật ký ao nuôi trên điện thoại',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+              letterSpacing: -0.3,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Ghi lại số lượng thức ăn mỗi bữa, tiền thuốc và quá trình tôm lớn. Thay thế sổ tay giấy, dễ tra cứu bất kỳ lúc nào.',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              fontWeight: FontWeight.w400,
+              color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+              height: 1.55,
+            ),
+          ),
+          const Spacer(),
+          const SizedBox(height: 16),
+          _techFeaturePill('Quản lý tiền thức ăn và chi phí rõ ràng', isAbyss),
+        ],
+      ),
+    );
+  }
+
+  Widget _techFeaturePill(String text, bool isAbyss) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: isAbyss ? const Color(0x18FFFFFF) : const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.check_circle_rounded, size: 13, color: Color(0xFF10B981)),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w600,
+              color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ===========================================================================
+  // 7. MINIMALIST OPERATIONAL RELIABILITY METRICS
+  // ===========================================================================
+  Widget _buildEditorialMetricsSection(BuildContext context, bool isDesktop, bool isAbyss) {
+    return Center(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 1040),
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 28),
+        decoration: BoxDecoration(
+          color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
+            color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0),
+          ),
+        ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isNarrow = constraints.maxWidth < 650;
+            if (isNarrow) {
+              return Column(
+                children: [
+                  _editorialMetricNode('99.8%', 'Thời gian máy đo hoạt động', 'Đo đạc bền bỉ cả ngày lẫn đêm', isAbyss),
+                  Divider(color: isAbyss ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0), height: 32),
+                  _editorialMetricNode('< 1 Giây', 'Báo động tức thì', 'Phát hiện ngay khi nước có dấu hiệu lạ', isAbyss),
+                  Divider(color: isAbyss ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0), height: 32),
+                  _editorialMetricNode('85%+', 'Tôm sống khỏe mạnh', 'Giảm tối đa thiệt hại do sốc nước', isAbyss),
+                ],
+              );
+            }
+            return Row(
+              children: [
+                Expanded(child: _editorialMetricNode('99.8%', 'Thời gian máy đo hoạt động', 'Đo đạc bền bỉ cả ngày lẫn đêm', isAbyss)),
+                _verticalSeparator(isAbyss),
+                Expanded(child: _editorialMetricNode('< 1 Giây', 'Báo động tức thì', 'Phát hiện ngay khi nước có dấu hiệu lạ', isAbyss)),
+                _verticalSeparator(isAbyss),
+                Expanded(child: _editorialMetricNode('85%+', 'Tôm sống khỏe mạnh', 'Giảm tối đa thiệt hại do sốc nước', isAbyss)),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _editorialMetricNode(String num, String title, String sub, bool isAbyss) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          num,
+          style: GoogleFonts.jetBrainsMono(
+            fontSize: 34,
+            fontWeight: FontWeight.w900,
+            color: const Color(0xFF00D2FF),
+            letterSpacing: -1.0,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          title,
+          textAlign: TextAlign.center,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          sub,
+          textAlign: TextAlign.center,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 11,
+            color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ===========================================================================
+  // 8. 3-STEP TURNKEY DEPLOYMENT
+  // ===========================================================================
+  Widget _buildEditorialWorkflowSection(BuildContext context, bool isDesktop, bool isAbyss) {
+    return Center(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 1040),
+        child: Column(
+          children: [
+            _editorialSectionHeader(
+              badge: 'HƯỚNG DẪN DỄ LÀM',
+              title: 'Sử dụng dễ dàng chỉ trong 3 bước',
+              subtitle: 'Lắp đặt đơn giản, nông dân nào cũng có thể tự làm được trong 10 phút.',
+              isAbyss: isAbyss,
+            ),
+            const SizedBox(height: 36),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isNarrow = constraints.maxWidth < 750;
+                if (isNarrow) {
+                  return Column(
+                    children: [
+                      _editorialStepCard('01', 'Cắm điện & Thả đầu đo xuống ao', 'Thả các đầu đo pH, Oxy và Nhiệt độ vào vị trí nước chảy gần dàn quạt.', isAbyss),
+                      const SizedBox(height: 14),
+                      _editorialStepCard('02', 'Kết nối với hệ thống', 'Thiết bị tự kết nối Wi-Fi và gửi số liệu đo về điện thoại ngay lập tức.', isAbyss),
+                      const SizedBox(height: 14),
+                      _editorialStepCard('03', 'Xem nước & Nhận hướng dẫn', 'Mở điện thoại xem tình trạng nước mọi lúc mọi nơi, có cảnh báo khi nước xấu.', isAbyss),
+                    ],
+                  );
+                }
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: _editorialStepCard('01', 'Cắm điện & Thả đầu đo xuống ao', 'Thả các đầu đo pH, Oxy và Nhiệt độ vào vị trí nước chảy gần dàn quạt.', isAbyss)),
+                    const SizedBox(width: 16),
+                    Expanded(child: _editorialStepCard('02', 'Kết nối với hệ thống', 'Thiết bị tự kết nối Wi-Fi và gửi số liệu đo về điện thoại ngay lập tức.', isAbyss)),
+                    const SizedBox(width: 16),
+                    Expanded(child: _editorialStepCard('03', 'Xem nước & Nhận hướng dẫn', 'Mở điện thoại xem tình trạng nước mọi lúc mọi nơi, có cảnh báo khi nước xấu.', isAbyss)),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _editorialStepCard(String stepNum, String title, String desc, bool isAbyss) {
+    return Container(
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFE2E8F0),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            stepNum,
+            style: GoogleFonts.jetBrainsMono(
+              fontSize: 26,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF0284C7),
+              letterSpacing: -1.0,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            title,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            desc,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 12.5,
+              color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ===========================================================================
+  // 9. PREMIUM EDITORIAL CALL TO ACTION BANNER
+  // ===========================================================================
+  Widget _buildEditorialCtaBanner(BuildContext context, bool isDesktop, bool isAbyss) {
+    return Center(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 1040),
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(horizontal: isDesktop ? 48 : 24, vertical: 40),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF0348C7), Color(0xFF0072CE), Color(0xFF0284C7)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF0284C7).withValues(alpha: 0.35),
+              blurRadius: 36,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Text(
+              'Bắt đầu theo dõi ao tôm của bạn ngay hôm nay',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: isDesktop ? 27 : 21,
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: 10),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 620),
+              child: Text(
+                'Nuôi tôm an tâm hơn với hệ thống đo nước tự động và trợ lý nhắc nhở cách chăm sóc ao mỗi ngày.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13.5,
+                  color: const Color(0xFFE0F2FE),
+                  height: 1.5,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: widget.onNavigateToOverview,
+              icon: const Icon(Icons.rocket_launch_rounded, size: 17),
+              label: Text(
+                'Vào Xem Nước Ao Ngay',
+                style: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13.5,
+                ),
+              ),
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: const Color(0xFF0284C7),
+                padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                elevation: 4,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ===========================================================================
+  // REUSABLE EDITORIAL SECTION HEADER
+  // ===========================================================================
+  Widget _editorialSectionHeader({
+    required String badge,
+    required String title,
+    required String subtitle,
+    required bool isAbyss,
+  }) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+          decoration: BoxDecoration(
+            color: (isAbyss ? const Color(0xFF00D2FF) : const Color(0xFF0284C7)).withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: (isAbyss ? const Color(0xFF00D2FF) : const Color(0xFF0284C7)).withValues(alpha: 0.30),
+            ),
+          ),
+          child: Text(
+            badge,
+            style: GoogleFonts.jetBrainsMono(
+              color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+              fontSize: 10.5,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          title,
+          textAlign: TextAlign.center,
+          style: GoogleFonts.plusJakartaSans(
+            fontWeight: FontWeight.w800,
+            fontSize: 26,
+            color: Colors.white,
+            letterSpacing: -0.5,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 620),
+          child: Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.plusJakartaSans(
+              color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF475569),
+              fontSize: 13.5,
+              height: 1.5,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
