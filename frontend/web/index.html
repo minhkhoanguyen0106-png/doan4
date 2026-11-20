@@ -184,12 +184,17 @@
   </div>
 
   <script>
-    // 1. Force unregister stale service workers that may cache old assets
+    // 1. Force unregister stale service workers and clear cache storage
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(registrations) {
         for (let registration of registrations) {
           registration.unregister();
         }
+      });
+    }
+    if ('caches' in window) {
+      caches.keys().then(function(names) {
+        for (let name of names) caches.delete(name);
       });
     }
 
@@ -201,7 +206,12 @@
         setTimeout(() => loader.remove(), 400);
       }
     });
+
+    // 3. Dynamically inject flutter_bootstrap.js with live timestamp
+    const bootScript = document.createElement('script');
+    bootScript.src = 'flutter_bootstrap.js?v=' + Date.now();
+    bootScript.async = true;
+    document.body.appendChild(bootScript);
   </script>
-  <script src="flutter_bootstrap.js?v=20261119_1752" async></script>
 </body>
 </html>
