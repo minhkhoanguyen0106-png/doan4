@@ -422,20 +422,26 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
                 fontWeight: FontWeight.w900,
                 letterSpacing: -0.6,
                 height: 1.22,
-                color: Colors.white,
-                shadows: const [
-                  Shadow(color: Color(0x3D000000), blurRadius: 10, offset: Offset(0, 2)),
-                ],
+                color: isAbyss ? Colors.white : const Color(0xFF061A3A),
+                shadows: isAbyss
+                    ? const [
+                        Shadow(color: Color(0x3D000000), blurRadius: 10, offset: Offset(0, 2)),
+                      ]
+                    : [
+                        Shadow(color: Colors.white.withValues(alpha: 0.9), blurRadius: 16, offset: const Offset(0, 1)),
+                      ],
               ),
               children: [
                 const TextSpan(text: 'Theo dõi chất lượng nước &\n'),
                 TextSpan(
                   text: 'chăm sóc ao tôm dễ dàng',
                   style: TextStyle(
-                    color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFFE0F2FE),
-                    shadows: const [
-                      Shadow(color: Color(0x33000000), blurRadius: 10, offset: Offset(0, 2)),
-                    ],
+                    color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                    shadows: isAbyss
+                        ? const [
+                            Shadow(color: Color(0x33000000), blurRadius: 10, offset: Offset(0, 2)),
+                          ]
+                        : null,
                   ),
                 ),
               ],
@@ -452,12 +458,16 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
             textAlign: TextAlign.center,
             style: GoogleFonts.plusJakartaSans(
               fontSize: isDesktop ? 13.5 : 12,
-              fontWeight: FontWeight.w600,
-              color: isAbyss ? const Color(0xFFCBD5E1) : Colors.white.withValues(alpha: 0.95),
+              fontWeight: isAbyss ? FontWeight.w600 : FontWeight.w700,
+              color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF0F172A),
               height: 1.5,
-              shadows: const [
-                Shadow(color: Color(0x28000000), blurRadius: 6, offset: Offset(0, 1)),
-              ],
+              shadows: isAbyss
+                  ? const [
+                      Shadow(color: Color(0x28000000), blurRadius: 6, offset: Offset(0, 1)),
+                    ]
+                  : [
+                      Shadow(color: Colors.white.withValues(alpha: 0.8), blurRadius: 10, offset: const Offset(0, 1)),
+                    ],
             ),
           ),
         ),
@@ -500,14 +510,15 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
                 ),
               ),
               style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: isAbyss ? const Color(0x28FFFFFF) : Colors.white.withValues(alpha: 0.20),
+                foregroundColor: isAbyss ? Colors.white : const Color(0xFF0284C7),
+                backgroundColor: isAbyss ? const Color(0x28FFFFFF) : Colors.white.withValues(alpha: 0.95),
                 side: BorderSide(
-                  color: isAbyss ? const Color(0x6638BDF8) : Colors.white.withValues(alpha: 0.75),
+                  color: isAbyss ? const Color(0x6638BDF8) : const Color(0xFFBAE6FD),
                   width: 1.2,
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: isAbyss ? 0 : 2,
               ),
             ),
             OutlinedButton.icon(
@@ -522,14 +533,15 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
                 ),
               ),
               style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: isAbyss ? const Color(0x28FFFFFF) : Colors.white.withValues(alpha: 0.20),
+                foregroundColor: isAbyss ? Colors.white : const Color(0xFF4338CA),
+                backgroundColor: isAbyss ? const Color(0x28FFFFFF) : Colors.white.withValues(alpha: 0.95),
                 side: BorderSide(
-                  color: isAbyss ? const Color(0x666366F1) : Colors.white.withValues(alpha: 0.75),
+                  color: isAbyss ? const Color(0x666366F1) : const Color(0xFFC7D2FE),
                   width: 1.2,
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: isAbyss ? 0 : 2,
               ),
             ),
           ],
@@ -563,15 +575,15 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
           decoration: BoxDecoration(
-            color: (isAbyss ? const Color(0xFF00D2FF) : Colors.white).withValues(alpha: isAbyss ? 0.15 : 0.22),
+            color: isAbyss ? const Color(0x2600D2FF) : Colors.white.withValues(alpha: 0.95),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: (isAbyss ? const Color(0xFF00D2FF) : Colors.white).withValues(alpha: isAbyss ? 0.35 : 0.60),
+              color: isAbyss ? const Color(0x5900D2FF) : const Color(0xFFBAE6FD),
               width: 1.1,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: isAbyss ? 0.20 : 0.10),
+                color: Colors.black.withValues(alpha: isAbyss ? 0.20 : 0.08),
                 blurRadius: 8,
               ),
             ],
@@ -583,11 +595,11 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
                 width: 6,
                 height: 6,
                 decoration: BoxDecoration(
-                  color: isAbyss ? const Color(0xFF00D2FF) : Colors.white,
+                  color: isAbyss ? const Color(0xFF00D2FF) : const Color(0xFF0284C7),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: (isAbyss ? const Color(0xFF00D2FF) : Colors.white).withValues(alpha: 0.8),
+                      color: (isAbyss ? const Color(0xFF00D2FF) : const Color(0xFF0284C7)).withValues(alpha: 0.8),
                       blurRadius: 6,
                     ),
                   ],
@@ -597,13 +609,10 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
               Text(
                 'HƯỚNG DẪN DỄ HIỂU',
                 style: GoogleFonts.jetBrainsMono(
-                  color: isAbyss ? const Color(0xFF38BDF8) : Colors.white,
+                  color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
                   fontSize: 10.5,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.1,
-                  shadows: const [
-                    Shadow(color: Color(0x33000000), blurRadius: 4, offset: Offset(0, 1)),
-                  ],
                 ),
               ),
             ],
@@ -618,11 +627,15 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
           style: GoogleFonts.plusJakartaSans(
             fontSize: isDesktop ? 22 : 18,
             fontWeight: FontWeight.w900,
-            color: Colors.white,
+            color: isAbyss ? Colors.white : const Color(0xFF061A3A),
             letterSpacing: -0.5,
-            shadows: const [
-              Shadow(color: Color(0x33000000), blurRadius: 8, offset: Offset(0, 2)),
-            ],
+            shadows: isAbyss
+                ? const [
+                    Shadow(color: Color(0x33000000), blurRadius: 8, offset: Offset(0, 2)),
+                  ]
+                : [
+                    Shadow(color: Colors.white.withValues(alpha: 0.8), blurRadius: 10, offset: const Offset(0, 1)),
+                  ],
           ),
         ),
         const SizedBox(height: 4),
@@ -635,11 +648,15 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
             textAlign: TextAlign.center,
             style: GoogleFonts.plusJakartaSans(
               fontSize: isDesktop ? 12 : 11,
-              fontWeight: FontWeight.w600,
-              color: isAbyss ? const Color(0xFFCBD5E1) : Colors.white.withValues(alpha: 0.95),
-              shadows: const [
-                Shadow(color: Color(0x28000000), blurRadius: 6, offset: Offset(0, 1)),
-              ],
+              fontWeight: isAbyss ? FontWeight.w600 : FontWeight.w700,
+              color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF0F172A),
+              shadows: isAbyss
+                  ? const [
+                      Shadow(color: Color(0x28000000), blurRadius: 6, offset: Offset(0, 1)),
+                    ]
+                  : [
+                      Shadow(color: Colors.white.withValues(alpha: 0.6), blurRadius: 8, offset: const Offset(0, 1)),
+                    ],
             ),
           ),
         ),
@@ -931,7 +948,12 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
             fontWeight: FontWeight.w800,
             letterSpacing: -0.6,
             height: 1.25,
-            color: Colors.white,
+            color: isAbyss ? Colors.white : const Color(0xFF061A3A),
+            shadows: isAbyss
+                ? null
+                : [
+                    Shadow(color: Colors.white.withValues(alpha: 0.8), blurRadius: 10, offset: const Offset(0, 1)),
+                  ],
           ),
         ),
         const SizedBox(height: 14),
@@ -939,12 +961,16 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
           'Chỉ một cơn mưa rào hay nửa đêm cạn oxy, môi trường nước có thể thay đổi rất nhanh làm tôm yếu hoặc chết nếu không phát hiện sớm.',
           style: GoogleFonts.plusJakartaSans(
             fontSize: 13.5,
-            fontWeight: FontWeight.w500,
-            color: isAbyss ? const Color(0xFFCBD5E1) : Colors.white.withValues(alpha: 0.95),
+            fontWeight: isAbyss ? FontWeight.w500 : FontWeight.w600,
+            color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF0F172A),
             height: 1.6,
-            shadows: const [
-              Shadow(color: Color(0x28000000), blurRadius: 6, offset: Offset(0, 1)),
-            ],
+            shadows: isAbyss
+                ? const [
+                    Shadow(color: Color(0x28000000), blurRadius: 6, offset: Offset(0, 1)),
+                  ]
+                : [
+                    Shadow(color: Colors.white.withValues(alpha: 0.6), blurRadius: 8, offset: const Offset(0, 1)),
+                  ],
           ),
         ),
         const SizedBox(height: 24),
@@ -1781,11 +1807,15 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
           style: GoogleFonts.plusJakartaSans(
             fontWeight: FontWeight.w800,
             fontSize: 26,
-            color: Colors.white,
+            color: isAbyss ? Colors.white : const Color(0xFF061A3A),
             letterSpacing: -0.5,
-            shadows: const [
-              Shadow(color: Color(0x3D000000), blurRadius: 10, offset: Offset(0, 2)),
-            ],
+            shadows: isAbyss
+                ? const [
+                    Shadow(color: Color(0x3D000000), blurRadius: 10, offset: Offset(0, 2)),
+                  ]
+                : [
+                    Shadow(color: Colors.white.withValues(alpha: 0.8), blurRadius: 10, offset: const Offset(0, 1)),
+                  ],
           ),
         ),
         const SizedBox(height: 8),
@@ -1795,12 +1825,17 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
             subtitle,
             textAlign: TextAlign.center,
             style: GoogleFonts.plusJakartaSans(
-              color: isAbyss ? const Color(0xFFCBD5E1) : Colors.white.withValues(alpha: 0.95),
+              color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF0F172A),
+              fontWeight: isAbyss ? FontWeight.w500 : FontWeight.w600,
               fontSize: 13.5,
               height: 1.5,
-              shadows: const [
-                Shadow(color: Color(0x33000000), blurRadius: 6, offset: Offset(0, 1)),
-              ],
+              shadows: isAbyss
+                  ? const [
+                      Shadow(color: Color(0x33000000), blurRadius: 6, offset: Offset(0, 1)),
+                    ]
+                  : [
+                      Shadow(color: Colors.white.withValues(alpha: 0.6), blurRadius: 8, offset: const Offset(0, 1)),
+                    ],
             ),
           ),
         ),
