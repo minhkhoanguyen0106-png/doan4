@@ -44,6 +44,7 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
   OceanLightingMode _lightingMode = OceanLightingMode.abyssal;
   int _tab = 7;
   bool _loading = true;
+  bool _isSimulating = false;
   String? _error;
   List<MonitoringSite> _sites = [];
   MonitoringSite? _selected;
@@ -275,6 +276,8 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
 
   Future<void> _load({int? siteId, bool silent = false}) async {
     if (!silent) {
+      _isSimulating = false;
+      ScaffoldMessenger.of(context).clearSnackBars();
       setState(() {
         _loading = true;
         _error = null;
@@ -327,10 +330,12 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
         _sites = sites;
         _selected = chosen;
         _devices = devices;
-        _latest = latest;
-        _summary = summary;
-        _history = history;
-        _alerts = alerts;
+        if (!_isSimulating) {
+          _latest = latest;
+          _summary = summary;
+          _history = history;
+          _alerts = alerts;
+        }
         _loading = false;
       });
     } catch (e) {
@@ -468,9 +473,12 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
                   ),
                   actions: [
                     IconButton(
-                      tooltip: 'Mô phỏng AI & Cảm biến IoT',
+                      tooltip: _isSimulating ? 'Đang mô phỏng IoT (Bấm để đổi kịch bản / Tắt)' : 'Mô phỏng AI & Cảm biến IoT',
                       onPressed: _openSimulationDialog,
-                      icon: const Icon(Icons.science_outlined, color: Color(0xFF0F62FE)),
+                      icon: Icon(
+                        _isSimulating ? Icons.science_rounded : Icons.science_outlined,
+                        color: _isSimulating ? const Color(0xFFF59E0B) : const Color(0xFF0F62FE),
+                      ),
                     ),
                     IconButton(
                       tooltip: 'Làm mới dữ liệu',
@@ -564,6 +572,7 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
                                     activeAlertCount: activeAlertCount,
                                     onAlertClick: () => _selectTab(4),
                                     onSimulate: _openSimulationDialog,
+                                    isSimulating: _isSimulating,
                                     lightingMode: _lightingMode,
                                     onToggleLighting: () => setState(() => _lightingMode = _lightingMode == OceanLightingMode.abyssal ? OceanLightingMode.sunlit : OceanLightingMode.abyssal),
                                   ),
@@ -991,6 +1000,43 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
         ),
         contentPadding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
         children: [
+          if (_isSimulating) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF59E0B).withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.bolt_rounded, color: Color(0xFFF59E0B)),
+                  const SizedBox(width: 10),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Đang bật chế độ mô phỏng số liệu', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                        Text('Các chỉ số đang được AI kiểm thử theo kịch bản.', style: TextStyle(fontSize: 11.5, color: Color(0xFF64748B))),
+                      ],
+                    ),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      _stopSimulation();
+                    },
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color(0xFFDC2626),
+                    ),
+                    child: const Text('Tắt mô phỏng'),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+          ],
           const Text(
             'Chọn kịch bản kiểm thử lâm sàng hoặc bảo vệ đồ án để quan sát phản ứng tức thời của AI và các giải thuật cảnh báo:',
             style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
@@ -1034,6 +1080,14 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
         ],
       ),
     );
+  }
+
+  void _stopSimulation() {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    setState(() {
+      _isSimulating = false;
+    });
+    _load();
   }
 
   Widget _simTile(
@@ -1093,6 +1147,9 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
     required double temp,
     required double tds,
   }) {
+    // Xóa triệt để mọi thanh thông báo snackbar (yêu cầu: "chỉnh cho cái này mất")
+    ScaffoldMessenger.of(context).clearSnackBars();
+
     final now = DateTime.now();
     final assessmentLevel = (ph < 6.0 || ph > 9.0 || doVal < 3.0)
         ? 'CRITICAL'
@@ -1124,32 +1181,58 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
       tds: MetricStats(count: 1, min: tds, average: tds, max: tds),
     );
 
+    // Sinh các cảnh báo mẫu tương ứng để giao diện cảnh báo hoạt động chuẩn xác
+    final currentSiteId = _selected?.id ?? 1;
+    final currentSiteName = _selected?.name ?? 'Ao nuôi mô phỏng';
+    List<WaterAlert> simulatedAlerts = [];
+    if (doVal < 3.0) {
+      simulatedAlerts.add(WaterAlert(
+        id: 991,
+        siteId: currentSiteId,
+        siteName: currentSiteName,
+        alertType: 'WATER_QUALITY',
+        title: 'Thiếu oxy khẩn cấp (${doVal.toStringAsFixed(1)} mg/L)',
+        message: 'Oxy hòa tan giảm sâu dưới ngưỡng sống của tôm. Bật quạt nước & rải oxy viên ngay!',
+        severity: 'CRITICAL',
+        status: 'ACTIVE',
+        triggeredAt: now,
+      ));
+    }
+    if (ph < 6.5) {
+      simulatedAlerts.add(WaterAlert(
+        id: 992,
+        siteId: currentSiteId,
+        siteName: currentSiteName,
+        alertType: 'WATER_QUALITY',
+        title: 'Nước bị axit hóa (pH ${ph.toStringAsFixed(1)})',
+        message: 'Độ pH thấp do nước mưa xả phèn bờ ao. Cần tạt vôi CaCO3 để nâng pH lên 7.5 - 8.2.',
+        severity: 'HIGH',
+        status: 'ACTIVE',
+        triggeredAt: now,
+      ));
+    } else if (ph > 8.8) {
+      simulatedAlerts.add(WaterAlert(
+        id: 993,
+        siteId: currentSiteId,
+        siteName: currentSiteName,
+        alertType: 'WATER_QUALITY',
+        title: 'Kiềm hóa cực đại (pH ${ph.toStringAsFixed(1)})',
+        message: 'Tảo nở hoa mạnh làm pH tăng vọt. Cần thay nước tầng mặt hoặc dùng mật đường hạ pH.',
+        severity: 'HIGH',
+        status: 'ACTIVE',
+        triggeredAt: now,
+      ));
+    }
+
     setState(() {
+      _isSimulating = true;
       _latest = simulated;
       _summary = simulatedSummary;
       _history = [simulated, ..._history];
-      _tab = 0; // Tự động chuyển ngay về tab Tổng quan để cập nhật giao diện
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Đã nạp số đo mô phỏng IoT thành công ($assessmentLevel)! Đang chuyển về Tổng quan.'),
-        backgroundColor: const Color(0xFF0F62FE),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 4),
-        action: SnackBarAction(
-          label: 'Xem phác đồ AI',
-          textColor: Colors.white,
-          onPressed: _showActionPlan,
-        ),
-      ),
-    );
-
-    // Mở ngay Hộp thoại Phác đồ AI cho tình huống vừa mô phỏng
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _showActionPlan();
+      if (simulatedAlerts.isNotEmpty) {
+        _alerts = simulatedAlerts;
       }
+      _tab = 0; // Chuyển về tab Tổng quan để cập nhật giao diện đo
     });
   }
 }
