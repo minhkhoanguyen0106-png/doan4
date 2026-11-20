@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/water_models.dart';
@@ -49,6 +50,7 @@ class LandingTab extends StatefulWidget {
 
 class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
+  late final AnimationController _ribbonController;
   final GlobalKey<TutorialVideoPlayerState> _videoPlayerKey = GlobalKey<TutorialVideoPlayerState>();
   double _scrollOffset = 0.0;
 
@@ -1113,12 +1115,12 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
   }
 
   // ===========================================================================
-  // 6. BENTO-GRID ARCHITECTURE — 4 TRỤ CỘT CÔNG NGHỆ NỀN TẢNG
+  // 6. S-CURVE RIBBON JOURNEY — 4 TRỤ CỘT CÔNG NGHỆ NỀN TẢNG NỐI BỞI DẢI ÁNH SÁNG
   // ===========================================================================
   Widget _buildBentoTechnologySection(BuildContext context, bool isDesktop, bool isAbyss) {
     return Center(
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 1080),
+        constraints: const BoxConstraints(maxWidth: 1140),
         child: Column(
           children: [
             // Section Header
@@ -1128,50 +1130,373 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
               subtitle: 'Giúp người nuôi yên tâm quản lý ao tôm, giảm chi phí và phòng ngừa rủi ro từ sớm.',
               isAbyss: isAbyss,
             ),
-            const SizedBox(height: 36),
+            const SizedBox(height: 48),
 
-            // Bento Grid: 4 Khung bằng nhau hoàn hảo (Equal width & height in 2x2 grid)
-            if (isDesktop) ...[
-              IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      child: _buildBentoSoftSensorCard(isAbyss),
-                    ),
-                    const SizedBox(width: 18),
-                    Expanded(
-                      child: _buildBentoEsp32Card(isAbyss),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 18),
-              IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      child: _buildBentoAiPrescriptionCard(isAbyss),
-                    ),
-                    const SizedBox(width: 18),
-                    Expanded(
-                      child: _buildBentoDiaryCard(isAbyss),
-                    ),
-                  ],
-                ),
-              ),
-            ] else ...[
-              _buildBentoSoftSensorCard(isAbyss),
-              const SizedBox(height: 14),
-              _buildBentoEsp32Card(isAbyss),
-              const SizedBox(height: 14),
-              _buildBentoAiPrescriptionCard(isAbyss),
-              const SizedBox(height: 14),
-              _buildBentoDiaryCard(isAbyss),
-            ],
+            // S-Curve Animated Flow Journey
+            AnimatedBuilder(
+              animation: _ribbonController,
+              builder: (context, _) {
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    final width = constraints.maxWidth;
+                    if (isDesktop && width >= 860) {
+                      return _buildDesktopSCurveJourney(width, isAbyss);
+                    } else {
+                      return _buildMobileSCurveJourney(width, isAbyss);
+                    }
+                  },
+                );
+              },
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildDesktopSCurveJourney(double width, bool isAbyss) {
+    const double cardHeight = 260.0;
+    const double vSpacing = 56.0;
+
+    final centerX = width / 2.0;
+    final nodeCenters = [
+      Offset(centerX, cardHeight * 0.5),
+      Offset(centerX, cardHeight + vSpacing + cardHeight * 0.5),
+      Offset(centerX, (cardHeight + vSpacing) * 2.0 + cardHeight * 0.5),
+      Offset(centerX, (cardHeight + vSpacing) * 3.0 + cardHeight * 0.5),
+    ];
+
+    return Stack(
+      children: [
+        // S-Curve Glowing Ribbon in Background
+        Positioned.fill(
+          child: CustomPaint(
+            painter: _SCurveRibbonPainter(
+              progress: _ribbonController.value,
+              isAbyss: isAbyss,
+              isDesktop: true,
+              nodeCenters: nodeCenters,
+            ),
+          ),
+        ),
+
+        // Foreground 4 Milestone Rows (Alternating Left - Right)
+        Column(
+          children: [
+            // Row 01: Tính tự động (Bên trái)
+            SizedBox(
+              height: cardHeight,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(child: _buildBentoSoftSensorCard(isAbyss)),
+                  const SizedBox(width: 24),
+                  _buildMilestoneNode('01', isAbyss),
+                  const SizedBox(width: 24),
+                  Expanded(child: _buildDecorativeCompanionCard('01', isAbyss)),
+                ],
+              ),
+            ),
+            const SizedBox(height: vSpacing),
+
+            // Row 02: Máy đo tự động (Bên phải)
+            SizedBox(
+              height: cardHeight,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(child: _buildDecorativeCompanionCard('02', isAbyss)),
+                  const SizedBox(width: 24),
+                  _buildMilestoneNode('02', isAbyss),
+                  const SizedBox(width: 24),
+                  Expanded(child: _buildBentoEsp32Card(isAbyss)),
+                ],
+              ),
+            ),
+            const SizedBox(height: vSpacing),
+
+            // Row 03: Gợi ý kỹ thuật (Bên trái)
+            SizedBox(
+              height: cardHeight,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(child: _buildBentoAiPrescriptionCard(isAbyss)),
+                  const SizedBox(width: 24),
+                  _buildMilestoneNode('03', isAbyss),
+                  const SizedBox(width: 24),
+                  Expanded(child: _buildDecorativeCompanionCard('03', isAbyss)),
+                ],
+              ),
+            ),
+            const SizedBox(height: vSpacing),
+
+            // Row 04: Sổ ghi chép dễ dùng (Bên phải)
+            SizedBox(
+              height: cardHeight,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(child: _buildDecorativeCompanionCard('04', isAbyss)),
+                  const SizedBox(width: 24),
+                  _buildMilestoneNode('04', isAbyss),
+                  const SizedBox(width: 24),
+                  Expanded(child: _buildBentoDiaryCard(isAbyss)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileSCurveJourney(double width, bool isAbyss) {
+    const double vSpacing = 28.0;
+    const double railX = 24.0;
+
+    final nodeCenters = [
+      const Offset(railX, 130.0),
+      const Offset(railX, 420.0),
+      const Offset(railX, 710.0),
+      const Offset(railX, 1000.0),
+    ];
+
+    return Stack(
+      children: [
+        // Vertical Glowing Rail in Background
+        Positioned.fill(
+          child: CustomPaint(
+            painter: _SCurveRibbonPainter(
+              progress: _ribbonController.value,
+              isAbyss: isAbyss,
+              isDesktop: false,
+              nodeCenters: nodeCenters,
+            ),
+          ),
+        ),
+
+        // Foreground 4 Cards Stacked along left rail
+        Column(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildMilestoneNode('01', isAbyss),
+                const SizedBox(width: 14),
+                Expanded(child: _buildBentoSoftSensorCard(isAbyss)),
+              ],
+            ),
+            const SizedBox(height: vSpacing),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildMilestoneNode('02', isAbyss),
+                const SizedBox(width: 14),
+                Expanded(child: _buildBentoEsp32Card(isAbyss)),
+              ],
+            ),
+            const SizedBox(height: vSpacing),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildMilestoneNode('03', isAbyss),
+                const SizedBox(width: 14),
+                Expanded(child: _buildBentoAiPrescriptionCard(isAbyss)),
+              ],
+            ),
+            const SizedBox(height: vSpacing),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildMilestoneNode('04', isAbyss),
+                const SizedBox(width: 14),
+                Expanded(child: _buildBentoDiaryCard(isAbyss)),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMilestoneNode(String stepNum, bool isAbyss) {
+    final goldColor = isAbyss ? const Color(0xFFDFB76C) : const Color(0xFFD97706);
+    final emeraldColor = isAbyss ? const Color(0xFF00E5A3) : const Color(0xFF10B981);
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isAbyss ? const Color(0xFF091325) : Colors.white,
+        border: Border.all(
+          color: goldColor,
+          width: 2.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: goldColor.withValues(alpha: 0.40),
+            blurRadius: 14,
+            spreadRadius: 1,
+          ),
+          BoxShadow(
+            color: emeraldColor.withValues(alpha: 0.25),
+            blurRadius: 22,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            stepNum,
+            style: GoogleFonts.jetBrainsMono(
+              fontSize: 13,
+              fontWeight: FontWeight.w900,
+              color: goldColor,
+              height: 1.0,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Container(
+            width: 5,
+            height: 5,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: emeraldColor,
+              boxShadow: [
+                BoxShadow(
+                  color: emeraldColor,
+                  blurRadius: 6,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDecorativeCompanionCard(String stepNum, bool isAbyss) {
+    final goldColor = isAbyss ? const Color(0xFFDFB76C) : const Color(0xFFD97706);
+    final emeraldColor = isAbyss ? const Color(0xFF00E5A3) : const Color(0xFF10B981);
+
+    String tag = '';
+    String header = '';
+    String formula = '';
+    String desc = '';
+    IconData icon = Icons.info_outline_rounded;
+
+    if (stepNum == '01') {
+      tag = 'MÔ HÌNH HÓA HỌC EMERSON';
+      header = 'Công thức tính [NH3] tự do 0đ';
+      formula = '[NH3] = TAN · 1 / (10^(pKa - pH) + 1)';
+      desc = 'Tự động tính nồng độ khí độc chính xác theo thời gian thực từ pH và Nhiệt độ nước mà không cần đầu dò đắt tiền.';
+      icon = Icons.science_rounded;
+    } else if (stepNum == '02') {
+      tag = 'PHẦN CỨNG IOT CHỐNG NƯỚC';
+      header = 'Chu kỳ đo siêu tốc 3 giây';
+      formula = 'ESP32 Dual-Core · Wi-Fi / MQTT';
+      desc = 'Chống chịu mưa bão IP67, lọc sóng nước ao tôm và phát còi báo động ngay tức khắc khi ao nuôi mất điện.';
+      icon = Icons.wifi_tethering_rounded;
+    } else if (stepNum == '03') {
+      tag = 'TRỢ LÝ KỸ THUẬT NUÔI TÔM';
+      header = 'Phác đồ phân liều theo thể tích ao';
+      formula = 'Vôi Dolomite · Men Vi Sinh EM · Oxy Viên';
+      desc = 'Tính sẵn số ký thuốc theo đúng diện tích và độ sâu ao của bạn, hướng dẫn các bước xử lý chuẩn mực.';
+      icon = Icons.health_and_safety_rounded;
+    } else {
+      tag = 'NHẬT KÝ SỐ HÓA TOÀN DIỆN';
+      header = 'Quản lý chi phí & FCR vụ nuôi';
+      formula = 'FCR = Tổng kg thức ăn / Sinh khối tôm';
+      desc = 'Tự động tổng hợp số tiền thức ăn mỗi ngày và đánh giá hiệu quả kinh tế từng ao qua biểu đồ tăng trọng.';
+      icon = Icons.auto_graph_rounded;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      decoration: BoxDecoration(
+        color: isAbyss ? const Color(0x180E1C38) : const Color(0xFAF8FAFC),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: (isAbyss ? goldColor : const Color(0xFFBAE6FD)).withValues(alpha: 0.35),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: (isAbyss ? emeraldColor : const Color(0xFF0284C7)).withValues(alpha: 0.04),
+            blurRadius: 18,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: goldColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: goldColor.withValues(alpha: 0.3)),
+                ),
+                child: Text(
+                  tag,
+                  style: GoogleFonts.jetBrainsMono(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: goldColor,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+              ),
+              const Spacer(),
+              Icon(icon, color: goldColor, size: 20),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            header,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 15.5,
+              fontWeight: FontWeight.w800,
+              color: isAbyss ? Colors.white : const Color(0xFF0F172A),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: isAbyss ? const Color(0x24000000) : const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: emeraldColor.withValues(alpha: 0.3)),
+            ),
+            child: Text(
+              formula,
+              style: GoogleFonts.jetBrainsMono(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+                color: emeraldColor,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            desc,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+              height: 1.5,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }
@@ -1510,8 +1835,7 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
     );
   }
 
-  // ===========================================================================
-  // 7. MINIMALIST OPERATIONAL RELIABILITY METRICS
+// 7. MINIMALIST OPERATIONAL RELIABILITY METRICS
   // ===========================================================================
   Widget _buildEditorialMetricsSection(BuildContext context, bool isDesktop, bool isAbyss) {
     return Center(
@@ -1841,5 +2165,203 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
         ),
       ],
     );
+  }
+}
+
+class _SCurveRibbonPainter extends CustomPainter {
+  _SCurveRibbonPainter({
+    required this.progress,
+    required this.isAbyss,
+    required this.isDesktop,
+    required this.nodeCenters,
+  });
+
+  final double progress;
+  final bool isAbyss;
+  final bool isDesktop;
+  final List<Offset> nodeCenters;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (nodeCenters.length < 4) return;
+
+    final Path path = Path();
+
+    if (isDesktop) {
+      final p1 = nodeCenters[0];
+      final p2 = nodeCenters[1];
+      final p3 = nodeCenters[2];
+      final p4 = nodeCenters[3];
+
+      // Start above node 1 sweeping in from top-left
+      final start = Offset(p1.dx - 120, math.max(0.0, p1.dy - 70));
+      path.moveTo(start.dx, start.dy);
+
+      // Lead-in curve to node 1
+      path.cubicTo(
+        start.dx + 40, start.dy + 20,
+        p1.dx - 50, p1.dy - 20,
+        p1.dx, p1.dy,
+      );
+
+      // S-curve 1 -> 2: sweeps right across center
+      final dy12 = p2.dy - p1.dy;
+      path.cubicTo(
+        p1.dx + 160, p1.dy + dy12 * 0.20,
+        p2.dx + 160, p2.dy - dy12 * 0.20,
+        p2.dx, p2.dy,
+      );
+
+      // S-curve 2 -> 3: sweeps left across center
+      final dy23 = p3.dy - p2.dy;
+      path.cubicTo(
+        p2.dx - 160, p2.dy + dy23 * 0.20,
+        p3.dx - 160, p3.dy - dy23 * 0.20,
+        p3.dx, p3.dy,
+      );
+
+      // S-curve 3 -> 4: sweeps right across center
+      final dy34 = p4.dy - p3.dy;
+      path.cubicTo(
+        p3.dx + 160, p3.dy + dy34 * 0.20,
+        p4.dx + 160, p4.dy - dy34 * 0.20,
+        p4.dx, p4.dy,
+      );
+
+      // Lead-out curve under node 4
+      final end = Offset(p4.dx - 100, p4.dy + 70);
+      path.cubicTo(
+        p4.dx + 40, p4.dy + 30,
+        end.dx + 40, end.dy - 20,
+        end.dx, end.dy,
+      );
+    } else {
+      // Mobile: Clean vertical glowing rail on the left
+      final railX = nodeCenters[0].dx;
+      path.moveTo(railX, math.max(0.0, nodeCenters[0].dy - 40));
+      for (final n in nodeCenters) {
+        path.lineTo(railX, n.dy);
+      }
+      path.lineTo(railX, nodeCenters.last.dy + 40);
+    }
+
+    // 1. Base Track (mờ)
+    final trackColor = isAbyss
+        ? const Color(0xFFDFB76C).withValues(alpha: 0.18)
+        : const Color(0xFFD97706).withValues(alpha: 0.22);
+    final trackPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.5
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..color = trackColor;
+    canvas.drawPath(path, trackPaint);
+
+    // 2. Glowing Halo (Hào quang phát quang)
+    final glowColors = isAbyss
+        ? [
+            const Color(0xFFDFB76C).withValues(alpha: 0.50),
+            const Color(0xFFF5E6C8).withValues(alpha: 0.65),
+            const Color(0xFF00E5A3).withValues(alpha: 0.70),
+          ]
+        : [
+            const Color(0xFFD97706).withValues(alpha: 0.45),
+            const Color(0xFFB45309).withValues(alpha: 0.55),
+            const Color(0xFF4D7C0F).withValues(alpha: 0.60),
+          ];
+
+    final glowPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 14.0
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10.0)
+      ..shader = ui.Gradient.linear(
+        Offset(0, 0),
+        Offset(0, size.height),
+        glowColors,
+        [0.0, 0.5, 1.0],
+      );
+    canvas.drawPath(path, glowPaint);
+
+    // 3. Main Energy Beam (Dải sáng chính)
+    final beamColors = isAbyss
+        ? [
+            const Color(0xFFDFB76C),
+            const Color(0xFFF5E6C8),
+            const Color(0xFF00E5A3),
+          ]
+        : [
+            const Color(0xFFF59E0B),
+            const Color(0xFFD97706),
+            const Color(0xFF4D7C0F),
+          ];
+
+    final beamPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4.5
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..shader = ui.Gradient.linear(
+        Offset(0, 0),
+        Offset(0, size.height),
+        beamColors,
+        [0.0, 0.45, 1.0],
+      );
+    canvas.drawPath(path, beamPaint);
+
+    // 4. Moving Lead Orb (Đầu ngọc phát sáng dẫn đường)
+    final metrics = path.computeMetrics();
+    if (metrics.isNotEmpty) {
+      final metric = metrics.first;
+      final tangent = metric.getTangentForOffset(metric.length * progress);
+      if (tangent != null) {
+        final pos = tangent.position;
+
+        // Outer orb glow
+        canvas.drawCircle(
+          pos,
+          18.0,
+          Paint()
+            ..color = (isAbyss ? const Color(0xFF00E5A3) : const Color(0xFF4D7C0F))
+                .withValues(alpha: 0.45)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8.0),
+        );
+
+        // Mid orb glow
+        canvas.drawCircle(
+          pos,
+          12.0,
+          Paint()
+            ..color = (isAbyss ? const Color(0xFFDFB76C) : const Color(0xFFD97706))
+                .withValues(alpha: 0.75)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0),
+        );
+
+        // Core orb
+        canvas.drawCircle(
+          pos,
+          7.5,
+          Paint()..color = Colors.white,
+        );
+
+        // Core border ring
+        canvas.drawCircle(
+          pos,
+          7.5,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2.5
+            ..color = isAbyss ? const Color(0xFFDFB76C) : const Color(0xFFD97706),
+        );
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _SCurveRibbonPainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.isAbyss != isAbyss ||
+        oldDelegate.isDesktop != isDesktop;
   }
 }
