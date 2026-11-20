@@ -269,7 +269,7 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
               style: GoogleFonts.plusJakartaSans(
                 fontWeight: FontWeight.w900,
                 fontSize: 15.5,
-                color: Colors.white,
+                color: isAbyss ? Colors.white : const Color(0xFF0F172A),
                 letterSpacing: 1.6,
               ),
             ),
@@ -335,13 +335,13 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(10),
-        hoverColor: (isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7)).withValues(alpha: 0.15),
+        hoverColor: (isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7)).withValues(alpha: 0.12),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Text(
             label.toUpperCase(),
             style: GoogleFonts.plusJakartaSans(
-              color: Colors.white,
+              color: isAbyss ? Colors.white : const Color(0xFF0F172A),
               fontWeight: FontWeight.w900,
               fontSize: 13.0,
               letterSpacing: 1.0,
@@ -362,15 +362,19 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
           decoration: BoxDecoration(
-            color: (isAbyss ? const Color(0xFF00D2FF) : Colors.white).withValues(alpha: isAbyss ? 0.15 : 0.22),
+            color: isAbyss
+                ? const Color(0xFF00D2FF).withValues(alpha: 0.15)
+                : Colors.white.withValues(alpha: 0.95),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: (isAbyss ? const Color(0xFF00D2FF) : Colors.white).withValues(alpha: isAbyss ? 0.35 : 0.60),
+              color: isAbyss
+                  ? const Color(0xFF00D2FF).withValues(alpha: 0.35)
+                  : const Color(0xFF0284C7).withValues(alpha: 0.35),
               width: 1.1,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: isAbyss ? 0.20 : 0.10),
+                color: (isAbyss ? Colors.black : const Color(0xFF0284C7)).withValues(alpha: isAbyss ? 0.20 : 0.10),
                 blurRadius: 8,
               ),
             ],
@@ -382,11 +386,11 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
                 width: 7,
                 height: 7,
                 decoration: BoxDecoration(
-                  color: isAbyss ? const Color(0xFF00D2FF) : Colors.white,
+                  color: isAbyss ? const Color(0xFF00D2FF) : const Color(0xFF0284C7),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: (isAbyss ? const Color(0xFF00D2FF) : Colors.white).withValues(alpha: 0.8),
+                      color: (isAbyss ? const Color(0xFF00D2FF) : const Color(0xFF0284C7)).withValues(alpha: 0.8),
                       blurRadius: 6,
                     ),
                   ],
@@ -396,13 +400,10 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
               Text(
                 'THEO DÕI NƯỚC AO TÔM TỰ ĐỘNG',
                 style: GoogleFonts.jetBrainsMono(
-                  color: isAbyss ? const Color(0xFF38BDF8) : Colors.white,
+                  color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
                   fontSize: 10.5,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.1,
-                  shadows: const [
-                    Shadow(color: Color(0x33000000), blurRadius: 4, offset: Offset(0, 1)),
-                  ],
                 ),
               ),
             ],
@@ -846,7 +847,7 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
           style: GoogleFonts.jetBrainsMono(
             fontSize: 20,
             fontWeight: FontWeight.w800,
-            color: Colors.white,
+            color: isAbyss ? Colors.white : const Color(0xFF0F172A),
             letterSpacing: -0.5,
           ),
         ),
@@ -1062,7 +1063,7 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                          color: isAbyss ? Colors.white : const Color(0xFF0F172A),
                         ),
                       ),
                       const SizedBox(height: 5),
@@ -1198,7 +1199,7 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
             style: GoogleFonts.plusJakartaSans(
               fontSize: 17,
               fontWeight: FontWeight.w800,
-              color: Colors.white,
+              color: isAbyss ? Colors.white : const Color(0xFF0F172A),
               letterSpacing: -0.4,
             ),
           ),
@@ -1296,7 +1297,7 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
             style: GoogleFonts.plusJakartaSans(
               fontSize: 17,
               fontWeight: FontWeight.w800,
-              color: Colors.white,
+              color: isAbyss ? Colors.white : const Color(0xFF0F172A),
               letterSpacing: -0.3,
             ),
           ),
@@ -1366,7 +1367,7 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
             style: GoogleFonts.plusJakartaSans(
               fontSize: 17,
               fontWeight: FontWeight.w800,
-              color: Colors.white,
+              color: isAbyss ? Colors.white : const Color(0xFF0F172A),
               letterSpacing: -0.3,
             ),
           ),
@@ -1436,7 +1437,7 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
             style: GoogleFonts.plusJakartaSans(
               fontSize: 17,
               fontWeight: FontWeight.w800,
-              color: Colors.white,
+              color: isAbyss ? Colors.white : const Color(0xFF0F172A),
               letterSpacing: -0.3,
             ),
           ),
@@ -1547,7 +1548,7 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
           style: GoogleFonts.plusJakartaSans(
             fontSize: 13,
             fontWeight: FontWeight.w700,
-            color: Colors.white,
+            color: isAbyss ? Colors.white : const Color(0xFF0F172A),
           ),
         ),
         const SizedBox(height: 2),
@@ -1639,7 +1640,7 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
             style: GoogleFonts.plusJakartaSans(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: isAbyss ? Colors.white : const Color(0xFF0F172A),
             ),
           ),
           const SizedBox(height: 6),
@@ -1742,20 +1743,33 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
           decoration: BoxDecoration(
-            color: (isAbyss ? const Color(0xFF00D2FF) : const Color(0xFF0284C7)).withValues(alpha: 0.12),
+            color: isAbyss
+                ? const Color(0xFF00D2FF).withValues(alpha: 0.15)
+                : Colors.white.withValues(alpha: 0.95),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: (isAbyss ? const Color(0xFF00D2FF) : const Color(0xFF0284C7)).withValues(alpha: 0.30),
+              color: isAbyss
+                  ? const Color(0xFF00D2FF).withValues(alpha: 0.35)
+                  : const Color(0xFF0284C7).withValues(alpha: 0.35),
+              width: 1.1,
             ),
+            boxShadow: [
+              if (!isAbyss)
+                BoxShadow(
+                  color: const Color(0xFF0284C7).withValues(alpha: 0.12),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+            ],
           ),
           child: Text(
             badge,
             style: GoogleFonts.jetBrainsMono(
               color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
               fontSize: 10.5,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w800,
               letterSpacing: 1.2,
             ),
           ),
@@ -1769,6 +1783,9 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
             fontSize: 26,
             color: Colors.white,
             letterSpacing: -0.5,
+            shadows: const [
+              Shadow(color: Color(0x3D000000), blurRadius: 10, offset: Offset(0, 2)),
+            ],
           ),
         ),
         const SizedBox(height: 8),
@@ -1778,9 +1795,12 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
             subtitle,
             textAlign: TextAlign.center,
             style: GoogleFonts.plusJakartaSans(
-              color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF475569),
+              color: isAbyss ? const Color(0xFFCBD5E1) : Colors.white.withValues(alpha: 0.95),
               fontSize: 13.5,
               height: 1.5,
+              shadows: const [
+                Shadow(color: Color(0x33000000), blurRadius: 6, offset: Offset(0, 1)),
+              ],
             ),
           ),
         ),

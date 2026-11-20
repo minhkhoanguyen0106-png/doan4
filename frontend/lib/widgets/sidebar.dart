@@ -28,7 +28,10 @@ class WaterSidebar extends StatelessWidget {
     // ĐỒNG BỘ MÀU SẮC ĐẠI DƯƠNG:
     // Khi ban đêm (isAbyss = true) -> Sidebar tối màu huyền bí, sâu thẳm
     // Khi ban ngày (isAbyss = false) -> Sidebar sáng màu ngọc lam tươi mát
-    final bool isSidebarLight = !isAbyss;
+    // Inverse dashboard contrast rule:
+    // Sunlit / Daytime mode (!isAbyss) -> Dashboard sidebar is DARK (isSidebarLight = false)
+    // Abyssal / Nighttime mode (isAbyss) -> Dashboard sidebar is LIGHT (isSidebarLight = true)
+    final bool isSidebarLight = isAbyss;
 
     return Container(
       width: 260,

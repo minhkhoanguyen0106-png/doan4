@@ -112,31 +112,60 @@ class _UnderwaterAmbientBackgroundState extends State<UnderwaterAmbientBackgroun
       },
       child: Stack(
         children: [
-          // 1. Deep Multi-Tier Atmospheric Ocean Canvas Gradient
+          // 1. Ocean Background: Abyssal Gradient (Night) vs User Image (Day - Khung Cảnh Đại Dương Xanh Lung Linh)
           Positioned.fill(
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 700),
-              curve: Curves.easeInOut,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: isAbyss
-                      ? const [
-                          Color(0xFF032238), // Night surface cyan-marine glow (Ảnh 2)
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Daytime Ocean Backdrop (Khung Cảnh Đại Dương Xanh Lung Linh)
+                AnimatedOpacity(
+                  opacity: isAbyss ? 0.0 : 1.0,
+                  duration: const Duration(milliseconds: 650),
+                  curve: Curves.easeInOut,
+                  child: Image.asset(
+                    'assets/images/day_ocean_bg.png',
+                    fit: BoxFit.cover,
+                    alignment: Alignment.center,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color(0xFF0275B8),
+                            Color(0xFF0EA5E9),
+                            Color(0xFF38BDF8),
+                            Color(0xFFBAE6FD),
+                          ],
+                          stops: [0.0, 0.30, 0.65, 1.0],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Nighttime Abyssal Multi-Tier Canvas Gradient
+                AnimatedOpacity(
+                  opacity: isAbyss ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 650),
+                  curve: Curves.easeInOut,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Color(0xFF032238), // Night surface cyan-marine glow
                           Color(0xFF02192A), // Deep pelagic ocean water
                           Color(0xFF011220), // Dark abyss depths
                           Color(0xFF010A14), // Benthic midnight ocean floor
-                        ]
-                      : const [
-                          Color(0xFF0275B8), // Sunlit tropical azure surface (Ảnh 3 & 1)
-                          Color(0xFF0EA5E9), // Crystal clear turquoise lagoon
-                          Color(0xFF38BDF8), // Light water column
-                          Color(0xFFBAE6FD), // Bright sandy seabed reflection
                         ],
-                  stops: const [0.0, 0.30, 0.65, 1.0],
+                        stops: [0.0, 0.30, 0.65, 1.0],
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
 

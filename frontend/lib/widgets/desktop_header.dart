@@ -36,17 +36,21 @@ class DesktopHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isAbyss = lightingMode == OceanLightingMode.abyssal;
+    // Inverse dashboard contrast rule:
+    // Sunlit mode (!isAbyss) -> Dashboard header is DARK
+    // Abyssal mode (isAbyss) -> Dashboard header is LIGHT
+    final bool isHeaderLight = isAbyss;
 
     return Container(
       height: 80,
       padding: const EdgeInsets.symmetric(horizontal: 28),
       decoration: BoxDecoration(
-        color: isAbyss
-            ? const Color(0xE6051124) // Deep ocean glassmorphism
-            : Colors.white.withValues(alpha: 0.94),
+        color: isHeaderLight
+            ? Colors.white.withValues(alpha: 0.95)
+            : const Color(0xE6051124), // Deep ocean glassmorphism
         border: Border(
           bottom: BorderSide(
-            color: isAbyss ? const Color(0x3338BDF8) : const Color(0xFFE8EEF6),
+            color: isHeaderLight ? const Color(0xFFE8EEF6) : const Color(0x3338BDF8),
             width: 1,
           ),
         ),
@@ -64,7 +68,7 @@ class DesktopHeader extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
-                    color: isAbyss ? Colors.white : const Color(0xFF0F172A),
+                    color: isHeaderLight ? const Color(0xFF0F172A) : Colors.white,
                     letterSpacing: -0.4,
                   ),
                 ),
@@ -73,7 +77,7 @@ class DesktopHeader extends StatelessWidget {
                   subtitle,
                   style: TextStyle(
                     fontSize: 12,
-                    color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                    color: isHeaderLight ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -89,15 +93,15 @@ class DesktopHeader extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
               decoration: BoxDecoration(
-                color: isAbyss ? const Color(0x33EF4444) : const Color(0xFFFEF2F2),
+                color: isHeaderLight ? const Color(0xFFFEF2F2) : const Color(0x33EF4444),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isAbyss ? const Color(0xFFEF4444) : const Color(0xFFFECACA),
+                  color: isHeaderLight ? const Color(0xFFFECACA) : const Color(0xFFEF4444),
                   width: 1,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFEF4444).withValues(alpha: isAbyss ? 0.25 : 0.1),
+                    color: const Color(0xFFEF4444).withValues(alpha: isHeaderLight ? 0.1 : 0.25),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -118,7 +122,7 @@ class DesktopHeader extends StatelessWidget {
                     '$activeAlertCount Cảnh báo nước',
                     style: TextStyle(
                       fontSize: 12,
-                      color: isAbyss ? const Color(0xFFFCA5A5) : const Color(0xFFB91C1C),
+                      color: isHeaderLight ? const Color(0xFFB91C1C) : const Color(0xFFFCA5A5),
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -133,10 +137,10 @@ class DesktopHeader extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
           decoration: BoxDecoration(
-            color: isAbyss ? const Color(0x2638BDF8) : const Color(0xFFF8FAFD),
+            color: isHeaderLight ? const Color(0xFFF8FAFD) : const Color(0x2638BDF8),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isAbyss ? const Color(0x4D38BDF8) : const Color(0xFFE2E8F0),
+              color: isHeaderLight ? const Color(0xFFE2E8F0) : const Color(0x4D38BDF8),
               width: 1,
             ),
           ),
@@ -166,7 +170,7 @@ class DesktopHeader extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: isAbyss ? const Color(0xFFE2E8F0) : const Color(0xFF334155),
+                  color: isHeaderLight ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                 ),
               ),
             ],
@@ -184,15 +188,15 @@ class DesktopHeader extends StatelessWidget {
             ),
             label: Text(isSimulating ? 'Đang thử số liệu' : 'Thử số liệu'),
             style: FilledButton.styleFrom(
-              backgroundColor: isSimulating ? const Color(0xFFF59E0B) : const Color(0xFFEEF2FF),
-              foregroundColor: isSimulating ? Colors.white : const Color(0xFF4F46E5),
+              backgroundColor: isSimulating ? const Color(0xFFF59E0B) : (isHeaderLight ? const Color(0xFFEEF2FF) : const Color(0x226366F1)),
+              foregroundColor: isSimulating ? Colors.white : (isHeaderLight ? const Color(0xFF4F46E5) : const Color(0xFFA5B4FC)),
               elevation: 0,
               visualDensity: VisualDensity.compact,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
                 side: BorderSide(
-                  color: isSimulating ? const Color(0xFFD97706) : const Color(0xFFC7D2FE),
+                  color: isSimulating ? const Color(0xFFD97706) : (isHeaderLight ? const Color(0xFFC7D2FE) : const Color(0x446366F1)),
                 ),
               ),
             ),
@@ -213,13 +217,13 @@ class DesktopHeader extends StatelessWidget {
               color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFFF59E0B),
             ),
             style: IconButton.styleFrom(
-              backgroundColor: isAbyss
-                  ? const Color(0xFF0C2449)
-                  : const Color(0xFFFEF3C7),
+              backgroundColor: isHeaderLight
+                  ? const Color(0xFFFEF3C7)
+                  : const Color(0xFF0C2449),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
                 side: BorderSide(
-                  color: isAbyss ? const Color(0x6638BDF8) : const Color(0xFFFDE68A),
+                  color: isHeaderLight ? const Color(0xFFFDE68A) : const Color(0x6638BDF8),
                 ),
               ),
             ),
@@ -232,12 +236,12 @@ class DesktopHeader extends StatelessWidget {
           onPressed: onRefresh,
           tooltip: 'Làm mới dữ liệu',
           style: IconButton.styleFrom(
-            backgroundColor: isAbyss ? const Color(0xFF0C2449) : const Color(0xFFF1F5F9),
-            foregroundColor: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0F62FE),
+            backgroundColor: isHeaderLight ? const Color(0xFFF1F5F9) : const Color(0xFF0C2449),
+            foregroundColor: isHeaderLight ? const Color(0xFF0F62FE) : const Color(0xFF38BDF8),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
               side: BorderSide(
-                color: isAbyss ? const Color(0x6638BDF8) : Colors.transparent,
+                color: isHeaderLight ? Colors.transparent : const Color(0x6638BDF8),
               ),
             ),
           ),
