@@ -289,7 +289,7 @@ class _DevicesTabState extends State<DevicesTab> {
                     ),
                     isDense: true,
                     contentPadding: EdgeInsets.symmetric(vertical: 8),
-                    border: InputBorder.none,
+                    border: InputBorder.none, filled: false, fillColor: Colors.transparent, enabledBorder: InputBorder.none, focusedBorder: InputBorder.none,
                   ),
                 ),
               ),

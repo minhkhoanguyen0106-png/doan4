@@ -343,14 +343,59 @@ class OverviewTab extends StatelessWidget {
             children: [
               Text(
                 'Số đo gần nhất',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                  color: isAbyss ? Colors.white : const Color(0xFF0F172A),
+                  letterSpacing: -0.4,
+                  shadows: isAbyss
+                      ? [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.5),
+                            blurRadius: 8,
+                            offset: const Offset(0, 1),
+                          ),
+                        ]
+                      : null,
+                ),
               ),
-              TextButton.icon(
-                onPressed: onChooseDay,
-                icon: const Icon(Icons.calendar_month_outlined, size: 18),
-                label: Text(dateLabel(day)),
+              Container(
+                decoration: BoxDecoration(
+                  color: isAbyss ? const Color(0x28FFFFFF) : const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: isAbyss ? const Color(0x3838BDF8) : const Color(0xFFBFDBFE),
+                  ),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: onChooseDay,
+                    borderRadius: BorderRadius.circular(10),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.calendar_month_outlined,
+                            size: 16,
+                            color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            dateLabel(day),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: isAbyss ? Colors.white : const Color(0xFF0284C7),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
@@ -362,9 +407,11 @@ class OverviewTab extends StatelessWidget {
           else ...[
             Text(
               'Đo lúc ${timeLabel(latest!.measuredAt.toLocal())}',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: const Color(0xFF77859A)),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: isAbyss ? const Color(0xFF93C5FD) : const Color(0xFF64748B),
+              ),
             ),
             const SizedBox(height: 12),
             LayoutBuilder(

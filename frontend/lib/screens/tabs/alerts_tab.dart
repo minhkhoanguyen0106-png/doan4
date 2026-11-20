@@ -361,16 +361,21 @@ class _AlertsTabState extends State<AlertsTab> {
                             child: TextField(
                               onChanged: (v) => setState(() => _query = v),
                               style: TextStyle(fontSize: 13, color: isAbyss ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w600),
-                              decoration: const InputDecoration(
+                              cursorColor: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                              decoration: InputDecoration(
+                                filled: false,
+                                fillColor: Colors.transparent,
                                 hintText: 'Tìm kiếm sự kiện hoặc nội dung...',
                                 hintStyle: TextStyle(
                                   fontSize: 12.5,
-                                  color: Color(0xFF94A3B8),
+                                  color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                                   fontWeight: FontWeight.normal,
                                 ),
                                 isDense: true,
-                                contentPadding: EdgeInsets.symmetric(vertical: 6),
+                                contentPadding: const EdgeInsets.symmetric(vertical: 6),
                                 border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
                               ),
                             ),
                           ),
@@ -401,16 +406,21 @@ class _AlertsTabState extends State<AlertsTab> {
                         child: TextField(
                           onChanged: (v) => setState(() => _query = v),
                           style: TextStyle(fontSize: 13, color: isAbyss ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w600),
-                          decoration: const InputDecoration(
+                          cursorColor: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                          decoration: InputDecoration(
+                            filled: false,
+                            fillColor: Colors.transparent,
                             hintText: 'Tìm kiếm theo sự kiện hoặc nội dung cảnh báo...',
                             hintStyle: TextStyle(
                               fontSize: 13,
-                              color: Color(0xFF94A3B8),
+                              color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                               fontWeight: FontWeight.normal,
                             ),
                             isDense: true,
-                            contentPadding: EdgeInsets.symmetric(vertical: 8),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 8),
                             border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
                           ),
                         ),
                       ),

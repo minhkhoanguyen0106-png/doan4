@@ -148,19 +148,25 @@ class AssessmentCard extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5.5),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF8FAFC),
+                          color: isAbyss ? const Color(0x2238BDF8) : const Color(0xFFF8FAFC),
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          border: Border.all(
+                            color: isAbyss ? const Color(0x4438BDF8) : const Color(0xFFE2E8F0),
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.calendar_month_rounded, color: Color(0xFF0284C7), size: 14),
+                            Icon(
+                              Icons.calendar_month_rounded,
+                              color: isAbyss ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                              size: 14,
+                            ),
                             const SizedBox(width: 5),
                             Text(
                               dateLabel(day),
-                              style: const TextStyle(
-                                color: Color(0xFF334155),
+                              style: TextStyle(
+                                color: isAbyss ? Colors.white : const Color(0xFF334155),
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -702,14 +708,19 @@ class MetricCard extends StatelessWidget {
       ),
       child: InkWell(
         onTap: onTap,
-        hoverColor: const Color(0xFFF8FAFD),
+        hoverColor: isAbyss
+            ? accent.withValues(alpha: 0.14)
+            : accent.withValues(alpha: 0.08),
+        splashColor: accent.withValues(alpha: 0.22),
+        highlightColor: accent.withValues(alpha: 0.10),
+        focusColor: accent.withValues(alpha: 0.12),
         child: Container(
           decoration: BoxDecoration(
             gradient: selected
                 ? LinearGradient(
                     colors: [
-                      accent.withValues(alpha: isAbyss ? 0.15 : 0.05),
-                      isAbyss ? accent.withValues(alpha: 0.04) : Colors.white,
+                      accent.withValues(alpha: isAbyss ? 0.20 : 0.08),
+                      isAbyss ? accent.withValues(alpha: 0.05) : Colors.white,
                     ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -728,7 +739,7 @@ class MetricCard extends StatelessWidget {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: accent.withValues(alpha: 0.12),
+                      color: accent.withValues(alpha: 0.14),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(icon, size: 20, color: accent),
@@ -739,7 +750,7 @@ class MetricCard extends StatelessWidget {
                       label,
                       style: TextStyle(
                         fontSize: 13,
-                        color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+                        color: isAbyss ? const Color(0xFFE2E8F0) : const Color(0xFF1E293B),
                         fontWeight: FontWeight.w700,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -779,7 +790,7 @@ class MetricCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
-                        color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                        color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF475569),
                       ),
                     ),
                   ],
@@ -797,7 +808,11 @@ class MetricCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         safeLabel ?? 'Tối ưu: $safeMin – $safeMax',
-                        style: const TextStyle(fontSize: 9.5, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                          fontWeight: FontWeight.w600,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -825,7 +840,7 @@ class MetricCard extends StatelessWidget {
                     'TB ${formatNumber(stat!.average!)} · Min ${formatNumber(stat!.min!)} - Max ${formatNumber(stat!.max!)}',
                     style: TextStyle(
                       fontSize: 10,
-                      color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+                      color: isAbyss ? const Color(0xFFE2E8F0) : const Color(0xFF334155),
                       fontWeight: FontWeight.w600,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -834,9 +849,10 @@ class MetricCard extends StatelessWidget {
               else
                 Text(
                   value != null ? 'Chưa đủ mẫu trung bình ngày' : 'Chưa có dữ liệu cảm biến',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 10,
-                    color: Color(0xFF94A3B8),
+                    color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
             ],
