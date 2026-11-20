@@ -50,7 +50,14 @@ class LandingTab extends StatefulWidget {
 
 class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
-  late final AnimationController _ribbonController;
+  AnimationController? _ribbonController;
+  AnimationController get ribbonAnim {
+    _ribbonController ??= AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat();
+    return _ribbonController!;
+  }
   final GlobalKey<TutorialVideoPlayerState> _videoPlayerKey = GlobalKey<TutorialVideoPlayerState>();
   double _scrollOffset = 0.0;
 
@@ -75,6 +82,7 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
 
   @override
   void dispose() {
+    _ribbonController?.dispose();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
@@ -1115,7 +1123,7 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
   }
 
   // ===========================================================================
-  // 6. S-CURVE RIBBON JOURNEY — 4 TRỤ CỘT CÔNG NGHỆ NỀN TẢNG NỐI BỞI DẢI ÁNH SÁNG
+  // 6. S-CURVE RIBBON JOURNEY — DÒNG NƯỚC CHẢY UỐN LƯỢN & ĐÀN CÁ BƠI XEN KẼ
   // ===========================================================================
   Widget _buildBentoTechnologySection(BuildContext context, bool isDesktop, bool isAbyss) {
     return Center(
@@ -1132,9 +1140,9 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
             ),
             const SizedBox(height: 48),
 
-            // S-Curve Animated Flow Journey
+            // S-Curve Animated Water Current & Swimming Fish Flow
             AnimatedBuilder(
-              animation: _ribbonController,
+              animation: ribbonAnim,
               builder: (context, _) {
                 return LayoutBuilder(
                   builder: (context, constraints) {
@@ -1155,168 +1163,119 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
   }
 
   Widget _buildDesktopSCurveJourney(double width, bool isAbyss) {
-    const double cardHeight = 260.0;
-    const double vSpacing = 56.0;
-
-    final centerX = width / 2.0;
-    final nodeCenters = [
-      Offset(centerX, cardHeight * 0.5),
-      Offset(centerX, cardHeight + vSpacing + cardHeight * 0.5),
-      Offset(centerX, (cardHeight + vSpacing) * 2.0 + cardHeight * 0.5),
-      Offset(centerX, (cardHeight + vSpacing) * 3.0 + cardHeight * 0.5),
-    ];
-
-    return Stack(
-      children: [
-        // S-Curve Glowing Ribbon in Background
-        Positioned.fill(
-          child: CustomPaint(
-            painter: _SCurveRibbonPainter(
-              progress: _ribbonController.value,
-              isAbyss: isAbyss,
-              isDesktop: true,
-              nodeCenters: nodeCenters,
-            ),
+    return CustomPaint(
+      painter: _WaterStreamFishPainter(
+        progress: ribbonAnim.value,
+        isAbyss: isAbyss,
+        isDesktop: true,
+      ),
+      child: Column(
+        children: [
+          // Row 01: Tính tự động (Bên trái) — Bên phải để trống cho dòng nước uốn lượn
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(child: _buildBentoSoftSensorCard(isAbyss)),
+              const SizedBox(width: 24),
+              _buildMilestoneNode('01', isAbyss),
+              const SizedBox(width: 24),
+              const Expanded(child: SizedBox()),
+            ],
           ),
-        ),
+          const SizedBox(height: 52),
 
-        // Foreground 4 Milestone Rows (Alternating Left - Right)
-        Column(
-          children: [
-            // Row 01: Tính tự động (Bên trái)
-            SizedBox(
-              height: cardHeight,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(child: _buildBentoSoftSensorCard(isAbyss)),
-                  const SizedBox(width: 24),
-                  _buildMilestoneNode('01', isAbyss),
-                  const SizedBox(width: 24),
-                  Expanded(child: _buildDecorativeCompanionCard('01', isAbyss)),
-                ],
-              ),
-            ),
-            const SizedBox(height: vSpacing),
+          // Row 02: Máy đo tự động (Bên phải) — Bên trái để trống cho dòng nước uốn lượn
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Expanded(child: SizedBox()),
+              const SizedBox(width: 24),
+              _buildMilestoneNode('02', isAbyss),
+              const SizedBox(width: 24),
+              Expanded(child: _buildBentoEsp32Card(isAbyss)),
+            ],
+          ),
+          const SizedBox(height: 52),
 
-            // Row 02: Máy đo tự động (Bên phải)
-            SizedBox(
-              height: cardHeight,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(child: _buildDecorativeCompanionCard('02', isAbyss)),
-                  const SizedBox(width: 24),
-                  _buildMilestoneNode('02', isAbyss),
-                  const SizedBox(width: 24),
-                  Expanded(child: _buildBentoEsp32Card(isAbyss)),
-                ],
-              ),
-            ),
-            const SizedBox(height: vSpacing),
+          // Row 03: Gợi ý kỹ thuật (Bên trái) — Bên phải để trống cho dòng nước uốn lượn
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(child: _buildBentoAiPrescriptionCard(isAbyss)),
+              const SizedBox(width: 24),
+              _buildMilestoneNode('03', isAbyss),
+              const SizedBox(width: 24),
+              const Expanded(child: SizedBox()),
+            ],
+          ),
+          const SizedBox(height: 52),
 
-            // Row 03: Gợi ý kỹ thuật (Bên trái)
-            SizedBox(
-              height: cardHeight,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(child: _buildBentoAiPrescriptionCard(isAbyss)),
-                  const SizedBox(width: 24),
-                  _buildMilestoneNode('03', isAbyss),
-                  const SizedBox(width: 24),
-                  Expanded(child: _buildDecorativeCompanionCard('03', isAbyss)),
-                ],
-              ),
-            ),
-            const SizedBox(height: vSpacing),
-
-            // Row 04: Sổ ghi chép dễ dùng (Bên phải)
-            SizedBox(
-              height: cardHeight,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(child: _buildDecorativeCompanionCard('04', isAbyss)),
-                  const SizedBox(width: 24),
-                  _buildMilestoneNode('04', isAbyss),
-                  const SizedBox(width: 24),
-                  Expanded(child: _buildBentoDiaryCard(isAbyss)),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ],
+          // Row 04: Sổ ghi chép dễ dùng (Bên phải) — Bên trái để trống cho dòng nước uốn lượn
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Expanded(child: SizedBox()),
+              const SizedBox(width: 24),
+              _buildMilestoneNode('04', isAbyss),
+              const SizedBox(width: 24),
+              Expanded(child: _buildBentoDiaryCard(isAbyss)),
+            ],
+          ),
+          const SizedBox(height: 36),
+        ],
+      ),
     );
   }
 
   Widget _buildMobileSCurveJourney(double width, bool isAbyss) {
-    const double vSpacing = 28.0;
-    const double railX = 24.0;
+    const double vSpacing = 26.0;
 
-    final nodeCenters = [
-      const Offset(railX, 130.0),
-      const Offset(railX, 420.0),
-      const Offset(railX, 710.0),
-      const Offset(railX, 1000.0),
-    ];
-
-    return Stack(
-      children: [
-        // Vertical Glowing Rail in Background
-        Positioned.fill(
-          child: CustomPaint(
-            painter: _SCurveRibbonPainter(
-              progress: _ribbonController.value,
-              isAbyss: isAbyss,
-              isDesktop: false,
-              nodeCenters: nodeCenters,
-            ),
+    return CustomPaint(
+      painter: _WaterStreamFishPainter(
+        progress: ribbonAnim.value,
+        isAbyss: isAbyss,
+        isDesktop: false,
+      ),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildMilestoneNode('01', isAbyss),
+              const SizedBox(width: 14),
+              Expanded(child: _buildBentoSoftSensorCard(isAbyss)),
+            ],
           ),
-        ),
-
-        // Foreground 4 Cards Stacked along left rail
-        Column(
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildMilestoneNode('01', isAbyss),
-                const SizedBox(width: 14),
-                Expanded(child: _buildBentoSoftSensorCard(isAbyss)),
-              ],
-            ),
-            const SizedBox(height: vSpacing),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildMilestoneNode('02', isAbyss),
-                const SizedBox(width: 14),
-                Expanded(child: _buildBentoEsp32Card(isAbyss)),
-              ],
-            ),
-            const SizedBox(height: vSpacing),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildMilestoneNode('03', isAbyss),
-                const SizedBox(width: 14),
-                Expanded(child: _buildBentoAiPrescriptionCard(isAbyss)),
-              ],
-            ),
-            const SizedBox(height: vSpacing),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildMilestoneNode('04', isAbyss),
-                const SizedBox(width: 14),
-                Expanded(child: _buildBentoDiaryCard(isAbyss)),
-              ],
-            ),
-          ],
-        ),
-      ],
+          const SizedBox(height: vSpacing),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildMilestoneNode('02', isAbyss),
+              const SizedBox(width: 14),
+              Expanded(child: _buildBentoEsp32Card(isAbyss)),
+            ],
+          ),
+          const SizedBox(height: vSpacing),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildMilestoneNode('03', isAbyss),
+              const SizedBox(width: 14),
+              Expanded(child: _buildBentoAiPrescriptionCard(isAbyss)),
+            ],
+          ),
+          const SizedBox(height: vSpacing),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildMilestoneNode('04', isAbyss),
+              const SizedBox(width: 14),
+              Expanded(child: _buildBentoDiaryCard(isAbyss)),
+            ],
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
     );
   }
 
@@ -1378,132 +1337,9 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildDecorativeCompanionCard(String stepNum, bool isAbyss) {
-    final goldColor = isAbyss ? const Color(0xFFDFB76C) : const Color(0xFFD97706);
-    final emeraldColor = isAbyss ? const Color(0xFF00E5A3) : const Color(0xFF10B981);
-
-    String tag = '';
-    String header = '';
-    String formula = '';
-    String desc = '';
-    IconData icon = Icons.info_outline_rounded;
-
-    if (stepNum == '01') {
-      tag = 'MÔ HÌNH HÓA HỌC EMERSON';
-      header = 'Công thức tính [NH3] tự do 0đ';
-      formula = '[NH3] = TAN · 1 / (10^(pKa - pH) + 1)';
-      desc = 'Tự động tính nồng độ khí độc chính xác theo thời gian thực từ pH và Nhiệt độ nước mà không cần đầu dò đắt tiền.';
-      icon = Icons.science_rounded;
-    } else if (stepNum == '02') {
-      tag = 'PHẦN CỨNG IOT CHỐNG NƯỚC';
-      header = 'Chu kỳ đo siêu tốc 3 giây';
-      formula = 'ESP32 Dual-Core · Wi-Fi / MQTT';
-      desc = 'Chống chịu mưa bão IP67, lọc sóng nước ao tôm và phát còi báo động ngay tức khắc khi ao nuôi mất điện.';
-      icon = Icons.wifi_tethering_rounded;
-    } else if (stepNum == '03') {
-      tag = 'TRỢ LÝ KỸ THUẬT NUÔI TÔM';
-      header = 'Phác đồ phân liều theo thể tích ao';
-      formula = 'Vôi Dolomite · Men Vi Sinh EM · Oxy Viên';
-      desc = 'Tính sẵn số ký thuốc theo đúng diện tích và độ sâu ao của bạn, hướng dẫn các bước xử lý chuẩn mực.';
-      icon = Icons.health_and_safety_rounded;
-    } else {
-      tag = 'NHẬT KÝ SỐ HÓA TOÀN DIỆN';
-      header = 'Quản lý chi phí & FCR vụ nuôi';
-      formula = 'FCR = Tổng kg thức ăn / Sinh khối tôm';
-      desc = 'Tự động tổng hợp số tiền thức ăn mỗi ngày và đánh giá hiệu quả kinh tế từng ao qua biểu đồ tăng trọng.';
-      icon = Icons.auto_graph_rounded;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-      decoration: BoxDecoration(
-        color: isAbyss ? const Color(0x180E1C38) : const Color(0xFAF8FAFC),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: (isAbyss ? goldColor : const Color(0xFFBAE6FD)).withValues(alpha: 0.35),
-          width: 1.2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: (isAbyss ? emeraldColor : const Color(0xFF0284C7)).withValues(alpha: 0.04),
-            blurRadius: 18,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: goldColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: goldColor.withValues(alpha: 0.3)),
-                ),
-                child: Text(
-                  tag,
-                  style: GoogleFonts.jetBrainsMono(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    color: goldColor,
-                    letterSpacing: 0.8,
-                  ),
-                ),
-              ),
-              const Spacer(),
-              Icon(icon, color: goldColor, size: 20),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            header,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 15.5,
-              fontWeight: FontWeight.w800,
-              color: isAbyss ? Colors.white : const Color(0xFF0F172A),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: isAbyss ? const Color(0x24000000) : const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: emeraldColor.withValues(alpha: 0.3)),
-            ),
-            child: Text(
-              formula,
-              style: GoogleFonts.jetBrainsMono(
-                fontSize: 11.5,
-                fontWeight: FontWeight.w700,
-                color: emeraldColor,
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            desc,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: isAbyss ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-              height: 1.5,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildBentoSoftSensorCard(bool isAbyss) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
       decoration: BoxDecoration(
         color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
         borderRadius: BorderRadius.circular(22),
@@ -1541,14 +1377,14 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
                 ),
               ),
               const Spacer(),
-              const Icon(Icons.bolt_rounded, color: Color(0xFF00D2FF), size: 24),
+              const Icon(Icons.bolt_rounded, color: Color(0xFF00D2FF), size: 22),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Text(
             'Tự tính khí độc NH₃ – Không cần mua đầu đo đắt tiền',
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 17,
+              fontSize: 16.5,
               fontWeight: FontWeight.w800,
               color: isAbyss ? Colors.white : const Color(0xFF0F172A),
               letterSpacing: -0.4,
@@ -1561,13 +1397,12 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
               fontSize: 13,
               fontWeight: FontWeight.w400,
               color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
-              height: 1.55,
+              height: 1.5,
             ),
           ),
-          const Spacer(),
           const SizedBox(height: 16),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: isAbyss ? const Color(0x18FFFFFF) : const Color(0xFFF1F5F9),
               borderRadius: BorderRadius.circular(10),
@@ -1577,7 +1412,7 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
                 Text(
                   'Công thức chuẩn hóa học',
                   style: GoogleFonts.jetBrainsMono(
-                    fontSize: 11.5,
+                    fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: const Color(0xFF38BDF8),
                   ),
@@ -1601,7 +1436,7 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
 
   Widget _buildBentoEsp32Card(bool isAbyss) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
       decoration: BoxDecoration(
         color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
         borderRadius: BorderRadius.circular(22),
@@ -1642,11 +1477,11 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
               const Icon(Icons.sensors_rounded, color: Color(0xFF38BDF8), size: 22),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Text(
             'Máy đo cắm tại ao – Tự gửi số liệu 24/24',
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 17,
+              fontSize: 16.5,
               fontWeight: FontWeight.w800,
               color: isAbyss ? Colors.white : const Color(0xFF0F172A),
               letterSpacing: -0.3,
@@ -1659,10 +1494,9 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
               fontSize: 13,
               fontWeight: FontWeight.w400,
               color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
-              height: 1.55,
+              height: 1.5,
             ),
           ),
-          const Spacer(),
           const SizedBox(height: 16),
           _techFeaturePill('Báo động ngay khi mất điện hoặc mất mạng', isAbyss),
         ],
@@ -1672,7 +1506,7 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
 
   Widget _buildBentoAiPrescriptionCard(bool isAbyss) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
       decoration: BoxDecoration(
         color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
         borderRadius: BorderRadius.circular(22),
@@ -1712,11 +1546,11 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
               const Icon(Icons.psychology_rounded, color: Color(0xFF10B981), size: 22),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Text(
             'Gợi ý lượng vôi, oxy viên và vi sinh cần đánh',
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 17,
+              fontSize: 16.5,
               fontWeight: FontWeight.w800,
               color: isAbyss ? Colors.white : const Color(0xFF0F172A),
               letterSpacing: -0.3,
@@ -1729,10 +1563,9 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
               fontSize: 13,
               fontWeight: FontWeight.w400,
               color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
-              height: 1.55,
+              height: 1.5,
             ),
           ),
-          const Spacer(),
           const SizedBox(height: 16),
           _techFeaturePill('Tính sẵn số ký thuốc cần đánh cho ao', isAbyss),
         ],
@@ -1742,7 +1575,7 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
 
   Widget _buildBentoDiaryCard(bool isAbyss) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
       decoration: BoxDecoration(
         color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
         borderRadius: BorderRadius.circular(22),
@@ -1782,11 +1615,11 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
               const Icon(Icons.menu_book_rounded, color: Color(0xFFF59E0B), size: 22),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Text(
             'Sổ nhật ký ao nuôi trên điện thoại',
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 17,
+              fontSize: 16.5,
               fontWeight: FontWeight.w800,
               color: isAbyss ? Colors.white : const Color(0xFF0F172A),
               letterSpacing: -0.3,
@@ -1799,10 +1632,9 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
               fontSize: 13,
               fontWeight: FontWeight.w400,
               color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
-              height: 1.55,
+              height: 1.5,
             ),
           ),
-          const Spacer(),
           const SizedBox(height: 16),
           _techFeaturePill('Quản lý tiền thức ăn và chi phí rõ ràng', isAbyss),
         ],
@@ -2168,198 +2000,272 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
   }
 }
 
-class _SCurveRibbonPainter extends CustomPainter {
-  _SCurveRibbonPainter({
+class _WaterStreamFishPainter extends CustomPainter {
+  _WaterStreamFishPainter({
     required this.progress,
     required this.isAbyss,
     required this.isDesktop,
-    required this.nodeCenters,
   });
 
   final double progress;
   final bool isAbyss;
   final bool isDesktop;
-  final List<Offset> nodeCenters;
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (nodeCenters.length < 4) return;
+    if (size.width <= 0 || size.height <= 0) return;
 
     final Path path = Path();
+    final centerX = size.width / 2.0;
 
     if (isDesktop) {
-      final p1 = nodeCenters[0];
-      final p2 = nodeCenters[1];
-      final p3 = nodeCenters[2];
-      final p4 = nodeCenters[3];
+      // 4 Node Y centers based on proportional height distribution
+      final y1 = size.height * 0.125;
+      final y2 = size.height * 0.375;
+      final y3 = size.height * 0.625;
+      final y4 = size.height * 0.875;
 
-      // Start above node 1 sweeping in from top-left
-      final start = Offset(p1.dx - 120, math.max(0.0, p1.dy - 70));
-      path.moveTo(start.dx, start.dy);
+      // Start above node 1 on the top-left
+      path.moveTo(centerX - size.width * 0.16, 0.0);
 
-      // Lead-in curve to node 1
+      // Curve gracefully into Node 01
       path.cubicTo(
-        start.dx + 40, start.dy + 20,
-        p1.dx - 50, p1.dy - 20,
-        p1.dx, p1.dy,
+        centerX - size.width * 0.10, y1 * 0.35,
+        centerX - 40.0, y1 - 20.0,
+        centerX, y1,
       );
 
-      // S-curve 1 -> 2: sweeps right across center
-      final dy12 = p2.dy - p1.dy;
+      // S-curve 1 -> 2: Sweeps OUTWARD TO THE RIGHT into the EMPTY space of Row 0 & 1
       path.cubicTo(
-        p1.dx + 160, p1.dy + dy12 * 0.20,
-        p2.dx + 160, p2.dy - dy12 * 0.20,
-        p2.dx, p2.dy,
+        centerX + size.width * 0.28, y1 + (y2 - y1) * 0.22,
+        centerX + size.width * 0.28, y2 - (y2 - y1) * 0.22,
+        centerX, y2,
       );
 
-      // S-curve 2 -> 3: sweeps left across center
-      final dy23 = p3.dy - p2.dy;
+      // S-curve 2 -> 3: Sweeps OUTWARD TO THE LEFT into the EMPTY space of Row 1 & 2
       path.cubicTo(
-        p2.dx - 160, p2.dy + dy23 * 0.20,
-        p3.dx - 160, p3.dy - dy23 * 0.20,
-        p3.dx, p3.dy,
+        centerX - size.width * 0.28, y2 + (y3 - y2) * 0.22,
+        centerX - size.width * 0.28, y3 - (y3 - y2) * 0.22,
+        centerX, y3,
       );
 
-      // S-curve 3 -> 4: sweeps right across center
-      final dy34 = p4.dy - p3.dy;
+      // S-curve 3 -> 4: Sweeps OUTWARD TO THE RIGHT into the EMPTY space of Row 2 & 3
       path.cubicTo(
-        p3.dx + 160, p3.dy + dy34 * 0.20,
-        p4.dx + 160, p4.dy - dy34 * 0.20,
-        p4.dx, p4.dy,
+        centerX + size.width * 0.28, y3 + (y4 - y3) * 0.22,
+        centerX + size.width * 0.28, y4 - (y4 - y3) * 0.22,
+        centerX, y4,
       );
 
-      // Lead-out curve under node 4
-      final end = Offset(p4.dx - 100, p4.dy + 70);
+      // Exit curve below node 4
       path.cubicTo(
-        p4.dx + 40, p4.dy + 30,
-        end.dx + 40, end.dy - 20,
-        end.dx, end.dy,
+        centerX - 40.0, y4 + 35.0,
+        centerX - size.width * 0.12, size.height - 20.0,
+        centerX - size.width * 0.16, size.height,
       );
     } else {
-      // Mobile: Clean vertical glowing rail on the left
-      final railX = nodeCenters[0].dx;
-      path.moveTo(railX, math.max(0.0, nodeCenters[0].dy - 40));
-      for (final n in nodeCenters) {
-        path.lineTo(railX, n.dy);
-      }
-      path.lineTo(railX, nodeCenters.last.dy + 40);
+      // Mobile: Clean vertical glowing water stream along node centers (x = 24.0)
+      const railX = 24.0;
+      path.moveTo(railX, 10.0);
+      path.lineTo(railX, math.max(10.0, size.height - 10.0));
     }
 
-    // 1. Base Track (mờ)
-    final trackColor = isAbyss
-        ? const Color(0xFFDFB76C).withValues(alpha: 0.18)
-        : const Color(0xFFD97706).withValues(alpha: 0.22);
-    final trackPaint = Paint()
+    // =======================================================================
+    // 1. DÒNG NƯỚC CHẢY ĐẠI DƯƠNG (Aqua Water Current Stream)
+    // =======================================================================
+    // 1a. Outer Water Glow Aura (Hào quang nước biển phát sáng)
+    final auraColors = isAbyss
+        ? [
+            const Color(0x3500D2FF),
+            const Color(0x4500E5A3),
+            const Color(0x3038BDF8),
+          ]
+        : [
+            const Color(0x250284C7),
+            const Color(0x3510B981),
+            const Color(0x250369A1),
+          ];
+
+    final auraPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 24.0
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 14.0)
+      ..shader = ui.Gradient.linear(
+        Offset(0, 0),
+        Offset(0, size.height),
+        auraColors,
+        [0.0, 0.5, 1.0],
+      );
+    canvas.drawPath(path, auraPaint);
+
+    // 1b. Translucent Water Stream Bed (Dải nước trong suốt uốn lượn)
+    final streamBedPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 8.0
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..color = (isAbyss ? const Color(0xFF00D2FF) : const Color(0xFF0284C7)).withValues(alpha: 0.20);
+    canvas.drawPath(path, streamBedPaint);
+
+    // 1c. Flowing Water Current Line (Lõi dòng nước phát sáng lấp lánh)
+    final coreWaterColors = isAbyss
+        ? [
+            const Color(0xCC00D2FF),
+            const Color(0xEEDFB76C),
+            const Color(0xEE00E5A3),
+          ]
+        : [
+            const Color(0xCC0284C7),
+            const Color(0xEED97706),
+            const Color(0xEE10B981),
+          ];
+
+    final coreWaterPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3.5
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
-      ..color = trackColor;
-    canvas.drawPath(path, trackPaint);
-
-    // 2. Glowing Halo (Hào quang phát quang)
-    final glowColors = isAbyss
-        ? [
-            const Color(0xFFDFB76C).withValues(alpha: 0.50),
-            const Color(0xFFF5E6C8).withValues(alpha: 0.65),
-            const Color(0xFF00E5A3).withValues(alpha: 0.70),
-          ]
-        : [
-            const Color(0xFFD97706).withValues(alpha: 0.45),
-            const Color(0xFFB45309).withValues(alpha: 0.55),
-            const Color(0xFF4D7C0F).withValues(alpha: 0.60),
-          ];
-
-    final glowPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 14.0
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10.0)
       ..shader = ui.Gradient.linear(
         Offset(0, 0),
         Offset(0, size.height),
-        glowColors,
-        [0.0, 0.5, 1.0],
-      );
-    canvas.drawPath(path, glowPaint);
-
-    // 3. Main Energy Beam (Dải sáng chính)
-    final beamColors = isAbyss
-        ? [
-            const Color(0xFFDFB76C),
-            const Color(0xFFF5E6C8),
-            const Color(0xFF00E5A3),
-          ]
-        : [
-            const Color(0xFFF59E0B),
-            const Color(0xFFD97706),
-            const Color(0xFF4D7C0F),
-          ];
-
-    final beamPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 4.5
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round
-      ..shader = ui.Gradient.linear(
-        Offset(0, 0),
-        Offset(0, size.height),
-        beamColors,
+        coreWaterColors,
         [0.0, 0.45, 1.0],
       );
-    canvas.drawPath(path, beamPaint);
+    canvas.drawPath(path, coreWaterPaint);
 
-    // 4. Moving Lead Orb (Đầu ngọc phát sáng dẫn đường)
+    // =======================================================================
+    // 2. BỌT NƯỚC NỔI DỌC DÒNG CHẢY (Flowing Water Bubbles)
+    // =======================================================================
     final metrics = path.computeMetrics();
-    if (metrics.isNotEmpty) {
-      final metric = metrics.first;
-      final tangent = metric.getTangentForOffset(metric.length * progress);
+    if (metrics.isEmpty) return;
+    final metric = metrics.first;
+    final totalLen = metric.length;
+
+    // Draw 8 ambient flowing bubbles
+    for (int i = 0; i < 8; i++) {
+      final bubbleProgress = (progress + (i / 8.0)) % 1.0;
+      final tangent = metric.getTangentForOffset(totalLen * bubbleProgress);
       if (tangent != null) {
         final pos = tangent.position;
+        final floatWag = math.sin((progress * 10 + i) * math.pi) * 6.0;
+        final bubblePos = Offset(pos.dx + floatWag, pos.dy);
+        final bubbleRadius = 2.0 + (i % 3) * 1.5;
 
-        // Outer orb glow
         canvas.drawCircle(
-          pos,
-          18.0,
+          bubblePos,
+          bubbleRadius,
           Paint()
-            ..color = (isAbyss ? const Color(0xFF00E5A3) : const Color(0xFF4D7C0F))
-                .withValues(alpha: 0.45)
-            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8.0),
-        );
-
-        // Mid orb glow
-        canvas.drawCircle(
-          pos,
-          12.0,
-          Paint()
-            ..color = (isAbyss ? const Color(0xFFDFB76C) : const Color(0xFFD97706))
-                .withValues(alpha: 0.75)
-            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0),
-        );
-
-        // Core orb
-        canvas.drawCircle(
-          pos,
-          7.5,
-          Paint()..color = Colors.white,
-        );
-
-        // Core border ring
-        canvas.drawCircle(
-          pos,
-          7.5,
-          Paint()
+            ..color = (isAbyss ? const Color(0x9900D2FF) : const Color(0x880284C7))
             ..style = PaintingStyle.stroke
-            ..strokeWidth = 2.5
-            ..color = isAbyss ? const Color(0xFFDFB76C) : const Color(0xFFD97706),
+            ..strokeWidth = 1.0,
+        );
+        canvas.drawCircle(
+          Offset(bubblePos.dx - 0.8, bubblePos.dy - 0.8),
+          bubbleRadius * 0.4,
+          Paint()..color = Colors.white.withValues(alpha: 0.8),
         );
       }
     }
+
+    // =======================================================================
+    // 3. ĐÀN CÁ BƠI UỐN LƯỢN DỌC DÒNG S (Swimming Fish along S-Curve)
+    // =======================================================================
+    // 3a. Chú cá dẫn đầu (Lead Swimming Fish)
+    final leadTangent = metric.getTangentForOffset(totalLen * progress);
+    if (leadTangent != null) {
+      final pos = leadTangent.position;
+      final angle = math.atan2(leadTangent.vector.dy, leadTangent.vector.dx);
+      final tailWag = math.sin(progress * 26.0 * math.pi);
+      _drawSwimmingFish(canvas, pos, angle, tailWag, scale: 1.15, isAbyss: isAbyss);
+    }
+
+    // 3b. Chú cá nhỏ bơi theo sau (Little Companion Fish following)
+    final followProgress = (progress - 0.12) < 0 ? (progress - 0.12 + 1.0) : (progress - 0.12);
+    final followTangent = metric.getTangentForOffset(totalLen * followProgress);
+    if (followTangent != null) {
+      final pos = followTangent.position;
+      final angle = math.atan2(followTangent.vector.dy, followTangent.vector.dx);
+      final tailWag = math.sin((progress - 0.12) * 26.0 * math.pi);
+      _drawSwimmingFish(canvas, pos, angle, tailWag, scale: 0.75, isAbyss: isAbyss);
+    }
+  }
+
+  /// Vẽ chú cá bơi sinh động với vây cá, đuôi vẫy sóng và mắt cá phát quang
+  void _drawSwimmingFish(
+    Canvas canvas,
+    Offset pos,
+    double angle,
+    double tailWag, {
+    required double scale,
+    required bool isAbyss,
+  }) {
+    canvas.save();
+    canvas.translate(pos.dx, pos.dy);
+    canvas.rotate(angle);
+    canvas.scale(scale);
+
+    // 1. Water Ripple Wake behind fish tail (Gợn nước sau đuôi cá)
+    final wakePaint = Paint()
+      ..color = (isAbyss ? const Color(0xFF00D2FF) : const Color(0xFF0284C7)).withValues(alpha: 0.35)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.4;
+    canvas.drawCircle(Offset(-22, tailWag * 3), 4.5, wakePaint);
+
+    // 2. Bioluminescent Aura (Hào quang bơi phát quang)
+    final fishAura = Paint()
+      ..color = (isAbyss ? const Color(0xFF00E5A3) : const Color(0xFF10B981)).withValues(alpha: 0.40)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 7.0);
+    canvas.drawOval(Rect.fromCenter(center: const Offset(0, 0), width: 34, height: 16), fishAura);
+
+    // 3. Fish Body (Thân cá uốn lượn thon gọn)
+    final bodyPath = Path();
+    bodyPath.moveTo(15, 0); // Mũi cá
+    bodyPath.quadraticBezierTo(4, -8, -10, -4); // Lưng cá
+    bodyPath.lineTo(-19, tailWag * 7 - 5); // Vây đuôi trên (vẫy sóng)
+    bodyPath.lineTo(-14, tailWag * 3); // Khuyết đuôi giữa
+    bodyPath.lineTo(-19, tailWag * 7 + 5); // Vây đuôi dưới (vẫy sóng)
+    bodyPath.lineTo(-10, 4); // Bụng cá
+    bodyPath.quadraticBezierTo(4, 8, 15, 0); // Bụng về mũi
+    bodyPath.close();
+
+    final bodyGradient = ui.Gradient.linear(
+      const Offset(-19, 0),
+      const Offset(15, 0),
+      isAbyss
+          ? [const Color(0xFF00E5A3), const Color(0xFFDFB76C), const Color(0xFFFFFFFF)]
+          : [const Color(0xFF10B981), const Color(0xFFD97706), const Color(0xFFFFFFFF)],
+      [0.0, 0.65, 1.0],
+    );
+
+    final bodyPaint = Paint()
+      ..shader = bodyGradient
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(bodyPath, bodyPaint);
+
+    // 4. Fish Fins (Vây cá bơi 2 bên)
+    final finPaint = Paint()
+      ..color = (isAbyss ? const Color(0xFFDFB76C) : const Color(0xFFD97706)).withValues(alpha: 0.85)
+      ..style = PaintingStyle.fill;
+
+    final finPath = Path()
+      ..moveTo(1, 3)
+      ..quadraticBezierTo(-4, 10, -9, 7)
+      ..lineTo(-4, 3)
+      ..close();
+    canvas.drawPath(finPath, finPaint);
+
+    // 5. Fish Eye (Mắt cá biển phát quang)
+    final eyeWhite = Paint()..color = Colors.white;
+    final eyePupil = Paint()..color = const Color(0xFF040A18);
+    canvas.drawCircle(const Offset(8.5, -2.5), 2.2, eyeWhite);
+    canvas.drawCircle(const Offset(9.0, -2.5), 1.1, eyePupil);
+
+    canvas.restore();
   }
 
   @override
-  bool shouldRepaint(covariant _SCurveRibbonPainter oldDelegate) {
+  bool shouldRepaint(covariant _WaterStreamFishPainter oldDelegate) {
     return oldDelegate.progress != progress ||
         oldDelegate.isAbyss != isAbyss ||
         oldDelegate.isDesktop != isDesktop;
