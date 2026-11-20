@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/water_models.dart';
+import 'underwater_ambient_canvas.dart';
 
 class WaterSidebar extends StatelessWidget {
   const WaterSidebar({
@@ -12,6 +13,12 @@ class WaterSidebar extends StatelessWidget {
     required this.onLogout,
     this.activeAlertCount = 0,
     this.isAbyss = false,
+    this.isSidebarLight = false,
+    this.onToggleLighting,
+    this.lightingMode,
+    this.onRefresh,
+    this.onSimulate,
+    this.isSimulating = false,
   });
 
   final int selectedIndex;
@@ -22,17 +29,15 @@ class WaterSidebar extends StatelessWidget {
   final VoidCallback onLogout;
   final int activeAlertCount;
   final bool isAbyss;
+  final bool isSidebarLight;
+  final VoidCallback? onToggleLighting;
+  final OceanLightingMode? lightingMode;
+  final VoidCallback? onRefresh;
+  final VoidCallback? onSimulate;
+  final bool isSimulating;
 
   @override
   Widget build(BuildContext context) {
-    // ĐỒNG BỘ MÀU SẮC ĐẠI DƯƠNG:
-    // Khi ban đêm (isAbyss = true) -> Sidebar tối màu huyền bí, sâu thẳm
-    // Khi ban ngày (isAbyss = false) -> Sidebar sáng màu ngọc lam tươi mát
-    // Inverse dashboard contrast rule:
-    // Sunlit / Daytime mode (!isAbyss) -> Dashboard sidebar is DARK (isSidebarLight = false)
-    // Abyssal / Nighttime mode (isAbyss) -> Dashboard sidebar is LIGHT (isSidebarLight = true)
-    final bool isSidebarLight = isAbyss;
-
     return Container(
       width: 260,
       decoration: BoxDecoration(
@@ -122,85 +127,116 @@ class WaterSidebar extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 1. Pinned Brand Header
-              InkWell(
-                onTap: () => onSelect(7),
-                borderRadius: BorderRadius.circular(16),
-                splashColor: const Color(0xFF00D2FF).withValues(alpha: 0.1),
-                hoverColor: isSidebarLight ? const Color(0xFFF1F5F9) : Colors.white.withValues(alpha: 0.04),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF0F62FE), Color(0xFF00D2FF)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF00D2FF).withValues(alpha: 0.35),
-                              blurRadius: 14,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.water_drop_rounded,
-                          color: Colors.white,
-                          size: 22,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'PONDORA',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1.4,
-                              fontSize: 16.5,
-                              color: isSidebarLight ? const Color(0xFF0F172A) : Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Row(
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 20, 14, 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => onSelect(7),
+                        borderRadius: BorderRadius.circular(14),
+                        hoverColor: Colors.white.withValues(alpha: 0.05),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                          child: Row(
                             children: [
                               Container(
-                                width: 6,
-                                height: 6,
+                                width: 38,
+                                height: 38,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF10B981),
-                                  shape: BoxShape.circle,
+                                  gradient: const LinearGradient(
+                                    colors: [Color(0xFF0F62FE), Color(0xFF00D2FF)],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFF10B981).withValues(alpha: 0.6),
-                                      blurRadius: 6,
+                                      color: const Color(0xFF00D2FF).withValues(alpha: 0.35),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 3),
                                     ),
                                   ],
                                 ),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'NUÔI TÔM THÔNG MINH',
-                                style: TextStyle(
-                                  color: isSidebarLight ? const Color(0xFF0284C7) : const Color(0xFF38BDF8),
-                                  fontSize: 9,
-                                  letterSpacing: 0.9,
-                                  fontWeight: FontWeight.w800,
+                                child: const Icon(
+                                  Icons.water_drop_rounded,
+                                  color: Colors.white,
+                                  size: 20,
                                 ),
+                              ),
+                              const SizedBox(width: 10),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'PONDORA',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 1.4,
+                                      fontSize: 15.5,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        width: 6,
+                                        height: 6,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF10B981),
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color(0xFF10B981).withValues(alpha: 0.6),
+                                              blurRadius: 6,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 5),
+                                      const Text(
+                                        'NUÔI TÔM THÔNG MINH',
+                                        style: TextStyle(
+                                          color: Color(0xFF38BDF8),
+                                          fontSize: 8.5,
+                                          letterSpacing: 0.8,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
+                        ),
+                      ),
+                    ),
+                    if (onToggleLighting != null) ...[
+                      const SizedBox(width: 4),
+                      IconButton(
+                        onPressed: onToggleLighting,
+                        tooltip: lightingMode == OceanLightingMode.abyssal
+                            ? 'Chế độ: Đại dương (Bấm đổi sang Nắng mai)'
+                            : 'Chế độ: Nắng mai (Bấm đổi sang Đại dương)',
+                        icon: Icon(
+                          lightingMode == OceanLightingMode.abyssal
+                              ? Icons.nights_stay_rounded
+                              : Icons.wb_sunny_rounded,
+                          size: 17,
+                          color: lightingMode == OceanLightingMode.abyssal
+                              ? const Color(0xFF38BDF8)
+                              : const Color(0xFFF59E0B),
+                        ),
+                        style: IconButton.styleFrom(
+                          backgroundColor: const Color(0x2238BDF8),
+                          padding: const EdgeInsets.all(7),
+                          minimumSize: const Size(32, 32),
+                        ),
                       ),
                     ],
-                  ),
+                  ],
                 ),
               ),
 
@@ -285,6 +321,60 @@ class WaterSidebar extends StatelessWidget {
                         ),
 
                       const SizedBox(height: 14),
+
+                      if (onSimulate != null) ...[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          child: InkWell(
+                            onTap: onSimulate,
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                              decoration: BoxDecoration(
+                                color: isSimulating
+                                    ? const Color(0xFFF59E0B).withValues(alpha: 0.16)
+                                    : const Color(0x1838BDF8),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isSimulating
+                                      ? const Color(0xFFF59E0B).withValues(alpha: 0.5)
+                                      : const Color(0x3338BDF8),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    isSimulating ? Icons.science_rounded : Icons.science_outlined,
+                                    size: 17,
+                                    color: isSimulating ? const Color(0xFFF59E0B) : const Color(0xFF38BDF8),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      isSimulating ? 'Đang thử số liệu' : 'Mô phỏng dữ liệu AI',
+                                      style: TextStyle(
+                                        color: isSimulating ? const Color(0xFFF59E0B) : Colors.white,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
+                                  if (isSimulating)
+                                    Container(
+                                      width: 7,
+                                      height: 7,
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFFF59E0B),
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                      ],
 
                       // Quick Add Card
                       Padding(
@@ -460,6 +550,28 @@ class WaterSidebar extends StatelessWidget {
                             ],
                           ),
                         ),
+                        if (onRefresh != null) ...[
+                          Material(
+                            color: Colors.transparent,
+                            child: Tooltip(
+                              message: 'Làm mới dữ liệu',
+                              child: InkWell(
+                                onTap: onRefresh,
+                                borderRadius: BorderRadius.circular(8),
+                                hoverColor: const Color(0xFF0284C7).withValues(alpha: 0.15),
+                                child: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  child: const Icon(
+                                    Icons.refresh_rounded,
+                                    size: 16,
+                                    color: Color(0xFF94A3B8),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                        ],
                         Material(
                           color: Colors.transparent,
                           child: Tooltip(

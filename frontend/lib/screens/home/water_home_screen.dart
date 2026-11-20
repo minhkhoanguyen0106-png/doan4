@@ -11,7 +11,6 @@ import '../../dialogs/site_form_dialog.dart';
 import '../../models/water_models.dart';
 import '../../services/alarm_sound_service.dart';
 import '../../widgets/common_views.dart';
-import '../../widgets/desktop_header.dart';
 import '../../widgets/sidebar.dart';
 import '../tabs/admin_tab.dart';
 import '../tabs/alerts_tab.dart';
@@ -491,9 +490,7 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
                 ),
           drawer: Drawer(
             width: 280,
-            backgroundColor: _lightingMode == OceanLightingMode.abyssal
-                ? Colors.white
-                : const Color(0xFF081226),
+            backgroundColor: const Color(0xFF081226),
             child: SafeArea(
               child: WaterSidebar(
                 selectedIndex: _tab,
@@ -513,6 +510,11 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
                 },
                 activeAlertCount: activeAlertCount,
                 isAbyss: _lightingMode == OceanLightingMode.abyssal,
+                onToggleLighting: () => setState(() => _lightingMode = _lightingMode == OceanLightingMode.abyssal ? OceanLightingMode.sunlit : OceanLightingMode.abyssal),
+                lightingMode: _lightingMode,
+                onRefresh: _load,
+                onSimulate: _openSimulationDialog,
+                isSimulating: _isSimulating,
               ),
             ),
           ),
@@ -543,43 +545,13 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
                               isAbyss: _lightingMode == OceanLightingMode.abyssal,
                               onLogout: widget.onLogout,
                               activeAlertCount: activeAlertCount,
+                              onToggleLighting: () => setState(() => _lightingMode = _lightingMode == OceanLightingMode.abyssal ? OceanLightingMode.sunlit : OceanLightingMode.abyssal),
+                              lightingMode: _lightingMode,
+                              onRefresh: _load,
+                              onSimulate: _openSimulationDialog,
+                              isSimulating: _isSimulating,
                             ),
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  DesktopHeader(
-                                    title: title,
-                                    subtitle: _tab == 0
-                                        ? 'Theo dõi các chỉ số và hoạt động của cảm biến.'
-                                        : _tab == 6
-                                        ? 'Số hóa thông tin ao nuôi, nhật ký chăm sóc, tôm và thức ăn.'
-                                        : _tab == 5
-                                        ? 'Quản lý quyền truy cập và trạng thái tài khoản.'
-                                        : _tab == 1
-                                        ? 'Quản lý các vị trí đang thu thập dữ liệu nước.'
-                                        : _tab == 2
-                                        ? 'Theo dõi kết nối và dữ liệu từ các thiết bị.'
-                                        : _tab == 4
-                                        ? 'Cảnh báo chất lượng nước và tình trạng thiết bị.'
-                                        : 'Tra cứu và đối chiếu các mẫu nước đã ghi nhận.',
-                                    loading: _loading,
-                                    onRefresh: _load,
-                                    accountMenu: _accountMenu(),
-                                    onlineDeviceCount: _devices
-                                        .where((device) => device.online)
-                                        .length,
-                                    deviceCount: _devices.length,
-                                    activeAlertCount: activeAlertCount,
-                                    onAlertClick: () => _selectTab(4),
-                                    onSimulate: _openSimulationDialog,
-                                    isSimulating: _isSimulating,
-                                    lightingMode: _lightingMode,
-                                    onToggleLighting: () => setState(() => _lightingMode = _lightingMode == OceanLightingMode.abyssal ? OceanLightingMode.sunlit : OceanLightingMode.abyssal),
-                                  ),
-                                  Expanded(child: _pageContent()),
-                                ],
-                              ),
-                            ),
+                            Expanded(child: _pageContent()),
                           ],
                         )
                       : Column(
@@ -608,29 +580,25 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
               : NavigationBarTheme(
                   data: NavigationBarThemeData(
                     height: 64,
-                    backgroundColor: _lightingMode == OceanLightingMode.abyssal
-                        ? Colors.white
-                        : const Color(0xFF081226),
+                    backgroundColor: const Color(0xFF081226),
                     indicatorColor: const Color(0xFF0284C7).withValues(alpha: 0.25),
                     labelTextStyle: WidgetStateProperty.resolveWith((states) {
                       final selected = states.contains(WidgetState.selected);
-                      final isDark = _lightingMode != OceanLightingMode.abyssal;
                       return TextStyle(
                         fontSize: 9.5,
                         fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
                         color: selected
                             ? const Color(0xFF38BDF8)
-                            : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                            : const Color(0xFF94A3B8),
                       );
                     }),
                     iconTheme: WidgetStateProperty.resolveWith((states) {
                       final selected = states.contains(WidgetState.selected);
-                      final isDark = _lightingMode != OceanLightingMode.abyssal;
                       return IconThemeData(
                         size: 21,
                         color: selected
                             ? const Color(0xFF38BDF8)
-                            : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                            : const Color(0xFF94A3B8),
                       );
                     }),
                   ),
