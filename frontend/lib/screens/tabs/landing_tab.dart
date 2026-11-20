@@ -1138,22 +1138,17 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
               subtitle: 'Giúp người nuôi yên tâm quản lý ao tôm, giảm chi phí và phòng ngừa rủi ro từ sớm.',
               isAbyss: isAbyss,
             ),
-            const SizedBox(height: 48),
+            const SizedBox(height: 52),
 
             // S-Curve Animated Water Current & Swimming Fish Flow
-            AnimatedBuilder(
-              animation: ribbonAnim,
-              builder: (context, _) {
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-                    final width = constraints.maxWidth;
-                    if (isDesktop && width >= 860) {
-                      return _buildDesktopSCurveJourney(width, isAbyss);
-                    } else {
-                      return _buildMobileSCurveJourney(width, isAbyss);
-                    }
-                  },
-                );
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final width = constraints.maxWidth;
+                if (isDesktop && width >= 860) {
+                  return _buildDesktopSCurveJourney(width, isAbyss);
+                } else {
+                  return _buildMobileSCurveJourney(width, isAbyss);
+                }
               },
             ),
           ],
@@ -1163,119 +1158,150 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
   }
 
   Widget _buildDesktopSCurveJourney(double width, bool isAbyss) {
-    return CustomPaint(
-      painter: _WaterStreamFishPainter(
-        progress: ribbonAnim.value,
-        isAbyss: isAbyss,
-        isDesktop: true,
-      ),
-      child: Column(
-        children: [
-          // Row 01: Tính tự động (Bên trái) — Bên phải để trống cho dòng nước uốn lượn
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(child: _buildBentoSoftSensorCard(isAbyss)),
-              const SizedBox(width: 24),
-              _buildMilestoneNode('01', isAbyss),
-              const SizedBox(width: 24),
-              const Expanded(child: SizedBox()),
-            ],
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        // Background animated S-curve water stream with swimming fish
+        Positioned.fill(
+          child: IgnorePointer(
+            child: AnimatedBuilder(
+              animation: ribbonAnim,
+              builder: (context, _) {
+                return CustomPaint(
+                  painter: _WaterStreamFishPainter(
+                    progress: ribbonAnim.value,
+                    isAbyss: isAbyss,
+                    isDesktop: true,
+                  ),
+                );
+              },
+            ),
           ),
-          const SizedBox(height: 52),
+        ),
 
-          // Row 02: Máy đo tự động (Bên phải) — Bên trái để trống cho dòng nước uốn lượn
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Expanded(child: SizedBox()),
-              const SizedBox(width: 24),
-              _buildMilestoneNode('02', isAbyss),
-              const SizedBox(width: 24),
-              Expanded(child: _buildBentoEsp32Card(isAbyss)),
-            ],
-          ),
-          const SizedBox(height: 52),
+        // Foreground 4 Journey Milestone Rows (Defines the true natural height of the Stack)
+        Column(
+          children: [
+            // Row 01: Tính tự động (Bên trái)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(child: _buildBentoSoftSensorCard(isAbyss)),
+                const SizedBox(width: 24),
+                _buildMilestoneNode('01', isAbyss),
+                const SizedBox(width: 24),
+                const Expanded(child: SizedBox()),
+              ],
+            ),
+            const SizedBox(height: 56),
 
-          // Row 03: Gợi ý kỹ thuật (Bên trái) — Bên phải để trống cho dòng nước uốn lượn
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(child: _buildBentoAiPrescriptionCard(isAbyss)),
-              const SizedBox(width: 24),
-              _buildMilestoneNode('03', isAbyss),
-              const SizedBox(width: 24),
-              const Expanded(child: SizedBox()),
-            ],
-          ),
-          const SizedBox(height: 52),
+            // Row 02: Máy đo tự động (Bên phải)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Expanded(child: SizedBox()),
+                const SizedBox(width: 24),
+                _buildMilestoneNode('02', isAbyss),
+                const SizedBox(width: 24),
+                Expanded(child: _buildBentoEsp32Card(isAbyss)),
+              ],
+            ),
+            const SizedBox(height: 56),
 
-          // Row 04: Sổ ghi chép dễ dùng (Bên phải) — Bên trái để trống cho dòng nước uốn lượn
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Expanded(child: SizedBox()),
-              const SizedBox(width: 24),
-              _buildMilestoneNode('04', isAbyss),
-              const SizedBox(width: 24),
-              Expanded(child: _buildBentoDiaryCard(isAbyss)),
-            ],
-          ),
-          const SizedBox(height: 36),
-        ],
-      ),
+            // Row 03: Gợi ý kỹ thuật (Bên trái)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(child: _buildBentoAiPrescriptionCard(isAbyss)),
+                const SizedBox(width: 24),
+                _buildMilestoneNode('03', isAbyss),
+                const SizedBox(width: 24),
+                const Expanded(child: SizedBox()),
+              ],
+            ),
+            const SizedBox(height: 56),
+
+            // Row 04: Sổ ghi chép dễ dùng (Bên phải)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Expanded(child: SizedBox()),
+                const SizedBox(width: 24),
+                _buildMilestoneNode('04', isAbyss),
+                const SizedBox(width: 24),
+                Expanded(child: _buildBentoDiaryCard(isAbyss)),
+              ],
+            ),
+            const SizedBox(height: 36),
+          ],
+        ),
+      ],
     );
   }
 
   Widget _buildMobileSCurveJourney(double width, bool isAbyss) {
-    const double vSpacing = 26.0;
+    const double vSpacing = 28.0;
 
-    return CustomPaint(
-      painter: _WaterStreamFishPainter(
-        progress: ribbonAnim.value,
-        isAbyss: isAbyss,
-        isDesktop: false,
-      ),
-      child: Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildMilestoneNode('01', isAbyss),
-              const SizedBox(width: 14),
-              Expanded(child: _buildBentoSoftSensorCard(isAbyss)),
-            ],
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Positioned.fill(
+          child: IgnorePointer(
+            child: AnimatedBuilder(
+              animation: ribbonAnim,
+              builder: (context, _) {
+                return CustomPaint(
+                  painter: _WaterStreamFishPainter(
+                    progress: ribbonAnim.value,
+                    isAbyss: isAbyss,
+                    isDesktop: false,
+                  ),
+                );
+              },
+            ),
           ),
-          const SizedBox(height: vSpacing),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildMilestoneNode('02', isAbyss),
-              const SizedBox(width: 14),
-              Expanded(child: _buildBentoEsp32Card(isAbyss)),
-            ],
-          ),
-          const SizedBox(height: vSpacing),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildMilestoneNode('03', isAbyss),
-              const SizedBox(width: 14),
-              Expanded(child: _buildBentoAiPrescriptionCard(isAbyss)),
-            ],
-          ),
-          const SizedBox(height: vSpacing),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildMilestoneNode('04', isAbyss),
-              const SizedBox(width: 14),
-              Expanded(child: _buildBentoDiaryCard(isAbyss)),
-            ],
-          ),
-          const SizedBox(height: 24),
-        ],
-      ),
+        ),
+        Column(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildMilestoneNode('01', isAbyss),
+                const SizedBox(width: 14),
+                Expanded(child: _buildBentoSoftSensorCard(isAbyss)),
+              ],
+            ),
+            const SizedBox(height: vSpacing),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildMilestoneNode('02', isAbyss),
+                const SizedBox(width: 14),
+                Expanded(child: _buildBentoEsp32Card(isAbyss)),
+              ],
+            ),
+            const SizedBox(height: vSpacing),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildMilestoneNode('03', isAbyss),
+                const SizedBox(width: 14),
+                Expanded(child: _buildBentoAiPrescriptionCard(isAbyss)),
+              ],
+            ),
+            const SizedBox(height: vSpacing),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildMilestoneNode('04', isAbyss),
+                const SizedBox(width: 14),
+                Expanded(child: _buildBentoDiaryCard(isAbyss)),
+              ],
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ],
     );
   }
 
@@ -1283,24 +1309,24 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
     final goldColor = isAbyss ? const Color(0xFFDFB76C) : const Color(0xFFD97706);
     final emeraldColor = isAbyss ? const Color(0xFF00E5A3) : const Color(0xFF10B981);
     return Container(
-      width: 48,
-      height: 48,
+      width: 52,
+      height: 52,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: isAbyss ? const Color(0xFF091325) : Colors.white,
+        color: isAbyss ? const Color(0xFF07142A) : Colors.white,
         border: Border.all(
           color: goldColor,
-          width: 2.2,
+          width: 2.4,
         ),
         boxShadow: [
           BoxShadow(
-            color: goldColor.withValues(alpha: 0.40),
-            blurRadius: 14,
+            color: goldColor.withValues(alpha: isAbyss ? 0.45 : 0.30),
+            blurRadius: 16,
             spreadRadius: 1,
           ),
           BoxShadow(
-            color: emeraldColor.withValues(alpha: 0.25),
-            blurRadius: 22,
+            color: emeraldColor.withValues(alpha: isAbyss ? 0.30 : 0.20),
+            blurRadius: 24,
             spreadRadius: 2,
           ),
         ],
@@ -1311,7 +1337,7 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
           Text(
             stepNum,
             style: GoogleFonts.jetBrainsMono(
-              fontSize: 13,
+              fontSize: 14,
               fontWeight: FontWeight.w900,
               color: goldColor,
               height: 1.0,
@@ -1319,8 +1345,8 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
           ),
           const SizedBox(height: 3),
           Container(
-            width: 5,
-            height: 5,
+            width: 5.5,
+            height: 5.5,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: emeraldColor,
@@ -1339,19 +1365,19 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
 
   Widget _buildBentoSoftSensorCard(bool isAbyss) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
       decoration: BoxDecoration(
-        color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
+        color: isAbyss ? const Color(0xEE091932) : Colors.white,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: isAbyss ? const Color(0x4038BDF8) : const Color(0xFFBAE6FD),
-          width: 1.2,
+          color: isAbyss ? const Color(0x4438BDF8) : const Color(0xFFBAE6FD),
+          width: 1.3,
         ),
         boxShadow: [
           BoxShadow(
             color: (isAbyss ? const Color(0xFF00D2FF) : const Color(0xFF0284C7))
-                .withValues(alpha: isAbyss ? 0.08 : 0.04),
-            blurRadius: 20,
+                .withValues(alpha: isAbyss ? 0.12 : 0.06),
+            blurRadius: 24,
             offset: const Offset(0, 6),
           ),
         ],
@@ -1362,9 +1388,9 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00D2FF).withValues(alpha: 0.15),
+                  color: const Color(0xFF00D2FF).withValues(alpha: 0.16),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -1373,18 +1399,19 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
                     fontSize: 10.5,
                     fontWeight: FontWeight.w800,
                     color: const Color(0xFF00D2FF),
+                    letterSpacing: 0.5,
                   ),
                 ),
               ),
               const Spacer(),
-              const Icon(Icons.bolt_rounded, color: Color(0xFF00D2FF), size: 22),
+              const Icon(Icons.bolt_rounded, color: Color(0xFF00D2FF), size: 24),
             ],
           ),
           const SizedBox(height: 12),
           Text(
             'Tự tính khí độc NH₃ – Không cần mua đầu đo đắt tiền',
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 16.5,
+              fontSize: 17,
               fontWeight: FontWeight.w800,
               color: isAbyss ? Colors.white : const Color(0xFF0F172A),
               letterSpacing: -0.4,
@@ -1392,25 +1419,25 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
           ),
           const SizedBox(height: 8),
           Text(
-            'Máy đo khí độc thường có giá rất cao và nhanh hỏng màng đo. PONDORA tự động tính nồng độ khí độc chính xác từ độ pH và nhiệt độ nước, giúp bà con tiết kiệm chi phí.',
+            'Máy đo khí độc thường có giá rất cao và nhanh hỏng màng đo. PONDORA tự động tính nồng độ khí độc chính xác từ độ pH và nhiệt độ nước theo công thức Emerson, giúp bà con tiết kiệm chi phí.',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 13,
               fontWeight: FontWeight.w400,
-              color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+              color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
               height: 1.5,
             ),
           ),
           const SizedBox(height: 16),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
             decoration: BoxDecoration(
-              color: isAbyss ? const Color(0x18FFFFFF) : const Color(0xFFF1F5F9),
+              color: isAbyss ? const Color(0x2238BDF8) : const Color(0xFFF1F5F9),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Row(
               children: [
                 Text(
-                  'Công thức chuẩn hóa học',
+                  'Công thức chuẩn hóa học Emerson',
                   style: GoogleFonts.jetBrainsMono(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -1421,8 +1448,8 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
                 Text(
                   'Chi phí đầu dò: 0đ',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w800,
                     color: const Color(0xFF10B981),
                   ),
                 ),
@@ -1436,19 +1463,19 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
 
   Widget _buildBentoEsp32Card(bool isAbyss) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
       decoration: BoxDecoration(
-        color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
+        color: isAbyss ? const Color(0xEE091932) : Colors.white,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: isAbyss ? const Color(0x4038BDF8) : const Color(0xFFBAE6FD),
-          width: 1.2,
+          color: isAbyss ? const Color(0x4438BDF8) : const Color(0xFFBAE6FD),
+          width: 1.3,
         ),
         boxShadow: [
           BoxShadow(
             color: (isAbyss ? const Color(0xFF00D2FF) : const Color(0xFF0284C7))
-                .withValues(alpha: isAbyss ? 0.08 : 0.04),
-            blurRadius: 20,
+                .withValues(alpha: isAbyss ? 0.12 : 0.06),
+            blurRadius: 24,
             offset: const Offset(0, 6),
           ),
         ],
@@ -1459,9 +1486,9 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF38BDF8).withValues(alpha: 0.15),
+                  color: const Color(0xFF38BDF8).withValues(alpha: 0.16),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -1470,18 +1497,19 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
                     fontSize: 10.5,
                     fontWeight: FontWeight.w800,
                     color: const Color(0xFF38BDF8),
+                    letterSpacing: 0.5,
                   ),
                 ),
               ),
               const Spacer(),
-              const Icon(Icons.sensors_rounded, color: Color(0xFF38BDF8), size: 22),
+              const Icon(Icons.sensors_rounded, color: Color(0xFF38BDF8), size: 24),
             ],
           ),
           const SizedBox(height: 12),
           Text(
             'Máy đo cắm tại ao – Tự gửi số liệu 24/24',
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 16.5,
+              fontSize: 17,
               fontWeight: FontWeight.w800,
               color: isAbyss ? Colors.white : const Color(0xFF0F172A),
               letterSpacing: -0.3,
@@ -1489,11 +1517,11 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
           ),
           const SizedBox(height: 8),
           Text(
-            'Đo đạc tự động 3 giây một lần, lọc nhiễu chính xác và tự gửi số liệu về điện thoại qua Wi-Fi mà không cần lội ao múc nước đo tay.',
+            'Đo đạc tự động 3 giây một lần, lọc nhiễu chính xác và tự gửi số liệu về điện thoại qua Wi-Fi mà không cần lội ao múc nước đo tay. Thiết bị chuẩn chống nước IP67 bền bỉ ngoài trời.',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 13,
               fontWeight: FontWeight.w400,
-              color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+              color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
               height: 1.5,
             ),
           ),
@@ -1506,18 +1534,18 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
 
   Widget _buildBentoAiPrescriptionCard(bool isAbyss) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
       decoration: BoxDecoration(
-        color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
+        color: isAbyss ? const Color(0xEE091932) : Colors.white,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: isAbyss ? const Color(0x4010B981) : const Color(0xFFBAE6FD),
-          width: 1.2,
+          color: isAbyss ? const Color(0x4410B981) : const Color(0xFFBAE6FD),
+          width: 1.3,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF10B981).withValues(alpha: isAbyss ? 0.08 : 0.04),
-            blurRadius: 20,
+            color: const Color(0xFF10B981).withValues(alpha: isAbyss ? 0.12 : 0.06),
+            blurRadius: 24,
             offset: const Offset(0, 6),
           ),
         ],
@@ -1528,9 +1556,9 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                  color: const Color(0xFF10B981).withValues(alpha: 0.16),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -1539,18 +1567,19 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
                     fontSize: 10.5,
                     fontWeight: FontWeight.w800,
                     color: const Color(0xFF10B981),
+                    letterSpacing: 0.5,
                   ),
                 ),
               ),
               const Spacer(),
-              const Icon(Icons.psychology_rounded, color: Color(0xFF10B981), size: 22),
+              const Icon(Icons.psychology_rounded, color: Color(0xFF10B981), size: 24),
             ],
           ),
           const SizedBox(height: 12),
           Text(
             'Gợi ý lượng vôi, oxy viên và vi sinh cần đánh',
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 16.5,
+              fontSize: 17,
               fontWeight: FontWeight.w800,
               color: isAbyss ? Colors.white : const Color(0xFF0F172A),
               letterSpacing: -0.3,
@@ -1558,16 +1587,16 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
           ),
           const SizedBox(height: 8),
           Text(
-            'Khi nước có dấu hiệu xấu, hệ thống tính sẵn lượng vôi nông nghiệp hoặc vi sinh cần đánh cho đúng thể tích ao của bạn.',
+            'Khi nước có dấu hiệu xấu hoặc biến động lạ, hệ thống phân tích và tính sẵn lượng vôi nông nghiệp, men vi sinh EM hoặc oxy viên cần đánh cho đúng diện tích và thể tích ao của bạn.',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 13,
               fontWeight: FontWeight.w400,
-              color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+              color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
               height: 1.5,
             ),
           ),
           const SizedBox(height: 16),
-          _techFeaturePill('Tính sẵn số ký thuốc cần đánh cho ao', isAbyss),
+          _techFeaturePill('Tính sẵn số ký thuốc theo thể tích khối nước ao', isAbyss),
         ],
       ),
     );
@@ -1575,18 +1604,18 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
 
   Widget _buildBentoDiaryCard(bool isAbyss) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
       decoration: BoxDecoration(
-        color: isAbyss ? const Color(0x28FFFFFF) : Colors.white,
+        color: isAbyss ? const Color(0xEE091932) : Colors.white,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: isAbyss ? const Color(0x40F59E0B) : const Color(0xFFBAE6FD),
-          width: 1.2,
+          color: isAbyss ? const Color(0x44F59E0B) : const Color(0xFFBAE6FD),
+          width: 1.3,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFF59E0B).withValues(alpha: isAbyss ? 0.08 : 0.04),
-            blurRadius: 20,
+            color: const Color(0xFFF59E0B).withValues(alpha: isAbyss ? 0.12 : 0.06),
+            blurRadius: 24,
             offset: const Offset(0, 6),
           ),
         ],
@@ -1597,9 +1626,9 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
+                  color: const Color(0xFFF59E0B).withValues(alpha: 0.16),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -1608,18 +1637,19 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
                     fontSize: 10.5,
                     fontWeight: FontWeight.w800,
                     color: const Color(0xFFF59E0B),
+                    letterSpacing: 0.5,
                   ),
                 ),
               ),
               const Spacer(),
-              const Icon(Icons.menu_book_rounded, color: Color(0xFFF59E0B), size: 22),
+              const Icon(Icons.menu_book_rounded, color: Color(0xFFF59E0B), size: 24),
             ],
           ),
           const SizedBox(height: 12),
           Text(
             'Sổ nhật ký ao nuôi trên điện thoại',
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 16.5,
+              fontSize: 17,
               fontWeight: FontWeight.w800,
               color: isAbyss ? Colors.white : const Color(0xFF0F172A),
               letterSpacing: -0.3,
@@ -1627,11 +1657,11 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
           ),
           const SizedBox(height: 8),
           Text(
-            'Ghi lại số lượng thức ăn mỗi bữa, tiền thuốc và quá trình tôm lớn. Thay thế sổ tay giấy, dễ tra cứu bất kỳ lúc nào.',
+            'Ghi lại số lượng thức ăn mỗi bữa, tiền thuốc và quá trình tôm lớn. Thay thế sổ tay giấy, dễ tra cứu bất kỳ lúc nào và tự động tính hệ số FCR để tối ưu chi phí vụ nuôi.',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 13,
               fontWeight: FontWeight.w400,
-              color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+              color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
               height: 1.5,
             ),
           ),
@@ -1644,21 +1674,21 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
 
   Widget _techFeaturePill(String text, bool isAbyss) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
-        color: isAbyss ? const Color(0x18FFFFFF) : const Color(0xFFF1F5F9),
+        color: isAbyss ? const Color(0x2238BDF8) : const Color(0xFFF1F5F9),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.check_circle_rounded, size: 13, color: Color(0xFF10B981)),
-          const SizedBox(width: 6),
+          const Icon(Icons.check_circle_rounded, size: 14, color: Color(0xFF10B981)),
+          const SizedBox(width: 7),
           Text(
             text,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 11.5,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
               color: isAbyss ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
             ),
           ),
@@ -2018,53 +2048,55 @@ class _WaterStreamFishPainter extends CustomPainter {
     final Path path = Path();
     final centerX = size.width / 2.0;
 
+    // 4 Node Y centers based on proportional row layout
+    final y1 = size.height * 0.115;
+    final y2 = size.height * 0.370;
+    final y3 = size.height * 0.625;
+    final y4 = size.height * 0.880;
+    final dy = y2 - y1;
+
     if (isDesktop) {
-      // 4 Node Y centers based on proportional height distribution
-      final y1 = size.height * 0.125;
-      final y2 = size.height * 0.375;
-      final y3 = size.height * 0.625;
-      final y4 = size.height * 0.875;
+      // Gentle horizontal wave amplitude into the empty half of each row
+      final amplitude = math.min(180.0, size.width * 0.20);
 
-      // Start above node 1 on the top-left
-      path.moveTo(centerX - size.width * 0.16, 0.0);
-
-      // Curve gracefully into Node 01
+      // 1. Entry curve from top ocean surface into Node 01
+      path.moveTo(centerX - 35.0, 0.0);
       path.cubicTo(
-        centerX - size.width * 0.10, y1 * 0.35,
-        centerX - 40.0, y1 - 20.0,
+        centerX - 15.0, y1 * 0.40,
+        centerX, y1 * 0.75,
         centerX, y1,
       );
 
-      // S-curve 1 -> 2: Sweeps OUTWARD TO THE RIGHT into the EMPTY space of Row 0 & 1
+      // 2. S-curve 01 -> 02: Sweeps smoothly to the RIGHT into the empty space of Row 1
       path.cubicTo(
-        centerX + size.width * 0.28, y1 + (y2 - y1) * 0.22,
-        centerX + size.width * 0.28, y2 - (y2 - y1) * 0.22,
+        centerX + amplitude * 1.30, y1 + dy * 0.32,
+        centerX + amplitude * 1.30, y2 - dy * 0.32,
         centerX, y2,
       );
 
-      // S-curve 2 -> 3: Sweeps OUTWARD TO THE LEFT into the EMPTY space of Row 1 & 2
+      // 3. S-curve 02 -> 03: Sweeps smoothly to the LEFT into the empty space of Row 2
       path.cubicTo(
-        centerX - size.width * 0.28, y2 + (y3 - y2) * 0.22,
-        centerX - size.width * 0.28, y3 - (y3 - y2) * 0.22,
+        centerX - amplitude * 1.30, y2 + dy * 0.32,
+        centerX - amplitude * 1.30, y3 - dy * 0.32,
         centerX, y3,
       );
 
-      // S-curve 3 -> 4: Sweeps OUTWARD TO THE RIGHT into the EMPTY space of Row 2 & 3
+      // 4. S-curve 03 -> 04: Sweeps smoothly to the RIGHT into the empty space of Row 3
       path.cubicTo(
-        centerX + size.width * 0.28, y3 + (y4 - y3) * 0.22,
-        centerX + size.width * 0.28, y4 - (y4 - y3) * 0.22,
+        centerX + amplitude * 1.30, y3 + dy * 0.32,
+        centerX + amplitude * 1.30, y4 - dy * 0.32,
         centerX, y4,
       );
 
-      // Exit curve below node 4
+      // 5. Exit curve below Node 04 into the deep abyss
       path.cubicTo(
-        centerX - 40.0, y4 + 35.0,
-        centerX - size.width * 0.12, size.height - 20.0,
-        centerX - size.width * 0.16, size.height,
+        centerX, y4 + (size.height - y4) * 0.40,
+        centerX - 25.0, size.height - 15.0,
+        centerX - 40.0, size.height,
       );
     } else {
-      // Mobile: Clean vertical glowing water stream along node centers (x = 24.0)
-      const railX = 24.0;
+      // Mobile: Clean vertical glowing water stream along node centers (x = 26.0)
+      const railX = 26.0;
       path.moveTo(railX, 10.0);
       path.lineTo(railX, math.max(10.0, size.height - 10.0));
     }
@@ -2072,7 +2104,7 @@ class _WaterStreamFishPainter extends CustomPainter {
     // =======================================================================
     // 1. DÒNG NƯỚC CHẢY ĐẠI DƯƠNG (Aqua Water Current Stream)
     // =======================================================================
-    // 1a. Outer Water Glow Aura (Hào quang nước biển phát sáng)
+    // 1a. Outer Water Glow Aura (Hào quang nước biển phát sáng lan tỏa)
     final auraColors = isAbyss
         ? [
             const Color(0x3500D2FF),
@@ -2087,7 +2119,7 @@ class _WaterStreamFishPainter extends CustomPainter {
 
     final auraPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 24.0
+      ..strokeWidth = 26.0
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 14.0)
@@ -2102,28 +2134,28 @@ class _WaterStreamFishPainter extends CustomPainter {
     // 1b. Translucent Water Stream Bed (Dải nước trong suốt uốn lượn)
     final streamBedPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 8.0
+      ..strokeWidth = 9.0
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
-      ..color = (isAbyss ? const Color(0xFF00D2FF) : const Color(0xFF0284C7)).withValues(alpha: 0.20);
+      ..color = (isAbyss ? const Color(0xFF00D2FF) : const Color(0xFF0284C7)).withValues(alpha: 0.22);
     canvas.drawPath(path, streamBedPaint);
 
-    // 1c. Flowing Water Current Line (Lõi dòng nước phát sáng lấp lánh)
+    // 1c. Flowing Water Current Core Line (Lõi dòng nước phát sáng lấp lánh)
     final coreWaterColors = isAbyss
         ? [
-            const Color(0xCC00D2FF),
-            const Color(0xEEDFB76C),
+            const Color(0xDD00D2FF),
+            const Color(0xFFDFB76C),
             const Color(0xEE00E5A3),
           ]
         : [
-            const Color(0xCC0284C7),
-            const Color(0xEED97706),
+            const Color(0xDD0284C7),
+            const Color(0xFFD97706),
             const Color(0xEE10B981),
           ];
 
     final coreWaterPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.5
+      ..strokeWidth = 3.6
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
       ..shader = ui.Gradient.linear(
@@ -2135,22 +2167,38 @@ class _WaterStreamFishPainter extends CustomPainter {
     canvas.drawPath(path, coreWaterPaint);
 
     // =======================================================================
-    // 2. BỌT NƯỚC NỔI DỌC DÒNG CHẢY (Flowing Water Bubbles)
+    // 2. GỢN SÓNG NƯỚC TỎA TRÒN TẠI CÁC NỐT MỐC (Water Ripple Rings at Nodes)
+    // =======================================================================
+    if (isDesktop) {
+      final ripplePulse = (progress * 2.0) % 1.0;
+      final ripplePaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.6 * (1.0 - ripplePulse)
+        ..color = (isAbyss ? const Color(0xFF00D2FF) : const Color(0xFF0284C7))
+            .withValues(alpha: 0.50 * (1.0 - ripplePulse));
+
+      for (final ny in [y1, y2, y3, y4]) {
+        canvas.drawCircle(Offset(centerX, ny), 28.0 + ripplePulse * 16.0, ripplePaint);
+      }
+    }
+
+    // =======================================================================
+    // 3. BỌT NƯỚC NỔI DỌC DÒNG CHẢY (Flowing Ocean Bubbles)
     // =======================================================================
     final metrics = path.computeMetrics();
     if (metrics.isEmpty) return;
     final metric = metrics.first;
     final totalLen = metric.length;
 
-    // Draw 8 ambient flowing bubbles
-    for (int i = 0; i < 8; i++) {
-      final bubbleProgress = (progress + (i / 8.0)) % 1.0;
+    // Draw 10 ambient flowing bubbles
+    for (int i = 0; i < 10; i++) {
+      final bubbleProgress = (progress + (i / 10.0)) % 1.0;
       final tangent = metric.getTangentForOffset(totalLen * bubbleProgress);
       if (tangent != null) {
         final pos = tangent.position;
-        final floatWag = math.sin((progress * 10 + i) * math.pi) * 6.0;
+        final floatWag = math.sin((progress * 12.0 + i) * math.pi) * 7.0;
         final bubblePos = Offset(pos.dx + floatWag, pos.dy);
-        final bubbleRadius = 2.0 + (i % 3) * 1.5;
+        final bubbleRadius = 2.2 + (i % 3) * 1.5;
 
         canvas.drawCircle(
           bubblePos,
@@ -2161,33 +2209,33 @@ class _WaterStreamFishPainter extends CustomPainter {
             ..strokeWidth = 1.0,
         );
         canvas.drawCircle(
-          Offset(bubblePos.dx - 0.8, bubblePos.dy - 0.8),
+          Offset(bubblePos.dx - 0.7, bubblePos.dy - 0.7),
           bubbleRadius * 0.4,
-          Paint()..color = Colors.white.withValues(alpha: 0.8),
+          Paint()..color = Colors.white.withValues(alpha: 0.85),
         );
       }
     }
 
     // =======================================================================
-    // 3. ĐÀN CÁ BƠI UỐN LƯỢN DỌC DÒNG S (Swimming Fish along S-Curve)
+    // 4. ĐÀN CÁ BƠI UỐN LƯỢN DỌC DÒNG S (Swimming Fish along S-Curve)
     // =======================================================================
-    // 3a. Chú cá dẫn đầu (Lead Swimming Fish)
+    // 4a. Chú cá dẫn đầu (Lead Swimming Fish)
     final leadTangent = metric.getTangentForOffset(totalLen * progress);
     if (leadTangent != null) {
       final pos = leadTangent.position;
       final angle = math.atan2(leadTangent.vector.dy, leadTangent.vector.dx);
-      final tailWag = math.sin(progress * 26.0 * math.pi);
-      _drawSwimmingFish(canvas, pos, angle, tailWag, scale: 1.15, isAbyss: isAbyss);
+      final tailWag = math.sin(progress * 28.0 * math.pi);
+      _drawSwimmingFish(canvas, pos, angle, tailWag, scale: 1.20, isAbyss: isAbyss);
     }
 
-    // 3b. Chú cá nhỏ bơi theo sau (Little Companion Fish following)
-    final followProgress = (progress - 0.12) < 0 ? (progress - 0.12 + 1.0) : (progress - 0.12);
+    // 4b. Chú cá nhỏ bơi theo sau (Little Companion Fish following)
+    final followProgress = (progress - 0.14) < 0 ? (progress - 0.14 + 1.0) : (progress - 0.14);
     final followTangent = metric.getTangentForOffset(totalLen * followProgress);
     if (followTangent != null) {
       final pos = followTangent.position;
       final angle = math.atan2(followTangent.vector.dy, followTangent.vector.dx);
-      final tailWag = math.sin((progress - 0.12) * 26.0 * math.pi);
-      _drawSwimmingFish(canvas, pos, angle, tailWag, scale: 0.75, isAbyss: isAbyss);
+      final tailWag = math.sin((progress - 0.14) * 28.0 * math.pi);
+      _drawSwimmingFish(canvas, pos, angle, tailWag, scale: 0.78, isAbyss: isAbyss);
     }
   }
 
