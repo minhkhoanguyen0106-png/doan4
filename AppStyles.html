@@ -1,0 +1,455 @@
+<style>
+/* ==========================================================================
+   APP STYLES: DẢI ÁNH SÁNG UỐN LƯỢN CHỮ S (.s-flow-journey)
+   Hỗ trợ 2 chế độ:
+   - Dark Mode:  Vàng Champagne (#F5E6C8 / #DFB76C) – Ngọc Lục Bảo (#10B981 / #00E5A3)
+   - Light Mode: Vàng Hổ Phách (#D97706 / #B45309) – Xanh Rêu Cổ Kính (#4D7C0F / #365314)
+   ========================================================================== */
+
+:root {
+  /* Dark Mode Palette (Mặc định) */
+  --s-bg-base: #070B14;
+  --s-bg-card: rgba(13, 22, 38, 0.72);
+  --s-bg-card-hover: rgba(18, 30, 52, 0.85);
+  --s-border-card: rgba(223, 183, 108, 0.28);
+  --s-border-card-hover: rgba(223, 183, 108, 0.65);
+  
+  --s-gold-champagne: #F5E6C8;
+  --s-gold-accent: #DFB76C;
+  --s-gold-dim: #997A44;
+  --s-emerald-gem: #10B981;
+  --s-emerald-glow: #00E5A3;
+  --s-emerald-deep: #064E3B;
+  
+  --s-beam-track: rgba(223, 183, 108, 0.12);
+  --s-beam-gradient-start: #DFB76C;
+  --s-beam-gradient-mid: #F5E6C8;
+  --s-beam-gradient-end: #00E5A3;
+  
+  --s-glow-shadow-gold: 0 0 24px rgba(223, 183, 108, 0.55), 0 0 48px rgba(223, 183, 108, 0.25);
+  --s-glow-shadow-emerald: 0 0 24px rgba(0, 229, 163, 0.55), 0 0 48px rgba(0, 229, 163, 0.25);
+  --s-orb-glow: drop-shadow(0 0 10px #DFB76C) drop-shadow(0 0 20px #00E5A3);
+  
+  --s-text-primary: #F8FAFC;
+  --s-text-secondary: #CBD5E1;
+  --s-text-muted: #64748B;
+  --s-badge-bg: rgba(223, 183, 108, 0.14);
+}
+
+/* Light Mode Overrides */
+[data-theme="light"],
+.theme-light {
+  --s-bg-base: #F8F6F0;
+  --s-bg-card: rgba(255, 255, 255, 0.82);
+  --s-bg-card-hover: rgba(255, 255, 255, 0.95);
+  --s-border-card: rgba(217, 119, 6, 0.28);
+  --s-border-card-hover: rgba(77, 124, 15, 0.55);
+  
+  --s-gold-champagne: #D97706;  /* Vàng hổ phách */
+  --s-gold-accent: #B45309;
+  --s-gold-dim: #78350F;
+  --s-emerald-gem: #4D7C0F;     /* Xanh rêu cổ kính */
+  --s-emerald-glow: #65A30D;
+  --s-emerald-deep: #365314;
+  
+  --s-beam-track: rgba(217, 119, 6, 0.14);
+  --s-beam-gradient-start: #D97706;
+  --s-beam-gradient-mid: #F59E0B;
+  --s-beam-gradient-end: #4D7C0F;
+  
+  --s-glow-shadow-gold: 0 0 20px rgba(217, 119, 6, 0.40), 0 0 40px rgba(217, 119, 6, 0.15);
+  --s-glow-shadow-emerald: 0 0 20px rgba(77, 124, 15, 0.40), 0 0 40px rgba(77, 124, 15, 0.15);
+  --s-orb-glow: drop-shadow(0 0 8px #D97706) drop-shadow(0 0 16px #4D7C0F);
+  
+  --s-text-primary: #1C1917;
+  --s-text-secondary: #44403C;
+  --s-text-muted: #78716C;
+  --s-badge-bg: rgba(217, 119, 6, 0.12);
+}
+
+/* ==========================================================================
+   CONTAINER CHÍNH: .s-flow-journey
+   ========================================================================== */
+.s-flow-journey {
+  position: relative;
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 80px 24px 120px 24px;
+  box-sizing: border-box;
+  overflow: visible;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--s-text-primary);
+}
+
+/* Header giới thiệu Journey */
+.s-journey-header {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 72px auto;
+  position: relative;
+  z-index: 5;
+}
+
+.s-journey-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: var(--s-badge-bg);
+  border: 1px solid var(--s-border-card);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--s-gold-accent);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.s-journey-title {
+  margin: 16px 0 12px 0;
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 900;
+  letter-spacing: -0.8px;
+  line-height: 1.25;
+  background: linear-gradient(135deg, var(--s-text-primary) 30%, var(--s-gold-accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.s-journey-desc {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--s-text-secondary);
+  margin: 0 auto;
+}
+
+/* ==========================================================================
+   SVG CANVAS DẢI SÁNG CHỮ S (#sRibbonCanvas)
+   ========================================================================== */
+.s-ribbon-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+  overflow: visible;
+}
+
+/* Đường dẫn mờ chạy trước (Track) */
+#sRibbonBase {
+  fill: none;
+  stroke: var(--s-beam-track);
+  stroke-width: 3px;
+  stroke-linecap: round;
+  stroke-dasharray: 6 8;
+  opacity: 0.75;
+}
+
+/* Dải sáng uốn lượn chính (Active Beam) */
+#sRibbonBeam {
+  fill: none;
+  stroke: url(#sBeamGrad);
+  stroke-width: 4.5px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 6px var(--s-gold-accent)) drop-shadow(0 0 16px var(--s-emerald-glow));
+  will-change: stroke-dashoffset;
+  transition: stroke-dashoffset 0.04s linear;
+}
+
+/* Đầu ngọc phát sáng dẫn đường (Lead Orb) */
+#sRibbonOrb {
+  fill: var(--s-gold-champagne);
+  stroke: var(--s-emerald-glow);
+  stroke-width: 2.5px;
+  filter: var(--s-orb-glow);
+  will-change: transform, cx, cy;
+  transition: opacity 0.3s ease;
+}
+
+/* ==========================================================================
+   DANH SÁCH 4 BƯỚC CỘT MỐC (.s-step-row)
+   ========================================================================== */
+.s-journey-timeline {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 110px;
+}
+
+.s-step-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  position: relative;
+  min-height: 260px;
+}
+
+/* 01 & 03: Nội dung bên Trái */
+.s-step-row.is-left .s-card-wrap {
+  grid-column: 1 / 2;
+  padding-right: 64px;
+}
+
+/* 02 & 04: Nội dung bên Phải */
+.s-step-row.is-right .s-card-wrap {
+  grid-column: 2 / 3;
+  padding-left: 64px;
+}
+
+/* ==========================================================================
+   NÚT MỐC CỘT SỐ (.s-milestone-node)
+   ========================================================================== */
+.s-milestone-node {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: var(--s-bg-base);
+  border: 2px solid var(--s-border-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 6;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+  transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+/* Vị trí Desktop: 
+   - Bước Left (01, 03): cột mốc ở trục giữa lệch trái (x ~ 20%)
+   - Bước Right (02, 04): cột mốc ở trục giữa lệch phải (x ~ 80%) */
+.s-step-row.is-left .s-milestone-node {
+  left: 20%;
+}
+.s-step-row.is-right .s-milestone-node {
+  left: 80%;
+}
+
+.s-node-number {
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  color: var(--s-text-muted);
+  transition: color 0.35s ease;
+  line-height: 1;
+}
+
+.s-node-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--s-text-muted);
+  margin-top: 3px;
+  transition: all 0.35s ease;
+}
+
+/* Trạng thái đã thắp sáng (Active Glow khi dải sáng chạm đến) */
+.s-milestone-node.is-active {
+  border-color: var(--s-gold-accent);
+  background: radial-gradient(circle at center, var(--s-bg-card) 40%, var(--s-bg-base) 100%);
+  box-shadow: var(--s-glow-shadow-gold), 0 0 35px var(--s-emerald-glow);
+  transform: translate(-50%, -50%) scale(1.12);
+}
+
+.s-milestone-node.is-active .s-node-number {
+  color: var(--s-gold-champagne);
+  text-shadow: 0 0 10px var(--s-gold-accent);
+}
+
+.s-milestone-node.is-active .s-node-dot {
+  background: var(--s-emerald-glow);
+  box-shadow: 0 0 10px var(--s-emerald-glow);
+  width: 7px;
+  height: 7px;
+}
+
+/* ==========================================================================
+   KHỐI NỘI DUNG 4 KHU VỰC (.s-card-content)
+   ========================================================================== */
+.s-card-content {
+  background: var(--s-bg-card);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: 24px;
+  border: 1px solid var(--s-border-card);
+  padding: 32px 36px;
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.35);
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.35s ease,
+              box-shadow 0.35s ease;
+  opacity: 0.22;
+  transform: translateY(28px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Slide-in & sáng lên khi cuộn tới */
+.s-card-content.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.s-card-content:hover {
+  background: var(--s-bg-card-hover);
+  border-color: var(--s-border-card-hover);
+  box-shadow: 0 24px 55px -8px rgba(0, 0, 0, 0.45),
+              0 0 25px rgba(223, 183, 108, 0.2);
+}
+
+/* Vạch sáng viền trên thẻ (Top accent sheen) */
+.s-card-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, var(--s-gold-accent), transparent);
+  opacity: 0.6;
+}
+
+.s-card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 8px;
+  background: var(--s-badge-bg);
+  border: 1px solid var(--s-border-card);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--s-gold-accent);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.s-card-title {
+  font-size: clamp(20px, 2.2vw, 24px);
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  margin: 0 0 12px 0;
+  color: var(--s-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.s-card-text {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--s-text-secondary);
+  margin: 0 0 22px 0;
+}
+
+/* Grid nội dung chi tiết nhỏ bên trong card */
+.s-card-features {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.s-feature-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--s-text-secondary);
+}
+
+.s-feature-icon {
+  font-size: 14px;
+  color: var(--s-emerald-glow);
+}
+
+/* Nút CTA tương tác */
+.s-card-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--s-gold-accent), #B38F4D);
+  color: #070B14;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(223, 183, 108, 0.35);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.s-card-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(223, 183, 108, 0.55), 0 0 20px var(--s-emerald-glow);
+}
+
+/* ==========================================================================
+   RESPONSIVE KHI XUỐNG MÀN HÌNH NHỎ (<= 900px)
+   Chuyển thành đường sáng dọc gọn bên mép trái
+   ========================================================================== */
+@media (max-width: 900px) {
+  .s-flow-journey {
+    padding: 60px 16px 80px 16px;
+  }
+  
+  .s-journey-timeline {
+    gap: 60px;
+    padding-left: 28px;
+  }
+  
+  .s-step-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-height: auto;
+  }
+  
+  /* Cả 4 bước đều căn thẳng cột bên phải dải sáng */
+  .s-step-row.is-left .s-card-wrap,
+  .s-step-row.is-right .s-card-wrap {
+    grid-column: unset;
+    padding: 0 0 0 44px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Cột mốc dời sang sát lề trái thành trục dọc */
+  .s-step-row.is-left .s-milestone-node,
+  .s-step-row.is-right .s-milestone-node {
+    left: 12px;
+    top: 40px;
+    width: 44px;
+    height: 44px;
+  }
+  
+  .s-node-number {
+    font-size: 11px;
+  }
+  
+  .s-card-content {
+    padding: 24px 22px;
+  }
+  
+  .s-card-features {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dải Ánh Sáng Uốn Lượn Chữ S | PONDORA Journey</title>
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Nhúng AppStyles.html (hỗ trợ cả chuẩn Google Apps Script và Web trực tiếp) -->
+  <?!= HtmlService.createHtmlOutputFromFile('AppStyles').getContent(); ?>
+  
+  <style>
+    /* Reset & Page Base */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: var(--s-bg-base);
+      color: var(--s-text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background-color 0.4s ease, color 0.4s ease;
+    }
+
+    /* Fixed Theme Toggle Bar */
+    .theme-toggle-bar {
+      position: fixed;
+      top: 20px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: var(--s-bg-card);
+      border: 1px solid var(--s-border-card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+    .theme-toggle-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--s-text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .theme-badge {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--s-badge-bg);
+      color: var(--s-gold-accent);
+      font-weight: 800;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Thanh chuyển đổi Theme (Dark / Light) để kiểm thử 2 bộ phối màu -->
+  <div class="theme-toggle-bar">
+    <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()">
+      <span id="themeIcon">☀️</span>
+      <span id="themeLabel">Chế độ Sáng</span>
+      <span class="theme-badge" id="themePaletteBadge">Vàng Champagne – Ngọc Lục Bảo</span>
+    </button>
+  </div>
+
+  <!-- ====================================================================
+       CONTAINER DẢI ÁNH SÁNG UỐN LƯỢN CHỮ S (.s-flow-journey)
+       Bọc 4 khu vực xen kẽ Trái / Phải
+       ==================================================================== -->
+  <section class="s-flow-journey" id="sFlowJourney">
+    
+    <!-- Tiêu đề giới thiệu hành trình -->
+    <header class="s-journey-header">
+      <div class="s-journey-eyebrow">
+        <span>✨</span> HÀNH TRÌNH TRẢI NGHIỆM LIÊN TỤC
+      </div>
+      <h2 class="s-journey-title">
+        Dải Ánh Sáng Kết Nối Không Gian Di Sản
+      </h2>
+      <p class="s-journey-desc">
+        Hệ thống định vị nhịp sống nghệ thuật với dải sáng uốn lượn chữ S dẫn dắt bạn qua 4 cột mốc văn hóa đặc sắc.
+      </p>
+    </header>
+
+    <!-- SVG Canvas chứa dải sáng uốn lượn chữ S -->
+    <svg class="s-ribbon-canvas" id="sRibbonCanvas" aria-hidden="true">
+      <defs>
+        <!-- Gradient động cho dải sáng (Champagne/Amber -> Emerald/Moss) -->
+        <linearGradient id="sBeamGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="var(--s-beam-gradient-start)" />
+          <stop offset="45%" stop-color="var(--s-beam-gradient-mid)" />
+          <stop offset="100%" stop-color="var(--s-beam-gradient-end)" />
+        </linearGradient>
+
+        <!-- Filter phát quang rực rỡ -->
+        <filter id="sBeamGlow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="6" result="blur1" />
+          <feGaussianBlur stdDeviation="14" result="blur2" />
+          <feMerge>
+            <feMergeNode in="blur2" />
+            <feMergeNode in="blur1" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+
+      <!-- Đường ray mờ dẫn đường trước -->
+      <path id="sRibbonBase" d="" />
+      
+      <!-- Dải sáng phát quang uốn lượn theo cuộn trang -->
+      <path id="sRibbonBeam" d="" filter="url(#sBeamGlow)" />
+      
+      <!-- Đầu ngọc phát sáng dẫn đường (Lead Orb) -->
+      <circle id="sRibbonOrb" r="7.5" cx="0" cy="0" />
+    </svg>
+
+    <!-- Danh sách 4 Cột mốc nội dung xen kẽ -->
+    <div class="s-journey-timeline">
+      
+      <!-- 01. TIN TỨC & BLOG (Bên Trái) -->
+      <div class="s-step-row is-left" id="step-01" data-step="1">
+        <!-- Nút mốc tròn 01 -->
+        <div class="s-milestone-node" id="node-01">
+          <span class="s-node-number">01</span>
+          <span class="s-node-dot"></span>
+        </div>
+
+        <!-- Khối nội dung bên Trái -->
+        <div class="s-card-wrap">
+          <div class="s-card-content" id="card-01">
+            <span class="s-card-badge">CỘT MỐC 01 · GÓC NHÌN DI SẢN</span>
+            <h3 class="s-card-title">
+              <span>📰</span> Tin Tức & Blog Văn Hóa Cổ Phục
+            </h3>
+            <p class="s-card-text">
+              Khám phá các bài viết chuyên sâu về phục dựng y quan triều Nguyễn, lịch sử chất liệu tơ tằm, gấm sa dệt tay và hành trình gìn giữ phong vị cổ truyền đất kinh kỳ.
+            </p>
+            <div class="s-card-features">
+              <div class="s-feature-pill">
+                <span class="s-feature-icon">✦</span> Bài viết nghiên cứu cổ vật
+              </div>
+              <div class="s-feature-pill">
+                <span class="s-feature-icon">✦</span> Ghi chép chuyện nghề may đo
+              </div>
+              <div class="s-feature-pill">
+                <span class="s-feature-icon">✦</span> Bộ sưu tập hoa văn cổ
+              </div>
+              <div class="s-feature-pill">
+                <span class="s-feature-icon">✦</span> Tạp chí phục chế định kỳ
+              </div>
+            </div>
+            <a href="#news" class="s-card-btn">Đọc Tin Tức Mới Nhất →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 02. KHO CLIP BIỂU DIỄN (Bên Phải) -->
+      <div class="s-step-row is-right" id="step-02" data-step="2">
+        <!-- Nút mốc tròn 02 -->
+        <div class="s-milestone-node" id="node-02">
+          <span class="s-node-number">02</span>
+          <span class="s-node-dot"></span>
+        </div>
+
+        <!-- Khối nội dung bên Phải -->
+        <div class="s-card-wrap">
+          <div class="s-card-content" id="card-02">
+            <span class="s-card-badge">CỘT MỐC 02 · THƯ VIỆN ĐA PHƯƠNG TIỆN</span>
+            <h3 class="s-card-title">
+              <span>🎬</span> Kho Clip Biểu Diễn & Trình Diễn Cung Đình
+            </h3>
+            <p class="s-card-text">
+              Thưởng thức những thước phim ghi hình chất lượng 4K về các buổi hòa nhạc cổ, trình diễn trang phục Áo Tấc, Nhật Bình, Giao Lĩnh và trích đoạn nghi lễ nhã nhạc đặc sắc.
+            </p>
+            <div class="s-card-features">
+              <div class="s-feature-pill">
+                <span class="s-feature-icon">✦</span> Video sân khấu nhạc vũ cung đình
+              </div>
+              <div class="s-feature-pill">
+                <span class="s-feature-icon">✦</span> Trình diễn catwalk cổ phục Việt
+              </div>
+              <div class="s-feature-pill">
+                <span class="s-feature-icon">✦</span> Tư liệu phục chế hiện vật sống
+              </div>
+              <div class="s-feature-pill">
+                <span class="s-feature-icon">✦</span> Hậu trường xưởng may đo thêu tay
+              </div>
+            </div>
+            <a href="#clips" class="s-card-btn">Vào Kho Video Biểu Diễn →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 03. SỰ KIỆN & LỄ HỘI (Bên Trái) -->
+      <div class="s-step-row is-left" id="step-03" data-step="3">
+        <!-- Nút mốc tròn 03 -->
+        <div class="s-milestone-node" id="node-03">
+          <span class="s-node-number">03</span>
+          <span class="s-node-dot"></span>
+        </div>
+
+        <!-- Khối nội dung bên Trái -->
+        <div class="s-card-wrap">
+          <div class="s-card-content" id="card-03">
+            <span class="s-card-badge">CỘT MỐC 03 · KẾT NỐI CỘNG ĐỒNG</span>
+            <h3 class="s-card-title">
+              <span>🏮</span> Sự Kiện & Hội Thảo Giao Lưu
+            </h3>
+            <p class="s-card-text">
+              Cập nhật lịch tổ chức các buổi đàm đạo nghệ thuật, tuần lễ di sản văn hóa, workshop trải nghiệm may thêu và dạ tiệc trà thất giao lưu cùng các nhà nghiên cứu.
+            </p>
+            <div class="s-card-features">
+              <div class="s-feature-pill">
+                <span class="s-feature-icon">✦</span> Triển lãm cổ phục Thăng Long
+              </div>
+              <div class="s-feature-pill">
+                <span class="s-feature-icon">✦</span> Workshop thêu kim tuyến thủ công
+              </div>
+              <div class="s-feature-pill">
+                <span class="s-feature-icon">✦</span> Dạ tiệc trà thất mùa thu
+              </div>
+              <div class="s-feature-pill">
+                <span class="s-feature-icon">✦</span> Diễn đàn bảo tồn y quan cổ
+              </div>
+            </div>
+            <a href="#events" class="s-card-btn">Xem Lịch Sự Kiện Sắp Tới →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 04. PHÂN QUYỀN 3 CỔNG (Bên Phải) -->
+      <div class="s-step-row is-right" id="step-04" data-step="4">
+        <!-- Nút mốc tròn 04 -->
+        <div class="s-milestone-node" id="node-04">
+          <span class="s-node-number">04</span>
+          <span class="s-node-dot"></span>
+        </div>
+
+        <!-- Khối nội dung bên Phải -->
+        <div class="s-card-wrap">
+          <div class="s-card-content" id="card-04">
+            <span class="s-card-badge">CỘT MỐC 04 · KHÔNG GIAN BẢO MẬT</span>
+            <h3 class="s-card-title">
+              <span>🏛️</span> Phân Quyền 3 Cổng Truy Cập Hệ Thống
+            </h3>
+            <p class="s-card-text">
+              Phân luồng thông minh với 3 cổng truy cập chuyên biệt đáp ứng nhu cầu trải nghiệm, vận hành xưởng may và quản trị toàn diện hệ thống:
+            </p>
+            <div class="s-card-features">
+              <div class="s-feature-pill">
+                <span class="s-feature-icon">✦</span> <strong>Cổng Khách:</strong> Tra cứu, đặt may & mua sắm
+              </div>
+              <div class="s-feature-pill">
+                <span class="s-feature-icon">✦</span> <strong>Cổng Nghệ Nhân:</strong> Nhật ký may đo & kiểm định
+              </div>
+              <div class="s-feature-pill">
+                <span class="s-feature-icon">✦</span> <strong>Cổng Quản Trị:</strong> Điều hành số liệu & phân quyền
+              </div>
+              <div class="s-feature-pill">
+                <span class="s-feature-icon">✦</span> <strong>Xác thực kép:</strong> Bảo mật cấp cao an toàn
+              </div>
+            </div>
+            <a href="#portals" class="s-card-btn">Chọn Cổng Đăng Nhập →</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       JAVASCRIPT: initSCurveRibbon()
+       - Đo đạc tự động tọa độ thực tế từng cột mốc 01-04 bằng ResizeObserver
+       - Sinh đường cong Cubic Bezier chữ S liên tục (Desktop > 900px)
+       - Chuyển thành đường sáng dọc gọn mép trái khi <= 900px
+       - Cuộn tới đâu vẽ mượt tới đó (Lerp 0.085 cho stroke-dashoffset)
+       - Thắp sáng .s-milestone-node & trượt nhẹ khối nội dung vào khung hình
+       ==================================================================== -->
+  <script>
+    function initSCurveRibbon() {
+      const container = document.getElementById('sFlowJourney');
+      const svg = document.getElementById('sRibbonCanvas');
+      const baseTrack = document.getElementById('sRibbonBase');
+      const lightBeam = document.getElementById('sRibbonBeam');
+      const leadOrb = document.getElementById('sRibbonOrb');
+      
+      const nodes = [
+        document.getElementById('node-01'),
+        document.getElementById('node-02'),
+        document.getElementById('node-03'),
+        document.getElementById('node-04')
+      ];
+      
+      const cards = [
+        document.getElementById('card-01'),
+        document.getElementById('card-02'),
+        document.getElementById('card-03'),
+        document.getElementById('card-04')
+      ];
+
+      if (!container || !svg || !lightBeam || !leadOrb || nodes.some(n => !n)) {
+        console.warn('[sCurveRibbon] Thiếu phần tử DOM cần thiết để khởi tạo.');
+        return;
+      }
+
+      let totalPathLength = 0;
+      let targetProgress = 0;
+      let currentProgress = 0;
+      let isRafRunning = false;
+      let nodeNormalizedPositions = [];
+
+      /**
+       * 1. Tính toán tọa độ thực tế và xây dựng đường dẫn SVG Cubic Bezier
+       */
+      function updatePathGeometry() {
+        const cRect = container.getBoundingClientRect();
+        const cWidth = cRect.width;
+        const cHeight = cRect.height;
+        
+        svg.setAttribute('viewBox', `0 0 ${cWidth} ${cHeight}`);
+
+        const isMobile = window.innerWidth <= 900;
+        const pts = [];
+
+        // Lấy tâm tọa độ của từng node 01-04 so với container
+        nodes.forEach((node) => {
+          const nRect = node.getBoundingClientRect();
+          const cx = nRect.left + nRect.width / 2 - cRect.left;
+          const cy = nRect.top + nRect.height / 2 - cRect.top;
+          pts.push({ x: cx, y: cy });
+        });
+
+        let pathD = '';
+
+        if (isMobile) {
+          // --- MÀN HÌNH NHỎ (<= 900px): Đường thẳng dọc mép trái thanh thoát ---
+          const railX = pts[0].x;
+          const startY = Math.max(10, pts[0].y - 50);
+          const endY = pts[pts.length - 1].y + 60;
+          
+          pathD = `M ${railX} ${startY}`;
+          pts.forEach(p => {
+            pathD += ` L ${p.x} ${p.y}`;
+          });
+          pathD += ` L ${railX} ${endY}`;
+        } else {
+          // --- MÀN HÌNH LỚN (> 900px): Đường cong Cubic Bezier chữ S uốn lượn liên tục ---
+          // Bắt đầu từ phía trên mốc 01 (ở giữa trang hoặc đầu container uốn vào)
+          const startX = pts[0].x - 120;
+          const startY = Math.max(20, pts[0].y - 80);
+          
+          pathD = `M ${startX} ${startY}`;
+          // Đoạn mớm vào mốc 01
+          pathD += ` C ${startX + 50} ${startY + 20}, ${pts[0].x - 50} ${pts[0].y - 20}, ${pts[0].x} ${pts[0].y}`;
+
+          // Nối các mốc 01 -> 02 -> 03 -> 04 bằng các đường cong S Cubic Bezier
+          for (let i = 0; i < pts.length - 1; i++) {
+            const pA = pts[i];
+            const pB = pts[i + 1];
+            const dy = pB.y - pA.y;
+            const dx = pB.x - pA.x;
+
+            // Điểm điều khiển đối xứng mềm mại tạo cung lượn chữ S
+            const cp1x = pA.x + dx * 0.55;
+            const cp1y = pA.y + dy * 0.15;
+            const cp2x = pB.x - dx * 0.55;
+            const cp2y = pB.y - dy * 0.15;
+
+            pathD += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${pB.x} ${pB.y}`;
+          }
+
+          // Đoạn đuôi thoát ra mềm mại dưới mốc 04
+          const last = pts[pts.length - 1];
+          const endX = last.x + 120;
+          const endY = last.y + 80;
+          pathD += ` C ${last.x + 50} ${last.y + 30}, ${endX - 40} ${endY - 20}, ${endX} ${endY}`;
+        }
+
+        baseTrack.setAttribute('d', pathD);
+        lightBeam.setAttribute('d', pathD);
+
+        totalPathLength = lightBeam.getTotalLength();
+        lightBeam.style.strokeDasharray = `${totalPathLength} ${totalPathLength}`;
+        lightBeam.style.strokeDashoffset = `${totalPathLength * (1 - currentProgress)}`;
+
+        // Tính khoảng cách từ đầu đường cong đến từng node để thắp sáng đúng lúc
+        nodeNormalizedPositions = pts.map(p => {
+          let closestDist = 0;
+          let minDiff = Infinity;
+          const samples = 80;
+          for (let s = 0; s <= samples; s++) {
+            const l = (s / samples) * totalPathLength;
+            const pt = lightBeam.getPointAtLength(l);
+            const dist = Math.hypot(pt.x - p.x, pt.y - p.y);
+            if (dist < minDiff) {
+              minDiff = dist;
+              closestDist = l / totalPathLength;
+            }
+          }
+          return closestDist;
+        });
+
+        updateBeamPosition();
+      }
+
+      /**
+       * 2. Tính toán tỷ lệ cuộn trang (Scroll Progress) đối với .s-flow-journey
+       */
+      function calculateScrollProgress() {
+        const cRect = container.getBoundingClientRect();
+        const winHeight = window.innerHeight;
+        
+        // Bắt đầu khi mép trên container vào 80% màn hình, kết thúc khi mép dưới chạm đáy
+        const startOffset = winHeight * 0.75;
+        const endOffset = winHeight * 0.25;
+        
+        const totalTravel = cRect.height + (startOffset - endOffset);
+        const scrolled = startOffset - cRect.top;
+        
+        let p = scrolled / totalTravel;
+        return Math.max(0, Math.min(1, p));
+      }
+
+      /**
+       * 3. Vòng lặp animation mượt mà (Lerp 0.085)
+       */
+      function updateBeamPosition() {
+        if (totalPathLength <= 0) return;
+
+        // Cập nhật vị trí stroke dải sáng
+        const offset = totalPathLength * (1 - currentProgress);
+        lightBeam.style.strokeDashoffset = offset.toFixed(2);
+
+        // Di chuyển đầu sáng #sRibbonOrb dọc theo đường cong
+        const travelDist = Math.max(0.001, Math.min(totalPathLength, currentProgress * totalPathLength));
+        const point = lightBeam.getPointAtLength(travelDist);
+        leadOrb.setAttribute('cx', point.x.toFixed(1));
+        leadOrb.setAttribute('cy', point.y.toFixed(1));
+        leadOrb.style.opacity = currentProgress > 0.01 ? '1' : '0';
+
+        // Thắp sáng nút mốc .s-milestone-node và trượt khối nội dung .s-card-content
+        nodeNormalizedPositions.forEach((nodePos, idx) => {
+          const node = nodes[idx];
+          const card = cards[idx];
+          // Kích hoạt khi tia sáng chạm đến hoặc vượt qua cột mốc
+          const isReached = currentProgress >= (nodePos - 0.035);
+
+          if (isReached) {
+            node.classList.add('is-active');
+            if (card) card.classList.add('is-visible');
+          } else {
+            node.classList.remove('is-active');
+            if (card) card.classList.remove('is-visible');
+          }
+        });
+      }
+
+      function animationTick() {
+        targetProgress = calculateScrollProgress();
+        
+        // Thuật toán Lerp 0.085 theo đúng yêu cầu đề bài
+        const diff = targetProgress - currentProgress;
+        if (Math.abs(diff) > 0.0005) {
+          currentProgress += diff * 0.085;
+          updateBeamPosition();
+          requestAnimationFrame(animationTick);
+          isRafRunning = true;
+        } else {
+          currentProgress = targetProgress;
+          updateBeamPosition();
+          isRafRunning = false;
+        }
+      }
+
+      function onScroll() {
+        if (!isRafRunning) {
+          requestAnimationFrame(animationTick);
+        }
+      }
+
+      // Lắng nghe sự kiện cuộn
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', () => {
+        updatePathGeometry();
+        onScroll();
+      });
+
+      // ResizeObserver tự động đo lại tọa độ thực tế khi layout co giãn
+      const resizeObserver = new ResizeObserver(() => {
+        updatePathGeometry();
+        onScroll();
+      });
+      resizeObserver.observe(container);
+
+      // Khởi tạo ban đầu
+      updatePathGeometry();
+      animationTick();
+    }
+
+    /**
+     * 4. Hàm chuyển đổi theme Dark Mode / Light Mode
+     */
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+
+      const icon = document.getElementById('themeIcon');
+      const label = document.getElementById('themeLabel');
+      const badge = document.getElementById('themePaletteBadge');
+
+      if (next === 'light') {
+        icon.textContent = '🌙';
+        label.textContent = 'Chế độ Tối';
+        badge.textContent = 'Vàng Hổ Phách – Xanh Rêu';
+      } else {
+        icon.textContent = '☀️';
+        label.textContent = 'Chế độ Sáng';
+        badge.textContent = 'Vàng Champagne – Ngọc Lục Bảo';
+      }
+    }
+
+    // Tự động khởi chạy khi trang đã sẵn sàng
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initSCurveRibbon);
+    } else {
+      initSCurveRibbon();
+    }
+  </script>
+
+</body>
+</html>
