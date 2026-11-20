@@ -443,6 +443,13 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
               ? null
               : AppBar(
                   titleSpacing: 8,
+                  backgroundColor: _lightingMode == OceanLightingMode.abyssal
+                      ? Colors.white
+                      : const Color(0xFF081226),
+                  foregroundColor: _lightingMode == OceanLightingMode.abyssal
+                      ? const Color(0xFF0F172A)
+                      : Colors.white,
+                  elevation: 0,
                   title: Row(
                     children: [
                       const Icon(
@@ -476,7 +483,9 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
                 ),
           drawer: Drawer(
             width: 280,
-            backgroundColor: const Color(0xFF060912),
+            backgroundColor: _lightingMode == OceanLightingMode.abyssal
+                ? Colors.white
+                : const Color(0xFF081226),
             child: SafeArea(
               child: WaterSidebar(
                 selectedIndex: _tab,
@@ -495,6 +504,7 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
                   widget.onLogout();
                 },
                 activeAlertCount: activeAlertCount,
+                isAbyss: _lightingMode == OceanLightingMode.abyssal,
               ),
             ),
           ),
@@ -589,19 +599,29 @@ class _WaterHomeScreenState extends State<WaterHomeScreen> {
               : NavigationBarTheme(
                   data: NavigationBarThemeData(
                     height: 64,
+                    backgroundColor: _lightingMode == OceanLightingMode.abyssal
+                        ? Colors.white
+                        : const Color(0xFF081226),
+                    indicatorColor: const Color(0xFF0284C7).withValues(alpha: 0.25),
                     labelTextStyle: WidgetStateProperty.resolveWith((states) {
                       final selected = states.contains(WidgetState.selected);
+                      final isDark = _lightingMode != OceanLightingMode.abyssal;
                       return TextStyle(
                         fontSize: 9.5,
                         fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                        color: selected ? const Color(0xFF0284C7) : const Color(0xFF64748B),
+                        color: selected
+                            ? const Color(0xFF38BDF8)
+                            : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                       );
                     }),
                     iconTheme: WidgetStateProperty.resolveWith((states) {
                       final selected = states.contains(WidgetState.selected);
+                      final isDark = _lightingMode != OceanLightingMode.abyssal;
                       return IconThemeData(
                         size: 21,
-                        color: selected ? const Color(0xFF0284C7) : const Color(0xFF64748B),
+                        color: selected
+                            ? const Color(0xFF38BDF8)
+                            : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                       );
                     }),
                   ),

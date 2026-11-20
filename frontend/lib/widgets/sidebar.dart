@@ -11,7 +11,7 @@ class WaterSidebar extends StatelessWidget {
     required this.onCreateSite,
     required this.onLogout,
     this.activeAlertCount = 0,
-    this.isAbyss = true,
+    this.isAbyss = false,
   });
 
   final int selectedIndex;
