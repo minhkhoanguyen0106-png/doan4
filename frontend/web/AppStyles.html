@@ -1,70 +1,116 @@
 <style>
 /* ==========================================================================
-   APP STYLES: DẢI ÁNH SÁNG UỐN LƯỢN CHỮ S (.s-flow-journey)
-   Hỗ trợ 2 chế độ:
+   APP STYLES: DẢI ÁNH SÁNG UỐN LƯỢN CHỮ S (S-CURVE RIBBON JOURNEY)
+   PONDORA - SMART AQUACULTURE SYSTEM
+   
+   Hỗ trợ 2 chế độ phối màu:
    - Dark Mode:  Vàng Champagne (#F5E6C8 / #DFB76C) – Ngọc Lục Bảo (#10B981 / #00E5A3)
-   - Light Mode: Vàng Hổ Phách (#D97706 / #B45309) – Xanh Rêu Cổ Kính (#4D7C0F / #365314)
+   - Light Mode: Vàng Hổ Phách (#D97706 / #B45309) – Xanh Rêu Cổ Kính (#4D7C0F / #65A30D)
    ========================================================================== */
 
 :root {
-  /* Dark Mode Palette (Mặc định) */
-  --s-bg-base: #070B14;
-  --s-bg-card: rgba(13, 22, 38, 0.72);
-  --s-bg-card-hover: rgba(18, 30, 52, 0.85);
-  --s-border-card: rgba(223, 183, 108, 0.28);
+  /* ========================================================================
+     DARK MODE PALETTE (Mặc định - Đại dương huyền ảo & Công nghệ sâu thẳm)
+     ======================================================================== */
+  --s-bg-base: #060B14;
+  --s-bg-card: rgba(10, 18, 34, 0.76);
+  --s-bg-card-hover: rgba(14, 25, 48, 0.88);
+  --s-border-card: rgba(223, 183, 108, 0.26);
   --s-border-card-hover: rgba(223, 183, 108, 0.65);
   
+  /* Vàng Champagne */
   --s-gold-champagne: #F5E6C8;
   --s-gold-accent: #DFB76C;
   --s-gold-dim: #997A44;
+  --s-gold-glow: rgba(223, 183, 108, 0.6);
+  
+  /* Ngọc Lục Bảo */
   --s-emerald-gem: #10B981;
   --s-emerald-glow: #00E5A3;
   --s-emerald-deep: #064E3B;
+  --s-emerald-shadow: rgba(0, 229, 163, 0.45);
   
+  /* Cyan Đại dương điểm xuyết */
+  --s-cyan-accent: #38BDF8;
+  --s-cyan-glow: #00D2FF;
+
+  /* Dải sáng đường ray (Ribbon Beam) */
   --s-beam-track: rgba(223, 183, 108, 0.12);
   --s-beam-gradient-start: #DFB76C;
   --s-beam-gradient-mid: #F5E6C8;
   --s-beam-gradient-end: #00E5A3;
   
-  --s-glow-shadow-gold: 0 0 24px rgba(223, 183, 108, 0.55), 0 0 48px rgba(223, 183, 108, 0.25);
-  --s-glow-shadow-emerald: 0 0 24px rgba(0, 229, 163, 0.55), 0 0 48px rgba(0, 229, 163, 0.25);
-  --s-orb-glow: drop-shadow(0 0 10px #DFB76C) drop-shadow(0 0 20px #00E5A3);
+  /* Hiệu ứng hào quang phát quang */
+  --s-glow-shadow-gold: 0 0 24px rgba(223, 183, 108, 0.55), 0 0 48px rgba(223, 183, 108, 0.22);
+  --s-glow-shadow-emerald: 0 0 24px rgba(0, 229, 163, 0.55), 0 0 48px rgba(0, 229, 163, 0.22);
+  --s-orb-glow: drop-shadow(0 0 10px #DFB76C) drop-shadow(0 0 22px #00E5A3) drop-shadow(0 0 32px #00D2FF);
   
+  /* Màu chữ & Thẻ thông tin */
   --s-text-primary: #F8FAFC;
   --s-text-secondary: #CBD5E1;
   --s-text-muted: #64748B;
   --s-badge-bg: rgba(223, 183, 108, 0.14);
+  --s-pill-bg: rgba(255, 255, 255, 0.04);
+  --s-pill-border: rgba(255, 255, 255, 0.08);
+
+  /* Status Colors (Đo đạc ao tôm) */
+  --s-status-optimal: #10B981;
+  --s-status-optimal-bg: rgba(16, 185, 129, 0.14);
+  --s-status-warning: #F59E0B;
+  --s-status-warning-bg: rgba(245, 158, 11, 0.14);
+  --s-status-critical: #EF4444;
+  --s-status-critical-bg: rgba(239, 68, 68, 0.14);
 }
 
-/* Light Mode Overrides */
+/* ==========================================================================
+   LIGHT MODE OVERRIDES (Vàng Hổ Phách – Xanh Rêu Sang Trọng, Sáng Rõ)
+   ========================================================================== */
 [data-theme="light"],
 .theme-light {
-  --s-bg-base: #F8F6F0;
-  --s-bg-card: rgba(255, 255, 255, 0.82);
-  --s-bg-card-hover: rgba(255, 255, 255, 0.95);
-  --s-border-card: rgba(217, 119, 6, 0.28);
+  --s-bg-base: #F8F9FA;
+  --s-bg-card: rgba(255, 255, 255, 0.88);
+  --s-bg-card-hover: rgba(255, 255, 255, 0.98);
+  --s-border-card: rgba(217, 119, 6, 0.24);
   --s-border-card-hover: rgba(77, 124, 15, 0.55);
   
-  --s-gold-champagne: #D97706;  /* Vàng hổ phách */
+  /* Vàng Hổ Phách */
+  --s-gold-champagne: #D97706;
   --s-gold-accent: #B45309;
   --s-gold-dim: #78350F;
-  --s-emerald-gem: #4D7C0F;     /* Xanh rêu cổ kính */
+  --s-gold-glow: rgba(217, 119, 6, 0.45);
+  
+  /* Xanh Rêu */
+  --s-emerald-gem: #4D7C0F;
   --s-emerald-glow: #65A30D;
   --s-emerald-deep: #365314;
+  --s-emerald-shadow: rgba(77, 124, 15, 0.35);
+
+  --s-cyan-accent: #0284C7;
+  --s-cyan-glow: #0EA5E9;
   
-  --s-beam-track: rgba(217, 119, 6, 0.14);
+  /* Dải sáng Ribbon Beam */
+  --s-beam-track: rgba(217, 119, 6, 0.16);
   --s-beam-gradient-start: #D97706;
   --s-beam-gradient-mid: #F59E0B;
   --s-beam-gradient-end: #4D7C0F;
   
-  --s-glow-shadow-gold: 0 0 20px rgba(217, 119, 6, 0.40), 0 0 40px rgba(217, 119, 6, 0.15);
-  --s-glow-shadow-emerald: 0 0 20px rgba(77, 124, 15, 0.40), 0 0 40px rgba(77, 124, 15, 0.15);
+  --s-glow-shadow-gold: 0 0 20px rgba(217, 119, 6, 0.38), 0 0 38px rgba(217, 119, 6, 0.15);
+  --s-glow-shadow-emerald: 0 0 20px rgba(77, 124, 15, 0.38), 0 0 38px rgba(77, 124, 15, 0.15);
   --s-orb-glow: drop-shadow(0 0 8px #D97706) drop-shadow(0 0 16px #4D7C0F);
   
-  --s-text-primary: #1C1917;
-  --s-text-secondary: #44403C;
-  --s-text-muted: #78716C;
+  --s-text-primary: #0F172A;
+  --s-text-secondary: #334155;
+  --s-text-muted: #64748B;
   --s-badge-bg: rgba(217, 119, 6, 0.12);
+  --s-pill-bg: rgba(2, 132, 199, 0.05);
+  --s-pill-border: rgba(2, 132, 199, 0.12);
+
+  --s-status-optimal: #059669;
+  --s-status-optimal-bg: rgba(5, 150, 105, 0.12);
+  --s-status-warning: #D97706;
+  --s-status-warning-bg: rgba(217, 119, 6, 0.12);
+  --s-status-critical: #DC2626;
+  --s-status-critical-bg: rgba(220, 38, 38, 0.12);
 }
 
 /* ==========================================================================
@@ -85,7 +131,7 @@
 /* Header giới thiệu Journey */
 .s-journey-header {
   text-align: center;
-  max-width: 720px;
+  max-width: 780px;
   margin: 0 auto 72px auto;
   position: relative;
   z-index: 5;
@@ -95,7 +141,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 16px;
+  padding: 6px 18px;
   border-radius: 999px;
   background: var(--s-badge-bg);
   border: 1px solid var(--s-border-card);
@@ -108,7 +154,7 @@
 }
 
 .s-journey-title {
-  margin: 16px 0 12px 0;
+  margin: 18px 0 14px 0;
   font-size: clamp(28px, 4vw, 42px);
   font-weight: 900;
   letter-spacing: -0.8px;
@@ -119,8 +165,8 @@
 }
 
 .s-journey-desc {
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 15.5px;
+  line-height: 1.65;
   color: var(--s-text-secondary);
   margin: 0 auto;
 }
@@ -139,24 +185,24 @@
   overflow: visible;
 }
 
-/* Đường dẫn mờ chạy trước (Track) */
+/* Đường dẫn mờ chạy trước (Base Track) */
 #sRibbonBase {
   fill: none;
   stroke: var(--s-beam-track);
   stroke-width: 3px;
   stroke-linecap: round;
   stroke-dasharray: 6 8;
-  opacity: 0.75;
+  opacity: 0.8;
 }
 
-/* Dải sáng uốn lượn chính (Active Beam) */
+/* Dải sáng uốn lượn chính (Active S-Curve Beam) */
 #sRibbonBeam {
   fill: none;
   stroke: url(#sBeamGrad);
-  stroke-width: 4.5px;
+  stroke-width: 5px;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: drop-shadow(0 0 6px var(--s-gold-accent)) drop-shadow(0 0 16px var(--s-emerald-glow));
+  filter: drop-shadow(0 0 6px var(--s-gold-accent)) drop-shadow(0 0 18px var(--s-emerald-glow));
   will-change: stroke-dashoffset;
   transition: stroke-dashoffset 0.04s linear;
 }
@@ -165,21 +211,21 @@
 #sRibbonOrb {
   fill: var(--s-gold-champagne);
   stroke: var(--s-emerald-glow);
-  stroke-width: 2.5px;
+  stroke-width: 3px;
   filter: var(--s-orb-glow);
   will-change: transform, cx, cy;
   transition: opacity 0.3s ease;
 }
 
 /* ==========================================================================
-   DANH SÁCH 4 BƯỚC CỘT MỐC (.s-step-row)
+   DANH SÁCH 4 BƯỚC CỘT MỐC (.s-step-row) XEN KẼ TRÁI - PHẢI
    ========================================================================== */
 .s-journey-timeline {
   position: relative;
   z-index: 4;
   display: flex;
   flex-direction: column;
-  gap: 110px;
+  gap: 120px;
 }
 
 .s-step-row {
@@ -187,30 +233,30 @@
   grid-template-columns: 1fr 1fr;
   align-items: center;
   position: relative;
-  min-height: 260px;
+  min-height: 280px;
 }
 
 /* 01 & 03: Nội dung bên Trái */
 .s-step-row.is-left .s-card-wrap {
   grid-column: 1 / 2;
-  padding-right: 64px;
+  padding-right: 72px;
 }
 
 /* 02 & 04: Nội dung bên Phải */
 .s-step-row.is-right .s-card-wrap {
   grid-column: 2 / 3;
-  padding-left: 64px;
+  padding-left: 72px;
 }
 
 /* ==========================================================================
-   NÚT MỐC CỘT SỐ (.s-milestone-node)
+   NÚT MỐC CỘT SỐ (.s-milestone-node) - 3 TRẠNG THÁI: THƯỜNG / ĐANG KÍCH HOẠT / ĐÃ ĐI QUA
    ========================================================================== */
 .s-milestone-node {
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 58px;
-  height: 58px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   background: var(--s-bg-base);
   border: 2px solid var(--s-border-card);
@@ -219,19 +265,19 @@
   align-items: center;
   justify-content: center;
   z-index: 6;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
   transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
 }
 
-/* Vị trí Desktop: 
-   - Bước Left (01, 03): cột mốc ở trục giữa lệch trái (x ~ 20%)
-   - Bước Right (02, 04): cột mốc ở trục giữa lệch phải (x ~ 80%) */
+/* Vị trí Desktop:
+   - Bước Left (01, 03): cột mốc ở trục bên trái (x ~ 18%)
+   - Bước Right (02, 04): cột mốc ở trục bên phải (x ~ 82%) */
 .s-step-row.is-left .s-milestone-node {
-  left: 20%;
+  left: 18%;
 }
 .s-step-row.is-right .s-milestone-node {
-  left: 80%;
+  left: 82%;
 }
 
 .s-node-number {
@@ -248,16 +294,16 @@
   height: 5px;
   border-radius: 50%;
   background: var(--s-text-muted);
-  margin-top: 3px;
+  margin-top: 4px;
   transition: all 0.35s ease;
 }
 
-/* Trạng thái đã thắp sáng (Active Glow khi dải sáng chạm đến) */
+/* 1. Trạng thái ĐANG KÍCH HOẠT (Active Glow khi dải sáng chạm đến) */
 .s-milestone-node.is-active {
   border-color: var(--s-gold-accent);
   background: radial-gradient(circle at center, var(--s-bg-card) 40%, var(--s-bg-base) 100%);
   box-shadow: var(--s-glow-shadow-gold), 0 0 35px var(--s-emerald-glow);
-  transform: translate(-50%, -50%) scale(1.12);
+  transform: translate(-50%, -50%) scale(1.15);
 }
 
 .s-milestone-node.is-active .s-node-number {
@@ -272,28 +318,45 @@
   height: 7px;
 }
 
+/* 2. Trạng thái ĐÃ ĐI QUA (Passed / Completed khi cuộn tiếp xuống dưới) */
+.s-milestone-node.is-passed {
+  border-color: var(--s-emerald-gem);
+  background: var(--s-bg-card);
+  box-shadow: 0 0 20px var(--s-emerald-shadow);
+  transform: translate(-50%, -50%) scale(1.05);
+}
+
+.s-milestone-node.is-passed .s-node-number {
+  color: var(--s-emerald-glow);
+}
+
+.s-milestone-node.is-passed .s-node-dot {
+  background: var(--s-emerald-glow);
+  box-shadow: 0 0 6px var(--s-emerald-glow);
+}
+
 /* ==========================================================================
    KHỐI NỘI DUNG 4 KHU VỰC (.s-card-content)
    ========================================================================== */
 .s-card-content {
   background: var(--s-bg-card);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: 24px;
   border: 1px solid var(--s-border-card);
-  padding: 32px 36px;
-  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.35);
+  padding: 34px 38px;
+  box-shadow: 0 20px 48px -10px rgba(0, 0, 0, 0.35);
   transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1),
               opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
               border-color 0.35s ease,
               box-shadow 0.35s ease;
-  opacity: 0.22;
+  opacity: 0.20;
   transform: translateY(28px);
   position: relative;
   overflow: hidden;
 }
 
-/* Slide-in & sáng lên khi cuộn tới */
+/* Hiệu ứng trượt nhẹ vào khung hình khi cuộn tới */
 .s-card-content.is-visible {
   opacity: 1;
   transform: translateY(0);
@@ -313,9 +376,9 @@
   top: 0;
   left: 10%;
   right: 10%;
-  height: 1.5px;
+  height: 2px;
   background: linear-gradient(90deg, transparent, var(--s-gold-accent), transparent);
-  opacity: 0.6;
+  opacity: 0.65;
 }
 
 .s-card-badge {
@@ -335,8 +398,8 @@
 }
 
 .s-card-title {
-  font-size: clamp(20px, 2.2vw, 24px);
-  font-weight: 800;
+  font-size: clamp(20px, 2.2vw, 25px);
+  font-weight: 900;
   letter-spacing: -0.4px;
   margin: 0 0 12px 0;
   color: var(--s-text-primary);
@@ -346,36 +409,123 @@
 }
 
 .s-card-text {
-  font-size: 14px;
-  line-height: 1.65;
+  font-size: 14.5px;
+  line-height: 1.68;
   color: var(--s-text-secondary);
   margin: 0 0 22px 0;
 }
 
-/* Grid nội dung chi tiết nhỏ bên trong card */
-.s-card-features {
+/* ==========================================================================
+   MINI TELEMETRY CARDS / LUỒNG IOT / CẢNH BÁO AI / QUẢN TRỊ AO
+   ========================================================================== */
+.s-card-metrics-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
   margin-bottom: 24px;
 }
 
-.s-feature-pill {
+.s-metric-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--s-pill-bg);
+  border: 1px solid var(--s-pill-border);
+  transition: all 0.25s ease;
+}
+
+.s-metric-item:hover {
+  border-color: var(--s-border-card);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.s-metric-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  font-size: 12px;
+  justify-content: space-between;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--s-text-muted);
+}
+
+.s-metric-badge {
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.s-metric-badge.is-optimal {
+  color: var(--s-status-optimal);
+  background: var(--s-status-optimal-bg);
+}
+
+.s-metric-badge.is-warning {
+  color: var(--s-status-warning);
+  background: var(--s-status-warning-bg);
+}
+
+.s-metric-badge.is-critical {
+  color: var(--s-status-critical);
+  background: var(--s-status-critical-bg);
+}
+
+.s-metric-val {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--s-text-primary);
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.s-metric-val small {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--s-text-muted);
+}
+
+.s-metric-safe {
+  font-size: 10px;
+  color: var(--s-text-muted);
+  font-weight: 600;
+}
+
+/* Luồng IoT Pipeline steps */
+.s-iot-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.s-iot-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--s-pill-bg);
+  border: 1px solid var(--s-pill-border);
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--s-text-secondary);
 }
 
-.s-feature-icon {
-  font-size: 14px;
+.s-iot-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(16, 185, 129, 0.15);
   color: var(--s-emerald-glow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
 }
 
 /* Nút CTA tương tác */
@@ -383,35 +533,39 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 22px;
-  border-radius: 12px;
+  padding: 11px 24px;
+  border-radius: 14px;
   background: linear-gradient(135deg, var(--s-gold-accent), #B38F4D);
   color: #070B14;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 800;
   text-decoration: none;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(223, 183, 108, 0.35);
+  box-shadow: 0 4px 18px rgba(223, 183, 108, 0.35);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .s-card-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(223, 183, 108, 0.55), 0 0 20px var(--s-emerald-glow);
+  box-shadow: 0 8px 26px rgba(223, 183, 108, 0.55), 0 0 20px var(--s-emerald-glow);
 }
 
 /* ==========================================================================
    RESPONSIVE KHI XUỐNG MÀN HÌNH NHỎ (<= 900px)
-   Chuyển thành đường sáng dọc gọn bên mép trái
+   Chuyển thành đường sáng dọc gọn gàng ở mép trái, 4 bước xếp thẳng 1 cột
    ========================================================================== */
 @media (max-width: 900px) {
   .s-flow-journey {
     padding: 60px 16px 80px 16px;
   }
   
+  .s-journey-header {
+    margin-bottom: 54px;
+  }
+  
   .s-journey-timeline {
-    gap: 60px;
+    gap: 64px;
     padding-left: 28px;
   }
   
@@ -422,11 +576,11 @@
     min-height: auto;
   }
   
-  /* Cả 4 bước đều căn thẳng cột bên phải dải sáng */
+  /* Cả 4 bước đều xếp thẳng 1 cột bên phải dải sáng */
   .s-step-row.is-left .s-card-wrap,
   .s-step-row.is-right .s-card-wrap {
     grid-column: unset;
-    padding: 0 0 0 44px;
+    padding: 0 0 0 48px;
     width: 100%;
     box-sizing: border-box;
   }
@@ -434,22 +588,40 @@
   /* Cột mốc dời sang sát lề trái thành trục dọc */
   .s-step-row.is-left .s-milestone-node,
   .s-step-row.is-right .s-milestone-node {
-    left: 12px;
+    left: 14px;
     top: 40px;
-    width: 44px;
-    height: 44px;
+    width: 46px;
+    height: 46px;
   }
   
   .s-node-number {
-    font-size: 11px;
+    font-size: 11.5px;
   }
   
   .s-card-content {
-    padding: 24px 22px;
+    padding: 24px 20px;
+    border-radius: 20px;
   }
   
-  .s-card-features {
+  .s-card-metrics-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   HỖ TRỢ PREFERS-REDUCED-MOTION (Hạn chế chuyển động khi người dùng yêu cầu)
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .s-card-content,
+  .s-milestone-node,
+  #sRibbonBeam,
+  #sRibbonOrb {
+    transition: none !important;
+    animation: none !important;
+  }
+  .s-card-content {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
 </style>

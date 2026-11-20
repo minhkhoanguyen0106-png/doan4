@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dải Ánh Sáng Uốn Lượn Chữ S | PONDORA Journey</title>
+  <title>Dải Ánh Sáng Uốn Lượn Chữ S | PONDORA S-Flow Journey</title>
   
-  <!-- Google Fonts: Plus Jakarta Sans -->
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   
   <!-- Nhúng AppStyles.html (hỗ trợ cả chuẩn Google Apps Script và Web trực tiếp) -->
   <?!= HtmlService.createHtmlOutputFromFile('AppStyles').getContent(); ?>
@@ -65,6 +65,24 @@
       font-weight: 800;
     }
   </style>
+
+  <script>
+    // Tự động nạp AppStyles.html nếu mở file cục bộ trực tiếp trên trình duyệt
+    if (!document.querySelector('style[data-app-styles="loaded"]')) {
+      fetch('AppStyles.html')
+        .then(res => res.text())
+        .then(html => {
+          const div = document.createElement('div');
+          div.innerHTML = html;
+          const style = div.querySelector('style');
+          if (style) {
+            style.setAttribute('data-app-styles', 'loaded');
+            document.head.appendChild(style);
+          }
+        })
+        .catch(() => {});
+    }
+  </script>
 </head>
 <body>
 
@@ -79,20 +97,20 @@
 
   <!-- ====================================================================
        CONTAINER DẢI ÁNH SÁNG UỐN LƯỢN CHỮ S (.s-flow-journey)
-       Bọc 4 khu vực xen kẽ Trái / Phải
+       Gom 4 khu vực xen kẽ Trái / Phải
        ==================================================================== -->
   <section class="s-flow-journey" id="sFlowJourney">
     
-    <!-- Tiêu đề giới thiệu hành trình -->
+    <!-- Tiêu đề giới thiệu hành trình PONDORA -->
     <header class="s-journey-header">
       <div class="s-journey-eyebrow">
-        <span>✨</span> HÀNH TRÌNH TRẢI NGHIỆM LIÊN TỤC
+        <span>✨</span> HÀNH TRÌNH CÔNG NGHỆ PONDORA
       </div>
       <h2 class="s-journey-title">
-        Dải Ánh Sáng Kết Nối Không Gian Di Sản
+        Dải Ánh Sáng Kết Nối Hệ Sinh Thái Thông Minh
       </h2>
       <p class="s-journey-desc">
-        Hệ thống định vị nhịp sống nghệ thuật với dải sáng uốn lượn chữ S dẫn dắt bạn qua 4 cột mốc văn hóa đặc sắc.
+        Quy trình khép kín dẫn dắt người nuôi tôm từ quan trắc chất lượng nước, thu thập dữ liệu IoT, cảnh báo sớm AI đến quản lý ao nuôi và đối chiếu lịch sử khoa học.
       </p>
     </header>
 
@@ -131,7 +149,9 @@
     <!-- Danh sách 4 Cột mốc nội dung xen kẽ -->
     <div class="s-journey-timeline">
       
-      <!-- 01. TIN TỨC & BLOG (Bên Trái) -->
+      <!-- ================================================================
+           01 – TỔNG QUAN CHẤT LƯỢNG NƯỚC (Bên Trái)
+           ================================================================ -->
       <div class="s-step-row is-left" id="step-01" data-step="1">
         <!-- Nút mốc tròn 01 -->
         <div class="s-milestone-node" id="node-01">
@@ -142,33 +162,61 @@
         <!-- Khối nội dung bên Trái -->
         <div class="s-card-wrap">
           <div class="s-card-content" id="card-01">
-            <span class="s-card-badge">CỘT MỐC 01 · GÓC NHÌN DI SẢN</span>
+            <span class="s-card-badge">CỘT MỐC 01 · CHỈ SỐ MÔI TRƯỜNG AO</span>
             <h3 class="s-card-title">
-              <span>📰</span> Tin Tức & Blog Văn Hóa Cổ Phục
+              <span>🌊</span> Tổng Quan Chất Lượng Nước Ao Nuôi
             </h3>
             <p class="s-card-text">
-              Khám phá các bài viết chuyên sâu về phục dựng y quan triều Nguyễn, lịch sử chất liệu tơ tằm, gấm sa dệt tay và hành trình gìn giữ phong vị cổ truyền đất kinh kỳ.
+              Theo dõi toàn diện các chỉ số hóa lý quan trọng trong ao tôm theo thời gian thực. Làm nổi bật trạng thái môi trường nước bằng màu sắc trực quan, giúp người nuôi nhận biết ngay vùng an toàn và dấu hiệu biến động.
             </p>
-            <div class="s-card-features">
-              <div class="s-feature-pill">
-                <span class="s-feature-icon">✦</span> Bài viết nghiên cứu cổ vật
+            
+            <!-- Grid 4 chỉ số đo then chốt trực quan -->
+            <div class="s-card-metrics-grid">
+              <div class="s-metric-item">
+                <div class="s-metric-header">
+                  <span>🧪 Độ pH Nước</span>
+                  <span class="s-metric-badge is-optimal">Tối ưu</span>
+                </div>
+                <div class="s-metric-val">7.8</div>
+                <div class="s-metric-safe">Khoảng chuẩn: 7.5 – 8.5 pH</div>
               </div>
-              <div class="s-feature-pill">
-                <span class="s-feature-icon">✦</span> Ghi chép chuyện nghề may đo
+
+              <div class="s-metric-item">
+                <div class="s-metric-header">
+                  <span>💨 Oxy Hòa Tan (DO)</span>
+                  <span class="s-metric-badge is-optimal">Đạt chuẩn</span>
+                </div>
+                <div class="s-metric-val">6.2 <small>mg/L</small></div>
+                <div class="s-metric-safe">Khoảng chuẩn: ≥ 4.0 mg/L</div>
               </div>
-              <div class="s-feature-pill">
-                <span class="s-feature-icon">✦</span> Bộ sưu tập hoa văn cổ
+
+              <div class="s-metric-item">
+                <div class="s-metric-header">
+                  <span>🌡️ Nhiệt Độ Nước</span>
+                  <span class="s-metric-badge is-optimal">Ổn định</span>
+                </div>
+                <div class="s-metric-val">28.5 <small>°C</small></div>
+                <div class="s-metric-safe">Khoảng chuẩn: 28 – 32 °C</div>
               </div>
-              <div class="s-feature-pill">
-                <span class="s-feature-icon">✦</span> Tạp chí phục chế định kỳ
+
+              <div class="s-metric-item">
+                <div class="s-metric-header">
+                  <span>💧 Độ Đục & TDS</span>
+                  <span class="s-metric-badge is-optimal">An toàn</span>
+                </div>
+                <div class="s-metric-val">12 <small>NTU</small> · 220 <small>mg/L</small></div>
+                <div class="s-metric-safe">Đục ≤ 25 NTU · TDS ≤ 800 mg/L</div>
               </div>
             </div>
-            <a href="#news" class="s-card-btn">Đọc Tin Tức Mới Nhất →</a>
+
+            <a href="#overview" class="s-card-btn">Xem Chỉ Số Nước Ao →</a>
           </div>
         </div>
       </div>
 
-      <!-- 02. KHO CLIP BIỂU DIỄN (Bên Phải) -->
+      <!-- ================================================================
+           02 – GIÁM SÁT DỮ LIỆU IOT (Bên Phải)
+           ================================================================ -->
       <div class="s-step-row is-right" id="step-02" data-step="2">
         <!-- Nút mốc tròn 02 -->
         <div class="s-milestone-node" id="node-02">
@@ -179,33 +227,57 @@
         <!-- Khối nội dung bên Phải -->
         <div class="s-card-wrap">
           <div class="s-card-content" id="card-02">
-            <span class="s-card-badge">CỘT MỐC 02 · THƯ VIỆN ĐA PHƯƠNG TIỆN</span>
+            <span class="s-card-badge">CỘT MỐC 02 · KẾT NỐI KHÔNG DÂY</span>
             <h3 class="s-card-title">
-              <span>🎬</span> Kho Clip Biểu Diễn & Trình Diễn Cung Đình
+              <span>📡</span> Giám Sát Dữ Liệu Cảm Biến IoT
             </h3>
             <p class="s-card-text">
-              Thưởng thức những thước phim ghi hình chất lượng 4K về các buổi hòa nhạc cổ, trình diễn trang phục Áo Tấc, Nhật Bình, Giao Lĩnh và trích đoạn nghi lễ nhã nhạc đặc sắc.
+              Quy trình tự động hóa khép kín: cảm biến đo đạc dưới nước, truyền dữ liệu số qua vi điều khiển ESP32, lưu trữ an toàn trên máy chủ đám mây và cập nhật tức thì đến ứng dụng điện thoại người nuôi mà không cần lội ao lấy mẫu.
             </p>
-            <div class="s-card-features">
-              <div class="s-feature-pill">
-                <span class="s-feature-icon">✦</span> Video sân khấu nhạc vũ cung đình
+
+            <!-- Minh họa luồng dữ liệu IoT Pipeline -->
+            <div class="s-iot-flow">
+              <div class="s-iot-step">
+                <div class="s-iot-icon">⚡</div>
+                <div>
+                  <strong>Bước 1: Cảm biến chuyên dụng</strong>
+                  <div>Đầu dò nhúng chìm đo tự động chu kỳ 3 giây/lần, lọc nhiễu chính xác.</div>
+                </div>
               </div>
-              <div class="s-feature-pill">
-                <span class="s-feature-icon">✦</span> Trình diễn catwalk cổ phục Việt
+
+              <div class="s-iot-step">
+                <div class="s-iot-icon">📶</div>
+                <div>
+                  <strong>Bước 2: ESP32 Transmitter</strong>
+                  <div>Thu thập tín hiệu, mã hóa JSON và truyền qua Wi-Fi / MQTT siêu tốc.</div>
+                </div>
               </div>
-              <div class="s-feature-pill">
-                <span class="s-feature-icon">✦</span> Tư liệu phục chế hiện vật sống
+
+              <div class="s-iot-step">
+                <div class="s-iot-icon">☁️</div>
+                <div>
+                  <strong>Bước 3: Spring Boot Cloud</strong>
+                  <div>Tiếp nhận, xác thực, ghi dữ liệu vào CSDL và kích hoạt bộ đánh giá tức thời.</div>
+                </div>
               </div>
-              <div class="s-feature-pill">
-                <span class="s-feature-icon">✦</span> Hậu trường xưởng may đo thêu tay
+
+              <div class="s-iot-step">
+                <div class="s-iot-icon">📱</div>
+                <div>
+                  <strong>Bước 4: Ứng dụng PONDORA</strong>
+                  <div>Giao diện trực quan cập nhật biểu đồ sống, phát âm thanh báo động khi mất điện.</div>
+                </div>
               </div>
             </div>
-            <a href="#clips" class="s-card-btn">Vào Kho Video Biểu Diễn →</a>
+
+            <a href="#iot-devices" class="s-card-btn">Khám Phá Thiết Bị Đo →</a>
           </div>
         </div>
       </div>
 
-      <!-- 03. SỰ KIỆN & LỄ HỘI (Bên Trái) -->
+      <!-- ================================================================
+           03 – PHÂN TÍCH VÀ CẢNH BÁO BẰNG AI (Bên Trái)
+           ================================================================ -->
       <div class="s-step-row is-left" id="step-03" data-step="3">
         <!-- Nút mốc tròn 03 -->
         <div class="s-milestone-node" id="node-03">
@@ -216,33 +288,60 @@
         <!-- Khối nội dung bên Trái -->
         <div class="s-card-wrap">
           <div class="s-card-content" id="card-03">
-            <span class="s-card-badge">CỘT MỐC 03 · KẾT NỐI CỘNG ĐỒNG</span>
+            <span class="s-card-badge">CỘT MỐC 03 · CHẨN ĐOÁN & CẢNH BÁO SỚM</span>
             <h3 class="s-card-title">
-              <span>🏮</span> Sự Kiện & Hội Thảo Giao Lưu
+              <span>🧠</span> Phân Tích & Cảnh Báo Sớm Bằng AI
             </h3>
             <p class="s-card-text">
-              Cập nhật lịch tổ chức các buổi đàm đạo nghệ thuật, tuần lễ di sản văn hóa, workshop trải nghiệm may thêu và dạ tiệc trà thất giao lưu cùng các nhà nghiên cứu.
+              Ứng dụng mô hình tính toán WQI theo tiêu chuẩn QCVN 02-19:2014 và cảm biến mềm Emerson để chẩn đoán rủi ro từ sớm. Hệ thống tự động phát cảnh báo khi các chỉ số vượt ngưỡng và cung cấp phác đồ xử lý trực quan, dễ hiểu cho bà con.
             </p>
-            <div class="s-card-features">
-              <div class="s-feature-pill">
-                <span class="s-feature-icon">✦</span> Triển lãm cổ phục Thăng Long
+
+            <div class="s-card-metrics-grid">
+              <div class="s-metric-item">
+                <div class="s-metric-header">
+                  <span>🔔 Cảnh Báo Đa Cấp</span>
+                  <span class="s-metric-badge is-optimal">3 Cấp Độ</span>
+                </div>
+                <div class="s-metric-val">Bình thường · Chú ý · Nguy cấp</div>
+                <div class="s-metric-safe">Âm báo động cảnh báo ngay khi mất oxy</div>
               </div>
-              <div class="s-feature-pill">
-                <span class="s-feature-icon">✦</span> Workshop thêu kim tuyến thủ công
+
+              <div class="s-metric-item">
+                <div class="s-metric-header">
+                  <span>⚗️ Cảm Biến Mềm NH3</span>
+                  <span class="s-metric-badge is-optimal">Chuẩn Emerson</span>
+                </div>
+                <div class="s-metric-val">4.2% <small>khí độc tự do</small></div>
+                <div class="s-metric-safe">Suy diễn chính xác từ pH và nhiệt độ nước</div>
               </div>
-              <div class="s-feature-pill">
-                <span class="s-feature-icon">✦</span> Dạ tiệc trà thất mùa thu
+
+              <div class="s-metric-item">
+                <div class="s-metric-header">
+                  <span>📋 Phác Đồ Kỹ Thuật</span>
+                  <span class="s-metric-badge is-optimal">Tính sẵn</span>
+                </div>
+                <div class="s-metric-val">Đánh vôi · Vi sinh · Quạt nước</div>
+                <div class="s-metric-safe">Tự tính số kg thuốc theo thể tích ao thực tế</div>
               </div>
-              <div class="s-feature-pill">
-                <span class="s-feature-icon">✦</span> Diễn đàn bảo tồn y quan cổ
+
+              <div class="s-metric-item">
+                <div class="s-metric-header">
+                  <span>📈 Phân Tích Xu Hướng</span>
+                  <span class="s-metric-badge is-optimal">Theo ngày</span>
+                </div>
+                <div class="s-metric-val">Dự báo tụt pH sau mưa</div>
+                <div class="s-metric-safe">Cảnh báo thiếu oxy rạng sáng từ 3:00 - 6:00</div>
               </div>
             </div>
-            <a href="#events" class="s-card-btn">Xem Lịch Sự Kiện Sắp Tới →</a>
+
+            <a href="#ai-plan" class="s-card-btn">Xem Phác Đồ Xử Lý AI →</a>
           </div>
         </div>
       </div>
 
-      <!-- 04. PHÂN QUYỀN 3 CỔNG (Bên Phải) -->
+      <!-- ================================================================
+           04 – QUẢN LÝ AO NUÔI VÀ LỊCH SỬ ĐO (Bên Phải)
+           ================================================================ -->
       <div class="s-step-row is-right" id="step-04" data-step="4">
         <!-- Nút mốc tròn 04 -->
         <div class="s-milestone-node" id="node-04">
@@ -253,28 +352,53 @@
         <!-- Khối nội dung bên Phải -->
         <div class="s-card-wrap">
           <div class="s-card-content" id="card-04">
-            <span class="s-card-badge">CỘT MỐC 04 · KHÔNG GIAN BẢO MẬT</span>
+            <span class="s-card-badge">CỘT MỐC 04 · QUẢN LÝ VỤ NUÔI & SỔ NHẬT KÝ</span>
             <h3 class="s-card-title">
-              <span>🏛️</span> Phân Quyền 3 Cổng Truy Cập Hệ Thống
+              <span>📋</span> Quản Lý Ao Nuôi & Lịch Sử Đo
             </h3>
             <p class="s-card-text">
-              Phân luồng thông minh với 3 cổng truy cập chuyên biệt đáp ứng nhu cầu trải nghiệm, vận hành xưởng may và quản trị toàn diện hệ thống:
+              Số hóa toàn diện dữ liệu từng ao nuôi: quản lý vị trí điểm đo, tra cứu biến động chất lượng nước theo giờ / ngày / tuần, kết hợp sổ ghi chép thức ăn và sinh khối tôm để bà con dễ dàng kiểm soát chi phí vụ nuôi.
             </p>
-            <div class="s-card-features">
-              <div class="s-feature-pill">
-                <span class="s-feature-icon">✦</span> <strong>Cổng Khách:</strong> Tra cứu, đặt may & mua sắm
+
+            <div class="s-card-metrics-grid">
+              <div class="s-metric-item">
+                <div class="s-metric-header">
+                  <span>🗺️ Quản Lý Nhiều Ao</span>
+                  <span class="s-metric-badge is-optimal">Đồng bộ</span>
+                </div>
+                <div class="s-metric-val">Ao nuôi 1, 2, 3...</div>
+                <div class="s-metric-safe">Gắn thiết bị đo độc lập cho từng ao</div>
               </div>
-              <div class="s-feature-pill">
-                <span class="s-feature-icon">✦</span> <strong>Cổng Nghệ Nhân:</strong> Nhật ký may đo & kiểm định
+
+              <div class="s-metric-item">
+                <div class="s-metric-header">
+                  <span>📊 Biểu Đồ Lịch Sử</span>
+                  <span class="s-metric-badge is-optimal">Trực quan</span>
+                </div>
+                <div class="s-metric-val">Đồ thị 24h & Ngày</div>
+                <div class="s-metric-safe">Đối chiếu xu hướng pH, oxy và nhiệt độ</div>
               </div>
-              <div class="s-feature-pill">
-                <span class="s-feature-icon">✦</span> <strong>Cổng Quản Trị:</strong> Điều hành số liệu & phân quyền
+
+              <div class="s-metric-item">
+                <div class="s-metric-header">
+                  <span>📖 Sổ Nhật Ký Điện Tử</span>
+                  <span class="s-metric-badge is-optimal">Tiện lợi</span>
+                </div>
+                <div class="s-metric-val">Ăn, thuốc, xiphong</div>
+                <div class="s-metric-safe">Thay thế sổ giấy, không sợ thất lạc số liệu</div>
               </div>
-              <div class="s-feature-pill">
-                <span class="s-feature-icon">✦</span> <strong>Xác thực kép:</strong> Bảo mật cấp cao an toàn
+
+              <div class="s-metric-item">
+                <div class="s-metric-header">
+                  <span>📑 Báo Cáo Định Kỳ</span>
+                  <span class="s-metric-badge is-optimal">Chu kỳ</span>
+                </div>
+                <div class="s-metric-val">Đánh giá vụ tôm</div>
+                <div class="s-metric-safe">Theo dõi sinh khối, FCR và tỷ lệ sống</div>
               </div>
             </div>
-            <a href="#portals" class="s-card-btn">Chọn Cổng Đăng Nhập →</a>
+
+            <a href="#diary" class="s-card-btn">Vào Sổ Nhật Ký Ao →</a>
           </div>
         </div>
       </div>
@@ -288,7 +412,8 @@
        - Sinh đường cong Cubic Bezier chữ S liên tục (Desktop > 900px)
        - Chuyển thành đường sáng dọc gọn mép trái khi <= 900px
        - Cuộn tới đâu vẽ mượt tới đó (Lerp 0.085 cho stroke-dashoffset)
-       - Thắp sáng .s-milestone-node & trượt nhẹ khối nội dung vào khung hình
+       - Thắp sáng .s-milestone-node (is-active & is-passed) & trượt nhẹ khối nội dung
+       - Hỗ trợ prefers-reduced-motion
        ==================================================================== -->
   <script>
     function initSCurveRibbon() {
@@ -322,6 +447,9 @@
       let currentProgress = 0;
       let isRafRunning = false;
       let nodeNormalizedPositions = [];
+
+      // Kiểm tra người dùng có bật chế độ giảm chuyển động không
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       /**
        * 1. Tính toán tọa độ thực tế và xây dựng đường dẫn SVG Cubic Bezier
@@ -359,7 +487,7 @@
           pathD += ` L ${railX} ${endY}`;
         } else {
           // --- MÀN HÌNH LỚN (> 900px): Đường cong Cubic Bezier chữ S uốn lượn liên tục ---
-          // Bắt đầu từ phía trên mốc 01 (ở giữa trang hoặc đầu container uốn vào)
+          // Bắt đầu từ phía trên mốc 01 uốn nhẹ vào
           const startX = pts[0].x - 120;
           const startY = Math.max(20, pts[0].y - 80);
           
@@ -367,14 +495,13 @@
           // Đoạn mớm vào mốc 01
           pathD += ` C ${startX + 50} ${startY + 20}, ${pts[0].x - 50} ${pts[0].y - 20}, ${pts[0].x} ${pts[0].y}`;
 
-          // Nối các mốc 01 -> 02 -> 03 -> 04 bằng các đường cong S Cubic Bezier
+          // Nối các mốc 01 -> 02 -> 03 -> 04 bằng các đường cong S Cubic Bezier đối xứng mềm mại
           for (let i = 0; i < pts.length - 1; i++) {
             const pA = pts[i];
             const pB = pts[i + 1];
             const dy = pB.y - pA.y;
             const dx = pB.x - pA.x;
 
-            // Điểm điều khiển đối xứng mềm mại tạo cung lượn chữ S
             const cp1x = pA.x + dx * 0.55;
             const cp1y = pA.y + dy * 0.15;
             const cp2x = pB.x - dx * 0.55;
@@ -424,7 +551,7 @@
         const cRect = container.getBoundingClientRect();
         const winHeight = window.innerHeight;
         
-        // Bắt đầu khi mép trên container vào 80% màn hình, kết thúc khi mép dưới chạm đáy
+        // Bắt đầu khi mép trên container vào 75% màn hình, kết thúc khi mép dưới chạm đáy
         const startOffset = winHeight * 0.75;
         const endOffset = winHeight * 0.25;
         
@@ -452,18 +579,25 @@
         leadOrb.setAttribute('cy', point.y.toFixed(1));
         leadOrb.style.opacity = currentProgress > 0.01 ? '1' : '0';
 
-        // Thắp sáng nút mốc .s-milestone-node và trượt khối nội dung .s-card-content
+        // Thắp sáng nút mốc .s-milestone-node (Active / Passed) & trượt khối nội dung .s-card-content
         nodeNormalizedPositions.forEach((nodePos, idx) => {
           const node = nodes[idx];
           const card = cards[idx];
-          // Kích hoạt khi tia sáng chạm đến hoặc vượt qua cột mốc
+          
           const isReached = currentProgress >= (nodePos - 0.035);
+          const isPassed = currentProgress >= (nodePos + 0.08);
 
-          if (isReached) {
+          if (isPassed) {
+            node.classList.remove('is-active');
+            node.classList.add('is-passed');
+            if (card) card.classList.add('is-visible');
+          } else if (isReached) {
             node.classList.add('is-active');
+            node.classList.remove('is-passed');
             if (card) card.classList.add('is-visible');
           } else {
             node.classList.remove('is-active');
+            node.classList.remove('is-passed');
             if (card) card.classList.remove('is-visible');
           }
         });
@@ -472,6 +606,13 @@
       function animationTick() {
         targetProgress = calculateScrollProgress();
         
+        if (prefersReducedMotion) {
+          currentProgress = targetProgress;
+          updateBeamPosition();
+          isRafRunning = false;
+          return;
+        }
+
         // Thuật toán Lerp 0.085 theo đúng yêu cầu đề bài
         const diff = targetProgress - currentProgress;
         if (Math.abs(diff) > 0.0005) {
