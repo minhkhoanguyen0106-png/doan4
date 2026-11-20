@@ -1158,6 +1158,9 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
   }
 
   Widget _buildDesktopSCurveJourney(double width, bool isAbyss) {
+    const double cardHeight = 230.0;
+    const double rowSpacing = 52.0;
+
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -1172,6 +1175,8 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
                     progress: ribbonAnim.value,
                     isAbyss: isAbyss,
                     isDesktop: true,
+                    cardHeight: cardHeight,
+                    rowSpacing: rowSpacing,
                   ),
                 );
               },
@@ -1183,54 +1188,66 @@ class _LandingTabState extends State<LandingTab> with SingleTickerProviderStateM
         Column(
           children: [
             // Row 01: Tính tự động (Bên trái)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(child: _buildBentoSoftSensorCard(isAbyss)),
-                const SizedBox(width: 24),
-                _buildMilestoneNode('01', isAbyss),
-                const SizedBox(width: 24),
-                const Expanded(child: SizedBox()),
-              ],
+            SizedBox(
+              height: cardHeight,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(child: _buildBentoSoftSensorCard(isAbyss)),
+                  const SizedBox(width: 24),
+                  _buildMilestoneNode('01', isAbyss),
+                  const SizedBox(width: 24),
+                  const Expanded(child: SizedBox()),
+                ],
+              ),
             ),
-            const SizedBox(height: 56),
+            const SizedBox(height: rowSpacing),
 
             // Row 02: Máy đo tự động (Bên phải)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Expanded(child: SizedBox()),
-                const SizedBox(width: 24),
-                _buildMilestoneNode('02', isAbyss),
-                const SizedBox(width: 24),
-                Expanded(child: _buildBentoEsp32Card(isAbyss)),
-              ],
+            SizedBox(
+              height: cardHeight,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Expanded(child: SizedBox()),
+                  const SizedBox(width: 24),
+                  _buildMilestoneNode('02', isAbyss),
+                  const SizedBox(width: 24),
+                  Expanded(child: _buildBentoEsp32Card(isAbyss)),
+                ],
+              ),
             ),
-            const SizedBox(height: 56),
+            const SizedBox(height: rowSpacing),
 
             // Row 03: Gợi ý kỹ thuật (Bên trái)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(child: _buildBentoAiPrescriptionCard(isAbyss)),
-                const SizedBox(width: 24),
-                _buildMilestoneNode('03', isAbyss),
-                const SizedBox(width: 24),
-                const Expanded(child: SizedBox()),
-              ],
+            SizedBox(
+              height: cardHeight,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(child: _buildBentoAiPrescriptionCard(isAbyss)),
+                  const SizedBox(width: 24),
+                  _buildMilestoneNode('03', isAbyss),
+                  const SizedBox(width: 24),
+                  const Expanded(child: SizedBox()),
+                ],
+              ),
             ),
-            const SizedBox(height: 56),
+            const SizedBox(height: rowSpacing),
 
             // Row 04: Sổ ghi chép dễ dùng (Bên phải)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Expanded(child: SizedBox()),
-                const SizedBox(width: 24),
-                _buildMilestoneNode('04', isAbyss),
-                const SizedBox(width: 24),
-                Expanded(child: _buildBentoDiaryCard(isAbyss)),
-              ],
+            SizedBox(
+              height: cardHeight,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Expanded(child: SizedBox()),
+                  const SizedBox(width: 24),
+                  _buildMilestoneNode('04', isAbyss),
+                  const SizedBox(width: 24),
+                  Expanded(child: _buildBentoDiaryCard(isAbyss)),
+                ],
+              ),
             ),
             const SizedBox(height: 36),
           ],
@@ -2035,11 +2052,15 @@ class _WaterStreamFishPainter extends CustomPainter {
     required this.progress,
     required this.isAbyss,
     required this.isDesktop,
+    this.cardHeight = 230.0,
+    this.rowSpacing = 52.0,
   });
 
   final double progress;
   final bool isAbyss;
   final bool isDesktop;
+  final double cardHeight;
+  final double rowSpacing;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -2048,57 +2069,67 @@ class _WaterStreamFishPainter extends CustomPainter {
     final Path path = Path();
     final centerX = size.width / 2.0;
 
-    // 4 Node Y centers based on proportional row layout
-    final y1 = size.height * 0.115;
-    final y2 = size.height * 0.370;
-    final y3 = size.height * 0.625;
-    final y4 = size.height * 0.880;
-    final dy = y2 - y1;
+    // Exact Node Y centers based on fixed cardHeight and rowSpacing (zero drift)
+    final y1 = cardHeight * 0.5;
+    final y2 = cardHeight + rowSpacing + cardHeight * 0.5;
+    final y3 = (cardHeight + rowSpacing) * 2.0 + cardHeight * 0.5;
+    final y4 = (cardHeight + rowSpacing) * 3.0 + cardHeight * 0.5;
+    final dy = cardHeight + rowSpacing;
 
     if (isDesktop) {
       // Gentle horizontal wave amplitude into the empty half of each row
-      final amplitude = math.min(180.0, size.width * 0.20);
+      final amplitude = math.min(170.0, size.width * 0.20);
 
-      // 1. Entry curve from top ocean surface into Node 01
-      path.moveTo(centerX - 35.0, 0.0);
+      // 1. Đi vào mốc 01 thẳng đứng từ mặt nước (Straight vertical entry from surface)
+      path.moveTo(centerX, 0.0);
+      path.lineTo(centerX, y1);
+
+      // 2. S-curve 01 -> 02: Uốn lượn mềm mại sang khoảng trống bên phải của hàng 1 rồi lượn về mốc 02
+      final ym1 = y1 + dy * 0.5;
       path.cubicTo(
-        centerX - 15.0, y1 * 0.40,
-        centerX, y1 * 0.75,
-        centerX, y1,
+        centerX, y1 + dy * 0.22,
+        centerX + amplitude, ym1 - dy * 0.22,
+        centerX + amplitude, ym1,
       );
-
-      // 2. S-curve 01 -> 02: Sweeps smoothly to the RIGHT into the empty space of Row 1
       path.cubicTo(
-        centerX + amplitude * 1.30, y1 + dy * 0.32,
-        centerX + amplitude * 1.30, y2 - dy * 0.32,
+        centerX + amplitude, ym1 + dy * 0.22,
+        centerX, y2 - dy * 0.22,
         centerX, y2,
       );
 
-      // 3. S-curve 02 -> 03: Sweeps smoothly to the LEFT into the empty space of Row 2
+      // 3. S-curve 02 -> 03: Lượn sang khoảng trống bên trái của hàng 2 rồi lượn về mốc 03
+      final ym2 = y2 + dy * 0.5;
       path.cubicTo(
-        centerX - amplitude * 1.30, y2 + dy * 0.32,
-        centerX - amplitude * 1.30, y3 - dy * 0.32,
+        centerX, y2 + dy * 0.22,
+        centerX - amplitude, ym2 - dy * 0.22,
+        centerX - amplitude, ym2,
+      );
+      path.cubicTo(
+        centerX - amplitude, ym2 + dy * 0.22,
+        centerX, y3 - dy * 0.22,
         centerX, y3,
       );
 
-      // 4. S-curve 03 -> 04: Sweeps smoothly to the RIGHT into the empty space of Row 3
+      // 4. S-curve 03 -> 04: Lượn sang khoảng trống bên phải của hàng 3 rồi vào mốc 04
+      final ym3 = y3 + dy * 0.5;
       path.cubicTo(
-        centerX + amplitude * 1.30, y3 + dy * 0.32,
-        centerX + amplitude * 1.30, y4 - dy * 0.32,
+        centerX, y3 + dy * 0.22,
+        centerX + amplitude, ym3 - dy * 0.22,
+        centerX + amplitude, ym3,
+      );
+      path.cubicTo(
+        centerX + amplitude, ym3 + dy * 0.22,
+        centerX, y4 - dy * 0.22,
         centerX, y4,
       );
 
-      // 5. Exit curve below Node 04 into the deep abyss
-      path.cubicTo(
-        centerX, y4 + (size.height - y4) * 0.40,
-        centerX - 25.0, size.height - 15.0,
-        centerX - 40.0, size.height,
-      );
+      // 5. Nhẹ nhàng lặn xuống đáy sâu (Smooth vertical exit into the abyss)
+      path.lineTo(centerX, size.height);
     } else {
       // Mobile: Clean vertical glowing water stream along node centers (x = 26.0)
       const railX = 26.0;
-      path.moveTo(railX, 10.0);
-      path.lineTo(railX, math.max(10.0, size.height - 10.0));
+      path.moveTo(railX, 0.0);
+      path.lineTo(railX, size.height);
     }
 
     // =======================================================================
